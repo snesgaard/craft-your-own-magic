@@ -1,8 +1,10 @@
 nw = require "nodeworks"
 
+decorate(nw.component, require "component")
+
 function love.load()
     world = nw.ecs.world()
-    world:push(require "scene.ai_test")
+    world:push(require "scene.sphere_test")
 end
 
 function love.update(dt)
