@@ -2,7 +2,12 @@ nw = require "nodeworks"
 
 decorate(nw.component, require "component")
 
-function love.load()
+function love.load(args)
+    if args[1] == "test" then
+        require "test"
+        return love.event.quit()
+    end
+
     world = nw.ecs.world()
     world:push(require "scene.sphere_test")
 end
