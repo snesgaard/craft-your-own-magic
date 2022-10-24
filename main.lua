@@ -1,6 +1,12 @@
 nw = require "nodeworks"
 
-decorate(nw.component, require "component")
+decorate(nw.component, require "component", true)
+
+local collision_class = nw.system.collision():class()
+
+function collision_class.is_solid(colinfo)
+    return colinfo.type == "slide" or colinfo.type == "touch"
+end
 
 function love.load(args)
     if args[1] == "test" then
@@ -9,7 +15,7 @@ function love.load(args)
     end
 
     world = nw.ecs.world()
-    world:push(require "scene.sphere_test")
+    world:push(require "scene.player_control")
 end
 
 function love.update(dt)
