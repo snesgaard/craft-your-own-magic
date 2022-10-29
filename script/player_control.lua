@@ -17,8 +17,8 @@ local function spawn_ball(entity)
 
     local ball_entity = entity:world():entity()
         :assemble(
-            ball.assemble.ball_projectile,
-            pos.x, pos.y, bump_world
+            ball.assemble.projectile,
+            pos.x, pos.y, "player", bump_world
         )
         :set(nw.component.velocity, vel.x, vel.y)
 end

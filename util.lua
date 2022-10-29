@@ -9,7 +9,7 @@ function util.test_ecs_world()
             nw.system.collision().assemble.init_entity,
             300, 300, nw.component.hitbox(-200, 0, 400, 100), bump_world
         )
-        :set(nw.component.is_geometry)
+        :set(nw.component.is_terrain)
 
     local player = ecs_world:entity()
         :assemble(

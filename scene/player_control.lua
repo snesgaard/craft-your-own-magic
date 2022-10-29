@@ -1,24 +1,8 @@
 local util = require "util"
-
-local system = {
-    base = require "system.base",
-    misc = require "system.misc",
-    timer = require "system.timer",
-    ball = require "system.ball",
-    misc = require "system.misc",
-}
-
+local system = require "system"
 
 return function(ctx)
-    local systems = list(
-        system.base.system(system.ball.rules),
-        system.base.system(system.timer),
-        system.base.system(system.misc),
-        nw.system.motion(),
-        nw.system.script()
-    )
-
-    local system_and_observables = systems:map(function(sys)
+    local system_and_observables = system.full:map(function(sys)
         return {
             observable = sys.observables(ctx),
             system = sys

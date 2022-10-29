@@ -31,10 +31,10 @@ function sub_rules.should_trigger(source, target)
     return false
 end
 
-function sub_rules.handle_event_on_trigger(source, target, info)
-    if not source:get(nw.component.event_on_trigger) then return end
+function sub_rules.handle_event_on_trigger(ctx, source, target, info)
+    if not source:get(nw.component.event_on_effect_trigger) then return end
 
-    local event = source:get(nw.component.event_on_trigger)
+    local event = source:get(nw.component.event_on_effect_trigger)
 
     if type(event) == "function" then
         ctx:emit(event(source, target, info))
@@ -44,6 +44,10 @@ function sub_rules.handle_event_on_trigger(source, target, info)
 end
 
 local function call_effect(info, source, target, func, ...)
+    if not func then
+        print("nil function in effect")
+        return
+    end
     info[func] = func(source, target, ...)
 end
 
@@ -70,7 +74,7 @@ function sub_rules.trigger_effect(ctx, source, target)
         source:set(nw.component.expired)
     end
 
-    sub_rules.handle_event_on_trigger(source, target, info)
+    sub_rules.handle_event_on_trigger(ctx, source, target, info)
 
     return info
 end
@@ -78,8 +82,8 @@ end
 function rules.collision(ctx, colinfo)
     local item = colinfo.ecs_world:entity(colinfo.item)
     local other = colinfo.ecs_world:entity(colinfo.other)
-    sub_rules.trigger_effect(ctx, source, target)
-    sub_rules.trigger_effect(ctx, target, source)
+    sub_rules.trigger_effect(ctx, item, other)
+    sub_rules.trigger_effect(ctx, other, item)
 end
 
 function rules.update(ctx, dt, ecs_world)

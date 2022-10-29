@@ -14,7 +14,7 @@ function component.is_actor() return true end
 
 function component.is_effect() return true end
 
-function component.is_geometry() return true end
+function component.is_terrain() return true end
 
 function component.event_on_timer_complete(event) return event end
 
@@ -29,10 +29,20 @@ function component.trigger_on_interval(interval)
     return {timers=dict(), interval=interval}
 end
 
-function component.effect(...) return list(...) end
+function component.effect(...)
+    local effects = list(...)
+    for _, effect in ipairs(effects) do
+        if type(effect[1]) ~= "function" then
+            errorf("First effect argument must be a function, but was %s", type(effect[1]))
+        end
+    end
+    return effects
+end
 
 function component.expire_on_trigger() return true end
 
-function component.event_on_trigger(event) return event end
+function component.event_on_effect_trigger(event) return event end
+
+function component.team(team) return team end
 
 return component

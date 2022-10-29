@@ -12,8 +12,8 @@ end
 
 local function check_slide(item, other)
     local c = nw.component
-    return (item:has(c.is_actor) and other:has(c.is_geometry))
-        or (item:has(c.is_geometry) and other:has(c.is_geometry))
+    return (item:has(c.is_actor) and other:has(c.is_terrain))
+        or (item:has(c.is_terrain) and other:has(c.is_terrain))
 end
 
 function collision_class.default_filter(ecs_world, item, other)

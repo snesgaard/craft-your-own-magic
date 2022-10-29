@@ -14,8 +14,13 @@ function effects.trigger_heal(source, target, effect)
     return combat.heal(target, effect.heal)
 end
 
-function effects.trigger_terrain(source, target, effect)
-    if not target:get(nw.component.terrain) then return end
+function effects.trigger_on_terrain(source, target, effect)
+    if not target:get(nw.component.is_terrain) then return end
+    return true
+end
+
+function effects.trigger_on_actor(source, target)
+    if not target:get(nw.component.is_actor) then return end
     return true
 end
 
