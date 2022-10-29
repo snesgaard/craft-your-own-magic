@@ -1,65 +1,48 @@
-local component = {}
-
-function component.ball_projectile() return true end
-
-function component.ball_explosion() return true end
+local combat = require "system.combat"
 
 local assemble = {}
 
-function assemble.ball_projectile(entity, x, y, bump_world)
+function assemble.projectile(entity, x, y, team, bump_world)
     entity
         :assemble(
             nw.system.collision().assemble.init_entity,
             x, y, nw.component.hitbox(10, 10), bump_world
         )
-        :set(component.ball_projectile)
+        :set(nw.component.is_effect)
+        :set(nw.component.team, team)
         :set(nw.component.timer, 2.0)
-        --:set(nw.component.die_on_timer_complete)
+        :set(nw.component.event_on_timer_complete, event.trigger_explosion)
+        :set(nw.component.event_on_effect_trigger, event.trigger_explosion)
+        :set(nw.component.effect, {damage = 2, trigger_on_terrain=true})
+        :set(nw.component.trigger_once_pr_entity)
 end
 
-function assemble.ball_explosion(entity, x, y, bump_world)
-    entity
+function assemble.explosion(entity, x, y, team, bump_world)
+    return entity
         :assemble(
             nw.system.collision().assemble.init_entity,
             x, y, nw.component.hitbox(100, 100), bump_world
         )
+        :set(nw.component.is_effect)
+        :set(nw.component.team, team)
         :set(nw.component.timer, 2.0)
         :set(nw.component.die_on_timer_complete)
+        :set(nw.component.effect, {damage = 5})
+        :set(nw.component.trigger_once_pr_entity)
 end
 
 local rules = {}
 
-function rules.spawn_explosion(ctx, ecs_world, x, y, bump_world)
-    local entity = ecs_world:entity()
-        :assemble(assemble.ball_explosion, x, y, bump_world)
-    ctx:emit("on_explosion_spawned", entity)
-end
+rules[event.trigger_explosion] = function(ctx, entity)
+    ctx:emit("destroy", entity)
 
-function rules.trigger_explosion(ctx, entity)
-    if not entity:has(component.ball_projectile) then return end
-    if entity:has(nw.component.expired) then return end
-
-    local x, y = entity:ensure(nw.component.position):unpack()
+    local pos = entity:get(nw.component.position)
+    local team = entity:get(nw.component.team)
     local bump_world = entity:get(nw.component.bump_world)
+    local explosion = entity:world():entity()
+        :assemble(assemble.explosion, x, y, team, bump_world)
 
-    entity:set(nw.component.expired)
-    ctx:emit("destroy", entity.id)
-    return rules.spawn_explosion(ctx, entity:world(), x, y, bump_world)
-end
-
-local function handle_collision(ctx, item, other)
-    return rules.trigger_explosion(ctx, item)
-end
-
-function rules.collision(ctx, colinfo)
-    local item = colinfo.ecs_world:entity(colinfo.item)
-    local other = colinfo.ecs_world:entity(colinfo.other)
-    handle_collision(ctx, item, other)
-    handle_collision(ctx, other, item)
-end
-
-function rules.timer_completed(ctx, id, ecs_world)
-    return rules.trigger_explosion(ctx, ecs_world:entity(id))
+    ctx:emit("on_trigger_explosion", explosion)
 end
 
 local system = {}

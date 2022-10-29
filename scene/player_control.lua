@@ -2,12 +2,18 @@ local util = require "util"
 
 local system = {
     base = require "system.base",
-    misc = require "system.misc"
+    misc = require "system.misc",
+    timer = require "system.timer",
+    ball = require "system.ball",
+    misc = require "system.misc",
 }
 
 
 return function(ctx)
     local systems = list(
+        system.base.system(system.ball.rules),
+        system.base.system(system.timer),
+        system.base.system(system.misc),
         nw.system.motion(),
         nw.system.script()
     )

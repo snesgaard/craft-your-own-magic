@@ -4,8 +4,27 @@ decorate(nw.component, require "component", true)
 
 local collision_class = nw.system.collision():class()
 
+transform = require "transform"
+
 function collision_class.is_solid(colinfo)
     return colinfo.type == "slide" or colinfo.type == "touch"
+end
+
+local function check_slide(item, other)
+    local c = nw.component
+    return (item:has(c.is_actor) and other:has(c.is_geometry))
+        or (item:has(c.is_geometry) and other:has(c.is_geometry))
+end
+
+function collision_class.default_filter(ecs_world, item, other)
+    local item = ecs_world:entity(item)
+    local other = ecs_world:entity(other)
+    if mirror_call(check_slide, item, other) then return "slide" end
+    return "cross"
+end
+
+function mirror_call(func, item, other, ...)
+    return func(item, other, ...) or func(other, item, ...)
 end
 
 function love.load(args)

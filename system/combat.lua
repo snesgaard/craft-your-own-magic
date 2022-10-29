@@ -9,7 +9,8 @@ function Combat:emit(...)
 end
 
 function Combat:deal_damage(target, damage)
-    local health = target:ensure(nw.component.health)
+    local health = target:get(nw.component.health)
+    if not health then return end
     local real_damage = math.min(health, math.max(damage, 0))
     local next_health = health - real_damage
 
@@ -21,7 +22,8 @@ function Combat:deal_damage(target, damage)
 end
 
 function Combat:heal(target, heal)
-    local health = target:ensure(nw.component.health)
+    local health = target:get(nw.component.health)
+    if not health then return end
     local real_heal = math.max(0, heal)
     local next_health = health + heal
     target:set(nw.component.health, next_health)

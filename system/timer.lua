@@ -1,15 +1,29 @@
 local rules = {}
 
-local function handle_timer(ctx, dt, id, timer)
+local function handle_event_on_complete(ctx, entity)
+    local event = entity:get(nw.component.event_on_timer_complete)
+
+    if not event then return end
+    
+    if type(event) == "function" then
+        ctx:emit(event(entity))
+    else
+        ctx:emit(event, entity)
+    end
+end
+
+local function handle_timer(ctx, dt, entity, timer)
     if timer:done() then return end
     timer:update(dt)
-    if timer:done() then ctx:emit("timer_completed", id) end
+    if not timer:done() then return end
+    ctx:emit("timer_completed", entity.id)
+    handle_event_on_complete(ctx, entity)
 end
 
 function rules.update(ctx, dt, ecs_world)
     local component_table = ecs_world:get_component_table(nw.component.timer)
     for id, timer in pairs(component_table) do
-        handle_timer(ctx, dt, id, timer)
+        handle_timer(ctx, dt, ecs_world:entity(id), timer)
     end
 end
 
