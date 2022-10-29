@@ -1,3 +1,5 @@
+local sub_rules = {}
+
 local rules = {}
 
 local function same_team(a, b)
@@ -37,9 +39,11 @@ local effects = {
     }
 }
 
-local function should_trigger(source, target)
+function sub_rules.should_trigger(source, target)
     if source:get(nw.component.trigger_once) then
-        return not source:get(nw.component.already_triggered)
+        if source:get(nw.component.already_triggered) then return false end
+        source:set(nw.component.already_triggered)
+        return true
     end
 
     if source:get(nw.component.trigger_once_pr_entity) then
@@ -53,7 +57,7 @@ local function should_trigger(source, target)
         local data = source:get(nw.component.trigger_on_interval)
         local t = data.timers[target.id]
         if t then
-            if not t:done() then return false
+            if not t:done() then return false end
             t:reset()
         else
             data.timers[target.id] = nw.component.timer(data.interval)
@@ -64,7 +68,7 @@ local function should_trigger(source, target)
     return false
 end
 
-local function handle_event_on_trigger(source, target, info)
+function sub_rules.handle_event_on_trigger(source, target, info)
     if not source:get(nw.component.event_on_trigger) then return end
 
     local event = source:get(nw.component.event_on_trigger)
@@ -76,7 +80,7 @@ local function handle_event_on_trigger(source, target, info)
     end
 end
 
-function rules.trigger_effect(ctx, source, target)
+function sub_rules.trigger_effect(ctx, source, target)
     local effect = source:get(nw.component.effect)
     if not effect then return end
 
@@ -96,12 +100,29 @@ function rules.trigger_effect(ctx, source, target)
         source:set(nw.component.expired)
     end
 
-    handle_event_on_trigger(source, target, info)
+    sub_rules.handle_event_on_trigger(source, target, info)
 end
 
 function rules.collision(ctx, colinfo)
     local item = colinfo.ecs_world:entity(colinfo.item)
     local other = colinfo.ecs_world:entity(colinfo.other)
-    rules.trigger_effect(ctx, source, target)
-    rules.trigger_effect(ctx, target, source)
+    sub_rules.trigger_effect(ctx, source, target)
+    sub_rules.trigger_effect(ctx, target, source)
 end
+
+function rules.update(ctx, dt, ecs_world)
+    local comp_table = ecs_world:get_component_table(
+        nw.component.trigger_on_interval
+    )
+
+    for _, data in pairs(comp_table) do
+        for _, timer in pairs(data.timers) do
+            timer:update(dt)
+        end
+    end
+end
+
+return {
+    rules = rules,
+    sub_rules = sub_rules
+}

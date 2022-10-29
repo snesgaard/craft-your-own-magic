@@ -18,4 +18,15 @@ function component.is_geometry() return true end
 
 function component.event_on_timer_complete(event) return event end
 
+function component.trigger_once() return true end
+
+function component.already_triggered() return true end
+
+function component.trigger_once_pr_entity() return dict() end
+
+function component.trigger_on_interval(interval)
+    if not interval then errorf("You must give an interval") end
+    return {timers=dict(), interval=interval}
+end
+
 return component

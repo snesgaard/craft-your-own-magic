@@ -17,3 +17,4 @@ end
 
 require "test.combat"
 require "test.timer"
+require "test.effect_resolution"
