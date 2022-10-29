@@ -2,43 +2,6 @@ local sub_rules = {}
 
 local rules = {}
 
-local function same_team(a, b)
-    return a:get(nw.component.team) == b:get(nw.component.team)
-end
-
-local function trigger_damage(source, target, effect)
-    if not effect.damage then return end
-    if same_team(source, target) then return end
-    return combat.damage(target, effect.damage)
-end
-
-local function trigger_heal(source, target, effect)
-    if not effect.heal then return end
-    if not same_team(source, target) then return end
-    return combat.heal(target, effect.heal)
-end
-
-local function trigger_terrain(source, target, effect)
-    if not effect.trigger_on_terrain then return end
-    if not target:get(nw.component.terrain) then return end
-    return true
-end
-
-local effects = {
-    {
-        name = "damage",
-        func = trigger_damage
-    },
-    {
-        name = "heal",
-        func = trigger_heal
-    },
-    {
-        name = "trigger_on_terrain",
-        func = trigger_on_terrain
-    }
-}
-
 function sub_rules.should_trigger(source, target)
     if source:get(nw.component.trigger_once) then
         if source:get(nw.component.already_triggered) then return false end
@@ -80,19 +43,23 @@ function sub_rules.handle_event_on_trigger(source, target, info)
     end
 end
 
+local function call_effect(info, source, target, func, ...)
+    info[func] = func(source, target, ...)
+end
+
 function sub_rules.trigger_effect(ctx, source, target)
-    local effect = source:get(nw.component.effect)
-    if not effect then return end
-
-    if source:get(nw.component.expired) then return end
-
     local info = dict()
+    local effect = source:get(nw.component.effect)
+    if not effect then return info end
 
-    for _, effect in ipairs(effects) do
-        info[effect.name] = effect.func(effect, target)
+    if source:get(nw.component.expired) then return info end
+
+
+    for _, e in ipairs(effect) do
+        call_effect(info, source, target, unpack(e))
     end
 
-    if dict:empty() then return end
+    if info:empty() then return info end
 
     ctx:emit("on_trigger_effect", source, target, info)
 
@@ -101,6 +68,8 @@ function sub_rules.trigger_effect(ctx, source, target)
     end
 
     sub_rules.handle_event_on_trigger(source, target, info)
+
+    return info
 end
 
 function rules.collision(ctx, colinfo)

@@ -13,7 +13,11 @@ function assemble.projectile(entity, x, y, team, bump_world)
         :set(nw.component.timer, 2.0)
         :set(nw.component.event_on_timer_complete, event.trigger_explosion)
         :set(nw.component.event_on_effect_trigger, event.trigger_explosion)
-        :set(nw.component.effect, {damage = 2, trigger_on_terrain=true})
+        :set(
+            nw.component.effect,
+            {effect.damage, 5},
+            {effect.trigger_on_terrain}
+        )
         :set(nw.component.trigger_once_pr_entity)
 end
 

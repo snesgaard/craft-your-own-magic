@@ -29,4 +29,10 @@ function component.trigger_on_interval(interval)
     return {timers=dict(), interval=interval}
 end
 
+function component.effect(...) return list(...) end
+
+function component.expire_on_trigger() return true end
+
+function component.event_on_trigger(event) return event end
+
 return component
