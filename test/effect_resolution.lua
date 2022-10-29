@@ -53,7 +53,9 @@ T("effect_resolution", function(T)
             return 22
         end
 
-        source:set(nw.component.effect, {effect_to_be_triggered})
+        source
+            :set(nw.component.effect, {effect_to_be_triggered})
+            :set(nw.component.trigger_once)
         local info = sub_rules.trigger_effect(ctx, source, target)
         T:assert(dst.was_triggered)
         T:assert(info[effect_to_be_triggered])

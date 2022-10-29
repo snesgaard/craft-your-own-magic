@@ -49,6 +49,9 @@ end
 
 function sub_rules.trigger_effect(ctx, source, target)
     local info = dict()
+    if not sub_rules.should_trigger(source, target) then
+        return info
+    end
     local effect = source:get(nw.component.effect)
     if not effect then return info end
 
