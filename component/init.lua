@@ -45,4 +45,8 @@ function component.event_on_effect_trigger(event) return event end
 
 function component.team(team) return team end
 
+function component.ignore_terrain() return true end
+
+function component.bouncy(b) return b end
+
 return component

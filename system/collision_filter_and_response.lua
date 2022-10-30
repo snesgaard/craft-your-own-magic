@@ -11,7 +11,7 @@ local function collision_filter(ecs_world, item, other)
     local other = ecs_world:entity(other)
 
     if other:has(comp.is_terrain) then
-        if item:has(comp.ignore_terrain) then return end
+        if item:has(comp.ignore_terrain) then return "cross" end
 
         return solid_collision(item, other)
     end
