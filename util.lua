@@ -21,7 +21,6 @@ function util.test_ecs_world()
         )
         :set(nw.component.gravity)
         :set(nw.component.is_actor)
-        --:set(nw.component.bouncy, 0.5)
 
     local other_actor = ecs_world:entity()
         :assemble(

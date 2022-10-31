@@ -41,5 +41,5 @@ function love.keypressed(key, scancode, isrepeat)
 end
 
 function love.mousemoved(x, y, dx, dy)
-    world:emit("mousemoved", x, y, dx, dy)
+    world:emit("mousemoved", x, y, dx, dy):spin()
 end
