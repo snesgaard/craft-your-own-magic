@@ -22,19 +22,19 @@ end
 local sub_rules = {}
 local rules = {}
 
-function sub_rules.handle_bounce(colinfo)
+function sub_rules.handle_bounce(ctx, colinfo)
     if colinfo.type ~= "bounce" then return end
     local bounce = colinfo.ecs_world:get(comp.bouncy, colinfo.item)
-    local velocity = colinfo.ecs_world:get(comp.velocity, colinfo.item)
-    if not bounce or not velocity then return end
+    local v = colinfo.ecs_world:get(comp.velocity, colinfo.item)
+    if not bounce or not v then return end
 
-    local normal = vec2(colinfo.normal.x, colinfo.normal.y)
-    local next_v = v - 2 * bounce * (v:dot(n)) * n
-    colinfo.ecs_world:set(comp.velocity, colinfo.item)
+    local n = vec2(colinfo.normal.x, colinfo.normal.y)
+    local next_v = v - (1 + bounce) * (v:dot(n)) * n
+    colinfo.ecs_world:set(comp.velocity, colinfo.item, next_v.x, next_v.y)
 end
 
-function rules.collision(colinfo)
-    sub_rules.handle_bounce(colinfo)
+function rules.collision(ctx, colinfo)
+    sub_rules.handle_bounce(ctx, colinfo)
 end
 
 return {

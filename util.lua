@@ -11,16 +11,17 @@ function util.test_ecs_world()
         )
         :set(nw.component.is_terrain)
 
-    local player = ecs_world:entity()
+    local player = ecs_world:entity("player")
         :assemble(
             nw.system.collision().assemble.init_entity,
-            300, 300, nw.component.hitbox(20, 50), bump_world
+            300, 200, nw.component.hitbox(20, 50), bump_world
         )
         :assemble(
             nw.system.script().set, require "script.player_control"
         )
         :set(nw.component.gravity)
         :set(nw.component.is_actor)
+        --:set(nw.component.bouncy, 0.5)
 
     local other_actor = ecs_world:entity()
         :assemble(
