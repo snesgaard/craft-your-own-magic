@@ -23,6 +23,7 @@ function assemble.projectile(entity, x, y, team, bump_world)
         )
         :set(
             nw.component.effect,
+            {effect.damage, 2},
             {effect.trigger_on_actor},
             {effect.trigger_on_terrain}
         )
@@ -36,10 +37,15 @@ function assemble.explosion(entity, x, y, team, bump_world)
             x, y, nw.component.hitbox(100, 100), bump_world
         )
         :set(nw.component.is_effect)
+        :set(
+            nw.component.effect,
+            {effect.damage, 5}
+        )
         :set(nw.component.team, team)
         :set(nw.component.timer, 2.0)
         :set(nw.component.die_on_timer_complete)
         :set(nw.component.trigger_once_pr_entity)
+        :set(nw.component.check_collision_on_update)
 end
 
 local rules = {}

@@ -1,17 +1,19 @@
+local combat = require "system.combat"
+
 local effects = {}
 
 function effects.same_team(a, b)
     return a:get(nw.component.team) == b:get(nw.component.team)
 end
 
-function effects.damage()
-    if same_team(source, target) then return end
-    return combat.damage(target, effect.damage)
+function effects.damage(source, target, damage)
+    if effects.same_team(source, target) then return end
+    return combat():deal_damage(target, damage)
 end
 
 function effects.trigger_heal(source, target, effect)
     if not effects.same_team(source, target) then return end
-    return combat.heal(target, effect.heal)
+    return combat():heal(target, effect.heal)
 end
 
 function effects.trigger_on_terrain(source, target, effect)

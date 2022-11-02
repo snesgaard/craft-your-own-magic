@@ -6,6 +6,22 @@ function component.expired() return true end
 
 function component.health(hp) return hp or 0 end
 
+function component.max_health(hp) return hp or 0 end
+
+function component.health(hp, max)
+    if not max then
+        return {
+            value = hp,
+            max = hp
+        }
+    else
+        return {
+            value = hp,
+            max = max
+        }
+    end
+end
+
 function component.damage(dmg) return dmg or 0 end
 
 function component.gravity(x, y) return vec2(x or 0, y or 800) end
@@ -48,5 +64,7 @@ function component.team(team) return team end
 function component.ignore_terrain() return true end
 
 function component.bouncy(b) return b end
+
+function component.check_collision_on_update() return true end
 
 return component

@@ -1,5 +1,6 @@
 local util = require "util"
 local system = require "system"
+local health_bar = require "ui.health_bars"
 
 return function(ctx)
     local system_and_observables = system.full:map(function(sys)
@@ -20,6 +21,7 @@ return function(ctx)
 
         for _, _ in ipairs(draw:pop()) do
             bump_debug.draw_world(level.bump_world)
+            health_bar.draw_health_bar(level.ecs_world)
         end
     end)
 end

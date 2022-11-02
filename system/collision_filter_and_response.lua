@@ -37,6 +37,17 @@ function rules.collision(ctx, colinfo)
     sub_rules.handle_bounce(ctx, colinfo)
 end
 
+function rules.update(ctx, dt, ecs_world)
+    local comp_table = ecs_world:get_component_table(
+        nw.component.check_collision_on_update
+    )
+
+    for id, value in pairs(comp_table) do
+        nw.system.collision(ctx):move(ecs_world:entity(id), 0, 0)
+        ecs_world:remove(nw.component.check_collision_on_update, id)
+    end
+end
+
 return {
     rules = rules,
     sub_rules = sub_rules,

@@ -28,6 +28,8 @@ function util.test_ecs_world()
             400, 300, nw.component.hitbox(20, 50), bump_world
         )
         :set(nw.component.is_actor)
+        :set(nw.component.health, 20)
+        :set(nw.component.max_health, 20)
 
     return {ecs_world = ecs_world, bump_world = bump_world}
 end
