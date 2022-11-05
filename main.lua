@@ -1,4 +1,5 @@
 nw = require "nodeworks"
+effect = require "effect"
 
 decorate(nw.component, require "component", true)
 

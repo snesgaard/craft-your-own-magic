@@ -10,7 +10,8 @@ local system = {
     timer = import("timer"),
     ball = import("ball"),
     effect = import("effect_resolution"),
-    collision = import("collision_filter_and_response")
+    collision = import("collision_filter_and_response"),
+    ui = import("ui")
 }
 
 system.full = list(
@@ -20,7 +21,8 @@ system.full = list(
     system.base.system(system.timer),
     system.base.system(system.misc),
     system.base.system(system.effect.rules),
-    nw.system.script()
+    nw.system.script(),
+    system.base.system(system.ui.rules)
 )
 
 return system

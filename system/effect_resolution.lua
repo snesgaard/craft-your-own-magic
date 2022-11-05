@@ -68,7 +68,10 @@ function sub_rules.trigger_effect(ctx, source, target)
 
     if info:empty() then return info end
 
-    ctx:emit("on_trigger_effect", source, target, info)
+    ctx:emit(
+        "on_trigger_effect",
+        {source=source, target=target, info=info}
+    )
 
     if source:get(nw.component.expire_on_trigger) then
         source:set(nw.component.expired)
