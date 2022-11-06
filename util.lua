@@ -7,7 +7,7 @@ function util.test_ecs_world()
     local platform = ecs_world:entity()
         :assemble(
             nw.system.collision().assemble.init_entity,
-            300, 300, nw.component.hitbox(-200, 0, 400, 100), bump_world
+            300, 300, nw.component.hitbox(-2000, 0, 4000, 100), bump_world
         )
         :set(nw.component.is_terrain)
 
@@ -21,6 +21,7 @@ function util.test_ecs_world()
         )
         :set(nw.component.gravity)
         :set(nw.component.is_actor)
+        :set(nw.component.health, 30)
 
     local other_actor = ecs_world:entity()
         :assemble(
@@ -29,7 +30,10 @@ function util.test_ecs_world()
         )
         :set(nw.component.is_actor)
         :set(nw.component.health, 20)
-        :set(nw.component.max_health, 20)
+        :assemble(
+            nw.system.script().set, require "script.patrol_fly"
+        )
+        :set(nw.component.team, "enemy")
 
     return {ecs_world = ecs_world, bump_world = bump_world}
 end

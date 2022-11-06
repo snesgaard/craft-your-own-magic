@@ -101,6 +101,16 @@ function rules.update(ctx, dt, ecs_world)
     end
 end
 
+function rules.on_trigger_effect(ctx, effect_info)
+    print("trigger")
+    if not effect_info.info[effect.damage] then return end
+
+    local hp = effect_info.target:get(nw.component.health)
+    if hp.value <= 0 then
+        ctx:emit("destroy", effect_info.target.id)
+    end
+end
+
 return {
     rules = rules,
     sub_rules = sub_rules

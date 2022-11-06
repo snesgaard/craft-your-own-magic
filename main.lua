@@ -1,6 +1,17 @@
 nw = require "nodeworks"
 effect = require "effect"
 
+function declare_world_interface(class)
+    local default_instance = class()
+
+    return function(ctx)
+        if not ctx then return default_instance end
+        local world = ctx.world or ctx
+        world[class] = world[class] or class(world)
+        return world[class]
+    end
+end
+
 decorate(nw.component, require "component", true)
 
 local collision_class = nw.system.collision():class()
