@@ -24,7 +24,14 @@ function script.normal(ctx, entity)
 end
 
 function script.activated(ctx, entity)
-    ai():wait(ctx, 0.5)
+    --ai():wait(ctx, 0.5)
+    entity:set(nw.component.timer, 0.5)
+
+    local timer_is_done = ctx:listen("timer_completed")
+        :filter(function(id) return id == entity.id end)
+        :latest()
+
+    while not timer_is_done:peek() and ctx:is_alive() do ctx:yield() end
 
     entity
         :set(nw.component.effect, effect:unpack())
@@ -33,7 +40,9 @@ function script.activated(ctx, entity)
 
     ai():wait(ctx, 0.5)
 
-    entity:remove(nw.component.effect)
+    entity
+        :remove(nw.component.effect)
+        :remove(nw.component.timer)
 end
 
 function script.top(ctx, entity)
@@ -48,6 +57,8 @@ local function draw(entity)
 
     if entity:get(nw.component.effect) then
         gfx.setColor(1, 0.2, 0.1)
+    elseif entity:get(nw.component.timer) then
+        gfx.setColor(1, 0.8, 0.2)
     else
         gfx.setColor(0.2, 1, 0.1)
     end
