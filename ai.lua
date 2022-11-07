@@ -17,4 +17,14 @@ function AI.move_to(entity, target, step)
     end
 end
 
+function ai:wait(ctx, duration)
+    local timer = nw.component.timer(duration)
+    local update = ctx:listen("update"):collect()
+
+    while ctx:is_alive() and not timer:done() do
+        update:pop():foreach(function(dt) timer:update(dt) end)
+        ctx:yield()
+    end
+end
+
 return declare_world_interface(AI.create)

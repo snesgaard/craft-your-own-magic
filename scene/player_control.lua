@@ -1,5 +1,6 @@
 local util = require "util"
 local system = require "system"
+local painter = require "painter"
 
 return function(ctx)
     local system_and_observables = system.full:map(function(sys)
@@ -19,6 +20,7 @@ return function(ctx)
         end
 
         for _, _ in ipairs(draw:pop()) do
+            painter.draw(level.ecs_world)
             bump_debug.draw_world(level.bump_world)
             system.ui.draw_health_bar(level.ecs_world)
             system.ui.draw_numbers(level.ecs_world)

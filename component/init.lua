@@ -67,4 +67,8 @@ function component.bouncy(b) return b end
 
 function component.check_collision_on_update() return true end
 
+function component.layer(l) return l or 0 end
+
+function component.order(o) return o or 0 end
+
 return component
