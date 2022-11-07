@@ -16,7 +16,7 @@ function script.normal(ctx, entity)
         end)
         :latest()
 
-    while ctx:is_alive() and not should_activate:peek() then
+    while ctx:is_alive() and not should_activate:peek() do
         ctx:yield()
     end
 
@@ -66,12 +66,12 @@ function assemble.trap(entity, x, y, bump_world)
     entity
         :assemble(
             nw.system.collision().assemble.init_entity,
-            x, y, nw.component.hitbox(100, 20)
+            x, y, nw.component.hitbox(100, 20), bump_world
         )
-        :set(nw.component.script, script.top)
+        :assemble(nw.system.script().set, script.top)
         :set(nw.component.team, "neutral")
         :set(nw.component.is_effect)
-        :set(nw.component.drawable)
+        :set(nw.component.drawable, draw)
 end
 
 return {

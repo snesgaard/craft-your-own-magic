@@ -35,6 +35,11 @@ function util.test_ecs_world()
         )
         :set(nw.component.team, "enemy")
 
+    local trap = ecs_world:entity()
+        :assemble(
+            require("system.trap").assemble.trap, 100, 300, bump_world
+        )
+
     return {ecs_world = ecs_world, bump_world = bump_world}
 end
 

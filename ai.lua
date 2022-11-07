@@ -17,7 +17,7 @@ function AI.move_to(entity, target, step)
     end
 end
 
-function ai:wait(ctx, duration)
+function AI:wait(ctx, duration)
     local timer = nw.component.timer(duration)
     local update = ctx:listen("update"):collect()
 
