@@ -101,12 +101,22 @@ function rules.update(ctx, dt, ecs_world)
     end
 end
 
+local function invoke_event(ctx, event, entity)
+    if type(event) == "table" then
+        ctx:emit(unpack(event))
+    elseif type(event) == "function" then
+        ctx:emit(event(entity))
+    end
+end
+
 function rules.on_trigger_effect(ctx, effect_info)
-    print("trigger")
     if not effect_info.info[effect.damage] then return end
 
     local hp = effect_info.target:get(nw.component.health)
     if hp.value <= 0 then
+        local event = effect_info.target:get(nw.component.event_on_death)
+        if event then invoke_event(ctx, event, effect_info.target) end
+
         ctx:emit("destroy", effect_info.target.id)
     end
 end

@@ -11,13 +11,15 @@ local system = {
     ball = import("ball"),
     effect = import("effect_resolution"),
     collision = import("collision_filter_and_response"),
-    ui = import("ui")
+    ui = import("ui"),
+    barrel = import("barrel")
 }
 
 system.full = list(
     nw.system.motion(),
     system.base.system(system.collision.rules),
     system.base.system(system.ball.rules),
+    system.base.system(system.barrel.rules),
     system.base.system(system.timer),
     system.base.system(system.misc),
     system.base.system(system.effect.rules),

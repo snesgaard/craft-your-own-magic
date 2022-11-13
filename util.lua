@@ -40,6 +40,11 @@ function util.test_ecs_world()
             require("system.trap").assemble.trap, 100, 300, bump_world
         )
 
+    local barrel = ecs_world:entity()
+        :assemble(
+            require("system.barrel").assemble.barrel, 300, 300, bump_world
+        )
+
     return {ecs_world = ecs_world, bump_world = bump_world}
 end
 
