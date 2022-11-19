@@ -8,7 +8,22 @@ end
 
 function effects.damage(source, target, damage)
     if effects.same_team(source, target) then return end
-    return combat():deal_damage(target, damage)
+
+    local health = target:get(nw.component.health)
+    if not health then return end
+    local real_damage = math.min(health.value, math.max(damage, 0))
+
+    if target:ensure(nw.component.invincible) > 0 then
+        real_damage = 0
+    end
+
+    local next_health = health.value - real_damage
+    target:set(nw.component.health, next_health, health.max)
+
+    local info = {
+        damage = real_damage, target = target, health = next_health
+    }
+    return info
 end
 
 function effects.trigger_heal(source, target, effect)

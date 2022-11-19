@@ -13,11 +13,17 @@ function Combat:deal_damage(target, damage)
     local health = target:get(nw.component.health)
     if not health then return end
     local real_damage = math.min(health.value, math.max(damage, 0))
-    local next_health = health.value - real_damage
 
+    if target:ensure(nw.component.invincible) > 0 then
+        real_damage = 0
+    end
+
+    local next_health = health.value - real_damage
     target:set(nw.component.health, next_health, health.max)
 
-    local info = {damage = real_damage, target = target, health = next_health}
+    local info = {
+        damage = real_damage, target = target, health = next_health
+    }
     self:emit("on_deal_damage", info)
     return info
 end
