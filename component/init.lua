@@ -73,4 +73,6 @@ function component.order(o) return o or 0 end
 
 function component.event_on_death(f) return f end
 
+function component.invincible(v) return v or 0 end
+
 return component

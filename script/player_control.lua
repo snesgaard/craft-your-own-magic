@@ -38,14 +38,50 @@ local function update_orientation(entity, x_dir)
     end
 end
 
-return function(ctx, entity)
+local dash_data = {
+    distance = 200,
+    time = 0.3
+}
+
+local function dash(ctx, entity)
+    update_orientation(entity, x_dir())
+    local sx = entity:get(nw.component.mirror) and -1 or 1
+
+    local speed = 500
+    local update = ctx:listen("update"):collect()
+
+    entity
+        :remove(nw.component.gravity)
+        :remove(nw.component.velocity)
+        :map(nw.component.invincible, function(v) return v + 1 end)
+
+    local motion_tween = nw.component.tween(
+        0, dash_data.distance, dash_data.time, ease.inOutQuad
+    )
+    while not motion_tween:is_done() and ctx:is_alive() do
+        for _, dt in ipairs(update:pop()) do
+            local _, _, dv = motion_tween:update(dt)
+            nw.system.collision(ctx):move(entity, dv * sx, 0)
+        end
+        ctx:yield()
+    end
+
+    entity
+        :set(nw.component.gravity)
+        :map(nw.component.invincible, function(v) return v - 1 end)
+end
+
+local function idle(ctx, entity)
     local update = ctx:listen("update"):collect()
     local jump = JumpControl.create(ctx, entity.id)
     local shoot = ctx:listen("keypressed")
         :filter(function(key) return key == "a" end)
         :latest()
+    local do_dash = ctx:listen("keypressed")
+        :filter(function(key) return key == "d" end)
+        :latest()
 
-    ctx:spin(function(ctx)
+    while ctx:is_alive() do
         for _, dt in ipairs(update:peek()) do
             nw.system.collision(ctx):move(entity, x_dir() * speed * dt, 0)
             update_orientation(entity, x_dir())
@@ -58,5 +94,12 @@ return function(ctx, entity)
         end
 
         if shoot:pop() then spawn_ball(entity) end
-    end)
+        if do_dash:pop() then return dash(ctx, entity) end
+
+        ctx:yield()
+    end
+end
+
+return function(ctx, entity)
+    while ctx:is_alive() do idle(ctx, entity) end
 end
