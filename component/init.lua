@@ -71,4 +71,6 @@ function component.layer(l) return l or 0 end
 
 function component.order(o) return o or 0 end
 
+function component.event_on_death(f) return f end
+
 return component
