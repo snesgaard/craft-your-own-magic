@@ -38,20 +38,47 @@ local function update_orientation(entity, x_dir)
     end
 end
 
-local hitbox = spatial(10, 0, 100, 100)
+local hitbox_animation = animation.animation()
+    :timeline(
+        "attack",
+        list(
+            {value=nil, time=-math.huge},
+            {value=spatial(0, 0, 20, 20), time=0},
+            {value=nil, time=0.5}
+        )
+    )
+
+
 
 local function attack(ctx, entity)
     entity:remove(nw.component.velocity)
 
     local pos = entity:ensure(nw.component.position)
     local bump_world = entity:get(nw.component.bump_world)
+    local mirror = entity:ensure(nw.component.mirror)
 
     local timer = nw.component.timer(1.0)
     local hb_entity = entity:world():entity()
-        :assemble(
-            nw.system.collision().assemble.init_entity,
-            pos.x, pos.y, hitbox, bump_world
-        )
+        :set(nw.component.position, pos.x, pos.y)
+        :set(nw.component.mirror, mirror)
+
+
+    local player = animation.player(hitbox_animation)
+        :on_update(function(value, prev_value)
+            if value.attack ~= prev_value.attack then
+                hb_entity:assemble(nw.system.collision().assemble.set_bump_world)
+                if value.attack ~= nil then
+                    hb_entity
+                        :set(nw.component.hitbox, value.attack:unpack())
+                        :assemble(
+                            nw.system.collision().assemble.set_bump_world,
+                            bump_world
+                        )
+                end
+            end
+        end)
+        :play_once()
+        :spin(ctx)
 
     hb_entity:destroy()
 end

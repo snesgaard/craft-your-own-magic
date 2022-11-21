@@ -1,5 +1,6 @@
 nw = require "nodeworks"
 effect = require "effect"
+animation = require "system.animation"
 
 function declare_world_interface(class)
     local default_instance = class()

@@ -108,7 +108,7 @@ function AnimationPlayer:__eq(other)
 end
 
 function AnimationPlayer:done()
-    return self.time <= self:duration() and self.once
+    return self:duration() <= self.time
 end
 
 local function update_time(self, dt)
@@ -141,11 +141,15 @@ function AnimationPlayer:spin(ctx)
         for _, dt in ipairs(update:pop()) do
             self:update(dt)
         end
+        ctx:yield()
     end
 end
 
 function AnimationPlayer:on_update(func)
     self._on_update = func
+    if self._on_update then
+        self._on_update(self:value(), {})
+    end
     return self
 end
 
