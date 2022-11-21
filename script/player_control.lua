@@ -38,6 +38,24 @@ local function update_orientation(entity, x_dir)
     end
 end
 
+local hitbox = spatial(10, 0, 100, 100)
+
+local function attack(ctx, entity)
+    entity:remove(nw.component.velocity)
+
+    local pos = entity:ensure(nw.component.position)
+    local bump_world = entity:get(nw.component.bump_world)
+
+    local timer = nw.component.timer(1.0)
+    local hb_entity = entity:world():entity()
+        :assemble(
+            nw.system.collision().assemble.init_entity,
+            pos.x, pos.y, hitbox, bump_world
+        )
+
+    hb_entity:destroy()
+end
+
 local dash_data = {
     distance = 200,
     time = 0.3
@@ -80,6 +98,9 @@ local function idle(ctx, entity)
     local do_dash = ctx:listen("keypressed")
         :filter(function(key) return key == "d" end)
         :latest()
+    local do_attack = ctx:listen("keypressed")
+        :filter(function(key) return key == "s" end)
+        :latest()
 
     while ctx:is_alive() do
         for _, dt in ipairs(update:peek()) do
@@ -95,6 +116,7 @@ local function idle(ctx, entity)
 
         if shoot:pop() then spawn_ball(entity) end
         if do_dash:pop() then return dash(ctx, entity) end
+        if do_attack:pop() then return attack(ctx, entity) end
 
         ctx:yield()
     end
