@@ -42,12 +42,45 @@ local hitbox_animation = animation.animation()
     :timeline(
         "attack",
         list(
-            {value=nil, time=-math.huge},
-            {value=spatial(0, 0, 20, 20), time=0},
-            {value=nil, time=0.5}
+            {value=nil, time=0},
+            {value=spatial(30, -30, 20, 20), time=0.2},
+            {value=nil, time=0.3},
+            {value=nil, time=0.4}
         )
     )
+    :timeline(
+        "motion",
+        list(
+            {value=0, time=0},
+            {value=10, time=0.2}
+        ),
+        ease.linear
+    )
 
+local function hitbox_sync(hb_entity, parent, value, prev_value, bump_world)
+    if value.attack == prev_value.attack then return end
+
+    hb_entity:assemble(nw.system.collision().assemble.set_bump_world)
+    local pos = parent:ensure(nw.component.position)
+    if not value.attack then return end
+    hb_entity
+        :set(nw.component.hitbox, value.attack:unpack())
+        :set(nw.component.position, pos.x, pos.y)
+        :assemble(
+            nw.system.collision().assemble.set_bump_world,
+            bump_world
+        )
+        :set(nw.component.check_collision_on_update)
+end
+
+local function anime_motion(ctx, entity, value, prev_value)
+    if not value.motion or not prev_value.motion then return end
+
+    local dx = value.motion - prev_value.motion
+    local sx = entity:get(nw.component.mirror) and -1 or 1
+
+    nw.system.collision(ctx):move(entity, dx * sx, 0)
+end
 
 
 local function attack(ctx, entity)
@@ -57,25 +90,21 @@ local function attack(ctx, entity)
     local bump_world = entity:get(nw.component.bump_world)
     local mirror = entity:ensure(nw.component.mirror)
 
-    local timer = nw.component.timer(1.0)
     local hb_entity = entity:world():entity()
         :set(nw.component.position, pos.x, pos.y)
         :set(nw.component.mirror, mirror)
-
+        :set(nw.component.is_effect)
+        :set(
+            nw.component.effect,
+            {effect.damage, 5}
+        )
+        :set(nw.component.team, "neutral")
+        :set(nw.component.trigger_once_pr_entity)
 
     local player = animation.player(hitbox_animation)
         :on_update(function(value, prev_value)
-            if value.attack ~= prev_value.attack then
-                hb_entity:assemble(nw.system.collision().assemble.set_bump_world)
-                if value.attack ~= nil then
-                    hb_entity
-                        :set(nw.component.hitbox, value.attack:unpack())
-                        :assemble(
-                            nw.system.collision().assemble.set_bump_world,
-                            bump_world
-                        )
-                end
-            end
+            hitbox_sync(hb_entity, entity, value, prev_value, bump_world)
+            anime_motion(ctx, entity, value, prev_value)
         end)
         :play_once()
         :spin(ctx)
