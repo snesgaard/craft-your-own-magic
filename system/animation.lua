@@ -33,7 +33,6 @@ function Timeline:value(time, ease)
 
         local prev_time = prev_node and prev_node.time or -math.huge
         local next_time = next_node and next_node.time or math.huge
-
         if prev_time <= time and time < next_time then
             return eval_nodes(ease, time, prev_node, next_node)
         end
@@ -48,6 +47,10 @@ function Timeline:duration()
         end
     end
     return duration
+end
+
+function Timeline:__tostring()
+    return string.format("Timeline: %s: %s", self.name, tostring(self.nodes))
 end
 
 local Animation = class()
@@ -97,6 +100,7 @@ function AnimationPlayer.create(animation)
         {
             time = 0,
             once = false,
+            speed = 1,
             animation = animation or Animation.create()
         },
         AnimationPlayer
@@ -124,7 +128,12 @@ end
 function AnimationPlayer:update(dt)
     local prev_values = self:value()
 
-    update_time(self, dt)
+    if self._on_update and self._on_update_next then
+        self._on_update_next = false
+        self._on_update(self:value(), {})
+    end
+
+    update_time(self, dt * self.speed)
 
     if self._on_update then
         local values = self:value()
@@ -132,6 +141,11 @@ function AnimationPlayer:update(dt)
     end
 
     return self:done()
+end
+
+function AnimationPlayer:set_speed(speed)
+    self.speed = speed or 1
+    return self
 end
 
 function AnimationPlayer:spin(ctx)
@@ -145,11 +159,17 @@ function AnimationPlayer:spin(ctx)
     end
 end
 
+function AnimationPlayer:spin_once(ctx)
+    self.update_obs = self.update_obs or ctx:listen("update"):collect()
+
+    for _, dt in ipairs(self.update_obs:pop()) do self:update(dt) end
+
+    return self:done()
+end
+
 function AnimationPlayer:on_update(func)
     self._on_update = func
-    if self._on_update then
-        self._on_update(self:value(), {})
-    end
+    self._on_update_next = true
     return self
 end
 
@@ -162,7 +182,21 @@ function AnimationPlayer:play_once()
     return self
 end
 
-function AnimationPlayer:duration() return self.animation:duration() end
+function AnimationPlayer:set_duration(duration)
+    self._duration = duration
+    return self
+end
+
+function AnimationPlayer:duration()
+    self._duration = self._duration or self.animation:duration()
+    return self._duration
+end
+
+function AnimationPlayer:play_in_seconds(seconds)
+    if not seconds then return self end
+    local speed = self:duration() / seconds
+    return self:set_speed(speed)
+end
 
 local function step(args)
     return list(
@@ -194,9 +228,20 @@ local function sequence(seq)
     end
 
     local last_value = List.tail(seq).value
-    table.insert(nodes, {value=last_value, time=time})
+    table.insert(nodes, dict{value=last_value, time=time})
 
     return nodes
+end
+
+local function lift_to_node(frame)
+    return dict{value=frame, dt=frame.dt}
+end
+
+local function from_aseprite(atlas, key)
+    local frames = get_atlas(atlas):get_animation(key):map(lift_to_node)
+
+    return Animation.create()
+        :timeline("frame", sequence(frames))
 end
 
 return {
@@ -204,5 +249,6 @@ return {
     animation = Animation.create,
     step = step,
     lerp = lerp,
-    sequence = sequence
+    sequence = sequence,
+    from_aseprite = from_aseprite
 }
