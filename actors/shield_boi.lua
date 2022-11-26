@@ -17,6 +17,30 @@ local function handle_frame(entity, frame)
     entity:set(nw.component.frame, frame)
 end
 
+local function create_hitbox(entity, slice, anchor)
+    local pos = entity:ensure(nw.component.position)
+    local bump_world = entity:get(nw.component.bump_world)
+
+    return entity:world():entity()
+        :assemble(
+            nw.system.collision().assemble.init_entity,
+            pos.x, pos.y, slice:move(-anchor.x, -anchor.y), bump_world
+        )
+
+end
+
+local function handle_slices(entity, frame, prev_frame)
+    if frame == prev_frame then return end
+    local slices = entity:ensure(nw.component.slices)
+
+    local anchor = frame.slices.body:centerbottom()
+
+    for name, slice in pairs(frame.slices) do
+        if slices[name] then slices[name]:destroy() end
+        slices[name] = create_hitbox(entity, slice, anchor)
+    end
+end
+
 local script = {}
 
 function script.attack(ctx, entity)
@@ -24,8 +48,9 @@ function script.attack(ctx, entity)
         animations.bash,
         function(key, anime)
             return animation.player(anime)
-                :on_update(function(value)
+                :on_update(function(value, prev_value)
                     handle_frame(entity, value.frame)
+                    handle_slices(entity, value.frame, prev_value.frame)
                 end)
         end
     )
