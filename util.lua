@@ -1,3 +1,5 @@
+local animation = require "system.animation"
+
 local util = {}
 
 function util.test_ecs_world()
@@ -44,6 +46,39 @@ function util.test_ecs_world()
         :assemble(
             require("system.barrel").assemble.barrel, 300, 300, bump_world
         )
+
+    local function rotator_script(ctx, entity)
+        local update = ctx:listen("update"):collect()
+
+        local color_sequence = {
+            {value=nw.component.color(1, 0, 0), dt=1.0},
+            {value=nw.component.color(0, 1, 0), dt=1.0},
+            {value=nw.component.color(0, 0, 1), dt=1.0},
+        }
+
+        local color_animation = animation.animation()
+            :timeline("color", animation.sequence(color_sequence))
+
+        local player = animation.player(color_animation)
+            :on_update(function(args)
+                entity:set(nw.component.color, args.color)
+            end)
+
+        while ctx:is_alive() do
+            for _, dt in ipairs(update:pop()) do
+                player:update(dt)
+            end
+            ctx:yield()
+        end
+    end
+
+    local rotator = ecs_world:entity()
+        :assemble(
+            nw.system.collision().assemble.init_entity,
+            400, 300, nw.component.hitbox(20, 50), bump_world
+        )
+        :set(nw.component.drawable, nw.drawable.body)
+        :assemble(nw.system.script().set, rotator_script)
 
     return {ecs_world = ecs_world, bump_world = bump_world}
 end
