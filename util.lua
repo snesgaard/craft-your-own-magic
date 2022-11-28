@@ -49,6 +49,7 @@ function util.test_ecs_world()
         :assemble(
             require("actors.shield_boi").assemble, 500, 300, bump_world
         )
+        :set(nw.component.team, "enemy")
 
     local function rotator_script(ctx, entity)
         local update = ctx:listen("update"):collect()
