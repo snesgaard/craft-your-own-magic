@@ -30,6 +30,8 @@ function mirror_call(func, item, other, ...)
     return func(item, other, ...) or func(other, item, ...)
 end
 
+Frame.slice_to_pos = Spatial.centerbottom
+
 function love.load(args)
     if args[1] == "test" then
         require "test"

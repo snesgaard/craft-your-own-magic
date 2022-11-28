@@ -17,6 +17,7 @@ local system = {
 
 system.full = list(
     nw.system.motion(),
+    nw.system.camera,
     system.base.system(system.collision.rules),
     system.base.system(system.ball.rules),
     system.base.system(system.barrel.rules),

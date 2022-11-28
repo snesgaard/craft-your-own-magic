@@ -32,9 +32,7 @@ function util.test_ecs_world()
         )
         :set(nw.component.is_actor)
         :set(nw.component.health, 20)
-        :assemble(
-            nw.system.script().set, require "script.patrol_fly"
-        )
+        --:assemble(nw.system.script().set, require "script.patrol_fly")
         :set(nw.component.team, "enemy")
 
     local trap = ecs_world:entity()
@@ -46,6 +44,12 @@ function util.test_ecs_world()
         :assemble(
             require("system.barrel").assemble.barrel, 300, 300, bump_world
         )
+
+    local shield_boi = ecs_world:entity()
+        :assemble(
+            require("actors.shield_boi").assemble, 500, 300, bump_world
+        )
+        :set(nw.component.team, "enemy")
 
     local function rotator_script(ctx, entity)
         local update = ctx:listen("update"):collect()
@@ -78,7 +82,7 @@ function util.test_ecs_world()
             400, 300, nw.component.hitbox(20, 50), bump_world
         )
         :set(nw.component.drawable, nw.drawable.body)
-        :assemble(nw.system.script().set, rotator_script)
+        --:assemble(nw.system.script().set, rotator_script)
 
     return {ecs_world = ecs_world, bump_world = bump_world}
 end
