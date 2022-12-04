@@ -113,8 +113,8 @@ local function attack(ctx, entity)
 end
 
 local dash_data = {
-    distance = 200,
-    time = 0.3
+    distance = 100,
+    time = 0.2
 }
 
 local function dash(ctx, entity)
