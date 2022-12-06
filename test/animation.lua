@@ -54,7 +54,7 @@ T("animation", function(T)
                 ease.linear
             )
 
-        local update_called = {count=0}
+        local update_called = {count=-1}
 
         local player = animation.player(data)
             :on_update(function() update_called.count = update_called.count + 1 end)
