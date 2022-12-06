@@ -4,19 +4,19 @@ local util = {}
 
 function util.test_ecs_world()
     local ecs_world = nw.ecs.entity.create()
-    local bump_world = nw.third.bump.newWorld()
+    local bump_world = nw.system.collision().get_bump_world(ecs_world)
 
     local platform = ecs_world:entity()
         :assemble(
             nw.system.collision().assemble.init_entity,
-            300, 300, nw.component.hitbox(-2000, 0, 4000, 100), bump_world
+            300, 300, nw.component.hitbox(-2000, 0, 4000, 100)
         )
         :set(nw.component.is_terrain)
 
     local player = ecs_world:entity("player")
         :assemble(
             nw.system.collision().assemble.init_entity,
-            300, 200, nw.component.hitbox(20, 50), bump_world
+            300, 200, nw.component.hitbox(20, 50)
         )
         :assemble(
             nw.system.script().set, require "script.player_control"
@@ -28,7 +28,7 @@ function util.test_ecs_world()
     local other_actor = ecs_world:entity()
         :assemble(
             nw.system.collision().assemble.init_entity,
-            400, 300, nw.component.hitbox(20, 50), bump_world
+            400, 300, nw.component.hitbox(20, 50)
         )
         :set(nw.component.is_actor)
         :set(nw.component.health, 20)
@@ -37,17 +37,17 @@ function util.test_ecs_world()
 
     local trap = ecs_world:entity()
         :assemble(
-            require("system.trap").assemble.trap, 100, 300, bump_world
+            require("system.trap").assemble.trap, 100, 300
         )
 
     local barrel = ecs_world:entity()
         :assemble(
-            require("system.barrel").assemble.barrel, 300, 300, bump_world
+            require("system.barrel").assemble.barrel, 300, 300
         )
 
     local shield_boi = ecs_world:entity()
         :assemble(
-            require("actors.shield_boi").assemble, 500, 300, bump_world
+            require("actors.shield_boi").assemble, 500, 300
         )
         :set(nw.component.team, "enemy")
 
@@ -79,7 +79,7 @@ function util.test_ecs_world()
     local rotator = ecs_world:entity()
         :assemble(
             nw.system.collision().assemble.init_entity,
-            400, 300, nw.component.hitbox(20, 50), bump_world
+            400, 300, nw.component.hitbox(20, 50)
         )
         :set(nw.component.drawable, nw.drawable.body)
         --:assemble(nw.system.script().set, rotator_script)
