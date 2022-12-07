@@ -1,5 +1,4 @@
 local Base = require "system.base"
-
 local Combat = Base()
 
 function Combat:damage(entity, damage)

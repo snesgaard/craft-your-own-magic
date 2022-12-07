@@ -17,3 +17,4 @@ end
 
 require "test.combat"
 require "test.animation"
+require "test.test_collision_and_effect"
