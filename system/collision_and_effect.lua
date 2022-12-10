@@ -32,12 +32,19 @@ function CollisionAndEffect:update(dt, ecs_world)
         nw.component.trigger_on_interval
     )
     for id, timer_table in pairs(timer_tables) do
+        local trig_table = ecs_world:ensure(
+            nw.component.trigger_once_pr_entity, id
+        )
+
+        for id, value in pairs(trig_table) do
+            if value and not timer_table.timers[id] then
+                 timer_table.timers[id] = nw.component.timer(timer_table.interval)
+            end
+        end
+
         for target, timer in pairs(timer_table.timers) do
             timer:update(dt)
-            if timer:is_done() then
-                local trig_table = ecs_world:ensure(
-                    nw.component.trigger_once_pr_entity, id
-                )
+            if timer:done() then
                 trig_table[target] = nil
                 timer_table[target] = nil
             end
