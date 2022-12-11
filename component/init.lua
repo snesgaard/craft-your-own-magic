@@ -32,7 +32,7 @@ function component.is_effect() return true end
 
 function component.is_terrain() return true end
 
-function component.event_on_timer_complete(event) return event end
+function component.on_timer_complete(func) return func end
 
 function component.trigger_once() return true end
 
