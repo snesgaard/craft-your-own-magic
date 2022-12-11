@@ -40,6 +40,8 @@ function component.already_triggered() return true end
 
 function component.trigger_once_pr_entity() return dict() end
 
+function component.on_collision(cb) return cb end
+
 function component.trigger_on_interval(interval)
     if not interval then errorf("You must give an interval") end
     return {timers=dict(), interval=interval}
@@ -65,7 +67,7 @@ function component.ignore_terrain() return true end
 
 function component.bouncy(b) return b end
 
-function component.check_collision_on_update() return true end
+function component.check_collision_once() return true end
 
 function component.layer(l) return l or 0 end
 
