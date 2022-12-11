@@ -4,6 +4,7 @@ local trigger = Base()
 function trigger:should(item, other)
     if not self:peek_should(item, other) then return false end
 
+    local entity_dict = item:ensure(nw.component.trigger_once_pr_entity)
     entity_dict[other] = true
     return true
 end
@@ -39,4 +40,4 @@ function trigger:update(dt, ecs_world)
     end
 end
 
-return trigger
+return trigger.from_ctx
