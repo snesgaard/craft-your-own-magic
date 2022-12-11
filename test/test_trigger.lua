@@ -1,20 +1,9 @@
-local coleffect = require "system.collision_and_effect"
+local trigger = require "system.trigger"
 
-T("collision_and_effect", function(T)
+T("test_system_trigger", function(T)
     local ecs_world = nw.ecs.entity.create()
     local item = ecs_world:entity()
     local other = ecs_world:entity()
-
-    T("collision_filter", function(T)
-        T:assert(coleffect().collision_filter(ecs_world, item.id, other.id) == "cross")
-
-        other:set(nw.component.is_terrain)
-        T:assert(coleffect().collision_filter(ecs_world, item.id, other.id) == "slide")
-        T:assert(coleffect().collision_filter(ecs_world, other.id, item.id) == "cross")
-
-        item:set(nw.component.ignore_terrain)
-        T:assert(coleffect().collision_filter(ecs_world, item.id, other.id) == "cross")
-    end)
 
     T("trigger_once_and_timer", function(T)
         T:assert(coleffect(ctx):can_trigger_effect(item, other))
@@ -28,5 +17,4 @@ T("collision_and_effect", function(T)
         coleffect(ctx):update(2.0, ecs_world)
         T:assert(coleffect(ctx):can_trigger_effect(item, other))
     end)
-
 end)
