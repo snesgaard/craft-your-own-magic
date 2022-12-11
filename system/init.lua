@@ -50,5 +50,6 @@ nw.system.timer = import("timer")
 nw.system.trigger = import("trigger")
 nw.system.collision_helper = import("collision_helper")
 nw.system.entity = import("entity")
+nw.system.combat = import("combat")
 
 return api

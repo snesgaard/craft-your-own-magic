@@ -1,5 +1,16 @@
 local assemble = {}
 
+assemble.CONFIG = {
+    FIREBALL = {
+        DURATION = 1.0,
+        DAMAGE = 2
+    },
+    EXPLOSION = {
+        DURATION = 2.0,
+        DAMAGE = 10
+    }
+}
+
 local ball = {}
 
 function ball.spawn_explosion(ctx, item)
@@ -11,8 +22,10 @@ end
 function ball.on_collision(ctx, item, other, colinfo)
     if not nw.system.trigger(ctx):should(item, other) then return end
 
-    local info = nw.system.combat(ctx):damage(other, 2)
-    if info and info.damage > 0 then spawn_explosion(ctx, item) end
+    local info = nw.system.combat(ctx):damage(
+        other, assemble.CONFIG.FIREBALL.DAMAGE
+    )
+    if info and info.damage > 0 then ball.spawn_explosion(ctx, item) end
 end
 
 function ball.on_timer_complete(ctx, item)
@@ -23,19 +36,8 @@ local explosion = {}
 
 function explosion.on_collision(ctx, item, other, colinfo)
     if not nw.system.trigger(ctx):should(item, other) then return end
-
-    nw.system.combat(ctx):damage(other, 10)
+    nw.system.combat(ctx):damage(other, assemble.CONFIG.EXPLOSION.DAMAGE)
 end
-
-
-assemble.CONFIG = {
-    FIREBALL = {
-        DURATION = 1.0
-    },
-    EXPLOSION = {
-        DURATION = 2.0
-    }
-}
 
 function assemble.fireball(entity, x, y, vx, vy)
     return entity
@@ -59,7 +61,7 @@ function assemble.explosion(entity, x, y)
         :set(nw.component.on_collision, explosion.on_collision)
         :set(nw.component.timer, assemble.CONFIG.EXPLOSION.DURATION)
         :set(nw.component.die_on_timer_complete)
-        :set(nw.component.check_collision_once)
+        :set(nw.component.velocity, 0, 0)
 end
 
 return assemble
