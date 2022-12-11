@@ -46,4 +46,9 @@ function api.handle_observables(ctx, obs, ...)
     end
 end
 
+nw.system.timer = import("timer")
+nw.system.trigger = import("trigger")
+nw.system.collision_helper = import("collision_helper")
+nw.system.entity = import("entity")
+
 return api

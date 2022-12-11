@@ -7,7 +7,7 @@ function timer:handle_timer_update(ecs_world, id, timer, dt)
     timer:update(dt)
     if not timer:done() then return end
     local cb = ecs_world:get(nw.component.on_timer_complete, id)
-    if cb then cb(ecs_world:entity(id)) end
+    if cb then cb(self.world, ecs_world:entity(id)) end
     local die = ecs_world:get(nw.component.die_on_timer_complete, id)
     if die then entity(self.world):destroy(ecs_world:entity(id)) end
 end
