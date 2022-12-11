@@ -20,4 +20,20 @@ function timer:update(dt, ecs_world)
     end
 end
 
+function timer.observables(ctx)
+    return {
+        update = ctx:listen("update"):collect()
+    }
+end
+
+function timer.handle_observables(ctx, obs, ...)
+    local worlds = {...}
+
+    for _, dt in ipairs(obs.update:pop()) do
+        for _, ecs_world in ipairs(worlds) do
+            timer.from_ctx(ctx):update(dt, ecs_world)
+        end
+    end
+end
+
 return timer.from_ctx

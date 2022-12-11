@@ -41,4 +41,23 @@ function CollisionHelper:check_collision_once(ecs_world)
     return collisions
 end
 
+function CollisionHelper.observables(ctx)
+    return {
+        collision = ctx:listen("collision"):collect(),
+        update = ctx:listen("update"):collect()
+    }
+end
+
+function CollisionHelper.handle_observables(ctx, obs, ...)
+    for _, colinfo in ipairs(obs.collision:pop()) do
+        CollisionHelper.from_ctx(ctx):on_collision(colinfo)
+    end
+
+    for _, _ in ipairs(obs.update:pop()) do
+        for _, ecs_world in ipairs{...} do
+            CollisionHelper.from_ctx(ctx):check_collision_once(ecs_world)
+        end
+    end
+end
+
 return CollisionHelper.from_ctx
