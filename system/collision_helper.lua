@@ -60,4 +60,8 @@ function CollisionHelper.handle_observables(ctx, obs, ...)
     end
 end
 
+function CollisionHelper.set_default_filter()
+    nw.system.collision():class().default_filter = CollisionHelper.collision_filter
+end
+
 return CollisionHelper.from_ctx
