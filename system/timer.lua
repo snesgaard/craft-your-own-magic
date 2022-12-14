@@ -5,7 +5,10 @@ local timer = Base()
 function timer:handle_timer_update(ecs_world, id, timer, dt)
     if timer:done() then return end
     timer:update(dt)
-    if not timer:done() then return end
+    return timer:done()
+end
+
+function timer:handle_finished(ecs_world, id)
     local cb = ecs_world:get(nw.component.on_timer_complete, id)
     if cb then cb(self.world, ecs_world:entity(id)) end
     local die = ecs_world:get(nw.component.die_on_timer_complete, id)
@@ -15,8 +18,13 @@ end
 function timer:update(dt, ecs_world)
     local timer_table = ecs_world:get_component_table(nw.component.timer)
 
+    local was_finished = {}
     for id, timer in pairs(timer_table) do
-        self:handle_timer_update(ecs_world, id, timer, dt)
+        was_finished[id] = self:handle_timer_update(ecs_world, id, timer, dt)
+    end
+
+    for id, finished in pairs(was_finished) do
+        if finished then self:handle_finished(ecs_world, id) end
     end
 end
 
@@ -30,7 +38,7 @@ function timer.handle_observables(ctx, obs, ...)
     local worlds = {...}
 
     for _, dt in ipairs(obs.update:pop()) do
-        for _, ecs_world in ipairs(worlds) do
+        for id, ecs_world in ipairs(worlds) do
             timer.from_ctx(ctx):update(dt, ecs_world)
         end
     end

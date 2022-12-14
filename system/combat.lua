@@ -6,8 +6,6 @@ function Combat:damage(entity, damage)
 
     local hp = entity:get(nw.component.health)
 
-    print("damage", entity, damage)
-
     local next_hp = entity:maybe_get(nw.component.health)
         :map(function(health)
             local real_damage = math.clamp(damage, 0, hp.value)

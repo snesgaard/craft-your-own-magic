@@ -35,4 +35,5 @@ function entity:spawn(ecs_world, id)
     return child
 end
 
+
 return entity.from_ctx

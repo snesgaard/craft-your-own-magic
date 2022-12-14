@@ -3,7 +3,6 @@ local CollisionHelper = Base()
 
 function CollisionHelper:invoke_on_collision(colinfo, item, other)
     local on_collision = item:get(nw.component.on_collision)
-    print("col check", on_collision)
     if not on_collision then return end
     on_collision(self.world, item, other, colinfo)
 end

@@ -5,8 +5,8 @@ end
 local system_order = list(
     nw.system.motion,
     nw.system.camera,
-    import("timer"),
     import("trigger"),
+    import("timer"),
     import("collision_helper"),
     nw.system.script
 )
