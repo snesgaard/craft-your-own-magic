@@ -24,7 +24,7 @@ function entity:spawn_from(parent, func, ...)
         args = {...}
     }
 
-    self:emit("on_spawned_from", child, parent, func, ...)
+    self:emit("on_spawned_from", info)
 
     return child
 end
