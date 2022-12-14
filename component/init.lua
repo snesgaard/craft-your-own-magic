@@ -77,4 +77,10 @@ function component.event_on_death(f) return f end
 
 function component.invincible(v) return v or 0 end
 
+function component.dead() return true end
+
+function component.brittle() return true end
+
+function component.on_death(f) return f end
+
 return component

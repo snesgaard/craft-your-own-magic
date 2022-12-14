@@ -66,6 +66,7 @@ T("test_fireball", function(T)
     end)
 
     T("trigger_then_hit", function(T)
+        print("hit test")
         world:emit("update", fireball.CONFIG.FIREBALL.DURATION):spin()
 
         local actor = nw.system.entity():spawn(ecs_world)
@@ -76,13 +77,16 @@ T("test_fireball", function(T)
             :set(nw.component.health, 100)
 
         local damage_spy = ctx:listen("on_damage"):latest()
+        local collision_spy = ctx:listen("collision"):latest()
         world:emit("update", 0):spin()
         T:assert(not damage_spy:peek())
 
+        collectgarbage()
         actor:set(nw.component.velocity, -1000, 0)
 
         world:emit("update", 1):spin()
 
+        print(dict(collision_spy:peek()), actor.id)
         T:assert(damage_spy:peek())
         T:assert(damage_spy:peek().target == actor)
         T:assert(damage_spy:peek().damage == fireball.CONFIG.EXPLOSION.DAMAGE)

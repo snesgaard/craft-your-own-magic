@@ -8,9 +8,10 @@ assemble.CONFIG = {
 local barrel = {}
 
 function barrel.on_death(ctx, entity)
-    local pos = item:ensure(nw.component.position)
-    nw.system.entity(ctx):spawn_from(entity)
-        :assemble(assemble.explosion, pos.x , pos.y)
+    local pos = entity:ensure(nw.component.position)
+
+    nw.system.entity(ctx):spawn_from(entity, assemble.explosion, pos.x, pos.y)
+    nw.system.entity(ctx):destroy(entity)
 end
 
 local explosion = {}
@@ -41,3 +42,5 @@ function assemble.explosion(entity, x, y)
         :set(nw.component.on_death, barrel.on_death)
         :set(nw.component.on_collision, explosion.on_collision)
 end
+
+return assemble

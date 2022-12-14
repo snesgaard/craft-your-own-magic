@@ -17,6 +17,15 @@ function entity:spawn_from(parent, func, ...)
         :set(nw.component.team, team)
         :assemble(func or noop, ...)
 
+    local info = {
+        child = child,
+        parent = parent,
+        func = func,
+        args = {...}
+    }
+
+    self:emit("on_spawned_from", child, parent, func, ...)
+
     return child
 end
 

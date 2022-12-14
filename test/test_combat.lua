@@ -12,6 +12,7 @@ T("combat", function(T)
         T:assert(info.damage == 3)
         T:assert(target:get(nw.component.health).value == 2)
         T:assert(target:get(nw.component.health).max == 10)
+        T:assert(not info.death)
     end)
 
     T("heal", function(T)
@@ -20,5 +21,18 @@ T("combat", function(T)
         T:assert(info.heal == 2)
         T:assert(target:get(nw.component.health).value == 7)
         T:assert(target:get(nw.component.health).max == 10)
+    end)
+
+    T("die", function(T)
+        local info = combat():damage(target, 100)
+        T:assert(info.death)
+
+        local brittle = ecs_world:entity()
+            :set(nw.component.brittle)
+
+        local info = combat():damage(brittle, 1)
+
+        T:assert(not info.damage)
+        T:assert(info.death)
     end)
 end)
