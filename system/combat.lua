@@ -17,6 +17,8 @@ function Combat:damage(entity, damage)
 
     self:emit("on_damage", info)
 
+    if next_value <= 0 then info.dead = self:die(entity) end
+
     return info
 end
 
@@ -37,6 +39,10 @@ function Combat:heal(entity, heal)
     self:emit("on_heal", info)
 
     return info
+end
+
+function Combat:die(entity)
+
 end
 
 return Combat.from_ctx
