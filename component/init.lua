@@ -83,4 +83,16 @@ function component.brittle() return true end
 
 function component.on_death(f) return f end
 
+function component.jump_request(cooldown)
+    return nw.component.timer(cooldown or 0.2)
+end
+
+function component.jump_on_ground(cooldown)
+    return nw.component.timer(cooldown or 0.2)
+end
+
+function component.jump(height)
+    return height
+end
+
 return component

@@ -8,6 +8,7 @@ local system_order = list(
     import("trigger"),
     import("timer"),
     import("collision_helper"),
+    import("jump"),
     nw.system.script
 )
 

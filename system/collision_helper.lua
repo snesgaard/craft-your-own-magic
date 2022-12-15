@@ -15,6 +15,10 @@ function CollisionHelper:on_collision(colinfo)
     self:invoke_on_collision(colinfo, other, item)
 end
 
+function CollisionHelper.is_solid(colinfo_type)
+    return colinfo_type == "slide" or colinfo_type == "bounce"
+end
+
 function CollisionHelper.collision_filter(ecs_world, item, other)
     local item = ecs_world:entity(item)
     local other = ecs_world:entity(other)
