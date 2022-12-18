@@ -1,5 +1,6 @@
 nw = require "nodeworks"
 animation = require "system.animation"
+require "coroutine_jump"
 
 decorate(nw.component, require "component", true)
 
