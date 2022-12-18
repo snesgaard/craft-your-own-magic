@@ -47,10 +47,14 @@ function api.handle_observables(ctx, obs, ...)
     end
 end
 
+nw.system.input = import("input")
 nw.system.timer = import("timer")
 nw.system.trigger = import("trigger")
 nw.system.collision_helper = import("collision_helper")
 nw.system.entity = import("entity")
 nw.system.combat = import("combat")
+nw.system.jump = import("jump")
+
+nw.system.collision_helper().set_default_filter()
 
 return api

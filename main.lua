@@ -3,15 +3,6 @@ animation = require "system.animation"
 
 decorate(nw.component, require "component", true)
 
-local collision_class = nw.system.collision():class()
---local system = require "system"
-
-function collision_class.is_solid(colinfo)
-    return colinfo.type == "slide" or colinfo.type == "touch" or colinfo.type == "bounce"
-end
-
---collision_class.default_filter = system.collision.collision_filter
-
 Frame.slice_to_pos = Spatial.centerbottom
 
 function love.load(args)
@@ -21,6 +12,7 @@ function love.load(args)
     end
 
     world = nw.ecs.world()
+    world:push(require "scene.player")
 end
 
 function love.update(dt)

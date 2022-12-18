@@ -54,8 +54,14 @@ function Jump:on_collision(colinfo)
     item:set(nw.component.jump_on_ground)
 end
 
-function Jump:request(entity)
+function Jump:request(entity, height)
     entity:set(nw.component.jump_request)
+    if height then entity:set(nw.component.jump, height) end
+end
+
+function Jump:is_on_ground(entity)
+    local g_timer = entity:get(nw.component.jump_on_ground)
+    return g_timer and not g_timer:done()
 end
 
 function Jump.observables(ctx)
