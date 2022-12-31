@@ -1,40 +1,25 @@
-local base = {}
+return function()
+    local Base = class()
 
-function base.observables_from_rules(ctx, rules)
-    local obs = {}
-
-    for name, _ in pairs(rules) do
-        obs[name] = ctx:listen(name):collect()
+    function Base.constructor(world)
+        return {world=world}
     end
 
-    return obs
-end
-
-local function update_rule(ctx, name, observable, rules, ecs_world)
-    local rule = rules[name]
-    if not rule then return end
-    for _, value in ipairs(observable:peek()) do
-        rule(ctx, value, ecs_world)
+    function Base:emit(...)
+        if self.world then self.world:emit(...) end
     end
+
+    function Base.from_ctx(ctx)
+        Base.default_instance = Base.default_instance or Base.create()
+        if not ctx then return Base.default_instance end
+        local world = ctx.world or ctx
+        if not world[Base] then world[Base] = Base.create(world) end
+        return world[Base]
+    end
+
+    function Base.observables(ctx) return {} end
+
+    function Base.handle_observables() end
+
+    return Base
 end
-
-function base.handle_observables(ctx, obs, rules, ecs_world, ...)
-    if not ecs_world then return end
-
-    for name, o in pairs(obs) do update_rule(ctx, name, o, rules, ecs_world) end
-
-    return base.handle_observables(ctx, obs, rules, ...)
-end
-
-function base.system(rules)
-    return {
-        observables = function(ctx)
-            return base.observables_from_rules(ctx, rules)
-        end,
-        handle_observables = function(ctx, obs, ecs_world, ...)
-            return base.handle_observables(ctx, obs, rules, ecs_world, ...)
-        end
-    }
-end
-
-return base

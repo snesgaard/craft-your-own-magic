@@ -1,34 +1,8 @@
 nw = require "nodeworks"
-effect = require "effect"
 animation = require "system.animation"
-
-function declare_world_interface(class)
-    local default_instance = class()
-
-    return function(ctx)
-        if not ctx then return default_instance end
-        local world = ctx.world or ctx
-        world[class] = world[class] or class(world)
-        return world[class]
-    end
-end
+require "coroutine_jump"
 
 decorate(nw.component, require "component", true)
-
-local collision_class = nw.system.collision():class()
-local system = require "system"
-
-transform = require "transform"
-
-function collision_class.is_solid(colinfo)
-    return colinfo.type == "slide" or colinfo.type == "touch" or colinfo.type == "bounce"
-end
-
-collision_class.default_filter = system.collision.collision_filter
-
-function mirror_call(func, item, other, ...)
-    return func(item, other, ...) or func(other, item, ...)
-end
 
 Frame.slice_to_pos = Spatial.centerbottom
 
@@ -39,7 +13,7 @@ function love.load(args)
     end
 
     world = nw.ecs.world()
-    world:push(require "scene.player_control")
+    world:push(require "scene.player")
 end
 
 function love.update(dt)

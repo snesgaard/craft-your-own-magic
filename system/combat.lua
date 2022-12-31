@@ -1,61 +1,67 @@
-local Combat = class()
+local Base = require "system.base"
+local Combat = Base()
 
-function Combat.create(world)
-    return setmetatable({world=world}, Combat)
-end
+function Combat:damage(entity, damage)
+    local info = {target = entity, damage_request = damage}
 
-function Combat:emit(...)
-    if self.world then self.world:emit(...) end
-end
+    local hp = entity:get(nw.component.health)
+
+    local next_hp = entity:maybe_get(nw.component.health)
+        :map(function(health)
+            local real_damage = math.clamp(damage, 0, hp.value)
+            local next_health = health.value - real_damage
+            return {
+                damage = real_damage,
+                health = nw.component.health(next_health, health.max)
+            }
+        end)
+        :visit(function(args)
+            info.damage = args.damage
+            entity:set(nw.component.health, args.health.value, args.health.max)
+        end)
 
 
-function Combat:deal_damage(target, damage)
-    local health = target:get(nw.component.health)
-    if not health then return end
-    local real_damage = math.min(health.value, math.max(damage, 0))
+    local should_die_from_hp = next_hp
+        :map(function(args) return args.health.value <= 0 end)
+        :value_or_default(false)
 
-    if target:ensure(nw.component.invincible) > 0 then
-        real_damage = 0
-    end
+    local is_brittle = entity:get(nw.component.brittle)
 
-    local next_health = health.value - real_damage
-    target:set(nw.component.health, next_health, health.max)
+    if is_brittle or should_die_from_hp then info.death = self:die(entity) end
 
-    local info = {
-        damage = real_damage, target = target, health = next_health
-    }
-    self:emit("on_deal_damage", info)
+    self:emit("on_damage", info)
+
     return info
 end
 
-function Combat:heal(target, heal)
-    local health = target:get(nw.component.health)
-    if not health then return end
-    local real_heal = math.max(0, heal)
-    local next_health = math.min(health.max, health.value + heal)
-    target:set(nw.component.health, next_health, health.max)
+function Combat:heal(entity, heal)
+    local hp = entity:get(nw.component.health)
+    if not hp then return end
+
+    local real_heal = math.clamp(heal, 0, hp.max - hp.value)
+    local next_value = hp.value + real_heal
+    entity:set(nw.component.health, next_value, hp.max)
 
     local info = {
-        target = target,
+        target = entity,
         heal = real_heal,
-        health = next_health
+        heal_request = heal
     }
+
     self:emit("on_heal", info)
+
     return info
 end
 
-local default_instance = Combat.create()
+function Combat:die(entity)
+    local info = {target = entity}
+    entity:set(nw.component.dead)
 
-local Api = class()
+    local on_death = entity:get(nw.component.on_death)
+    if on_death then on_death(self.world, entity) end
 
-function Api.from_ctx(ctx)
-    if not ctx then return default_instance end
-
-    local world = ctx.world or ctx
-    world[Combat] = Combat.create(world)
-    return world[Combat]
+    self:emit("on_death", info)
+    return info
 end
 
-function Api:__call(ctx) return Api.from_ctx(ctx) end
-
-return setmetatable({}, Api)
+return Combat.from_ctx

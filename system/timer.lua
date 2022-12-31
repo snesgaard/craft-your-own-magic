@@ -1,36 +1,47 @@
-local rules = {}
+local Base = require "system.base"
+local entity = require "system.entity"
+local timer = Base()
 
-local function handle_event_on_complete(ctx, entity)
-    local event = entity:get(nw.component.event_on_timer_complete)
-
-    if not event then return end
-    
-    if type(event) == "function" then
-        ctx:emit(event(entity))
-    else
-        ctx:emit(event, entity)
-    end
-end
-
-local function handle_timer(ctx, dt, entity, timer)
+function timer:handle_timer_update(ecs_world, id, timer, dt)
     if timer:done() then return end
     timer:update(dt)
-    if not timer:done() then return end
-    ctx:emit("timer_completed", entity.id)
-    handle_event_on_complete(ctx, entity)
+    return timer:done()
 end
 
-function rules.update(ctx, dt, ecs_world)
-    local component_table = ecs_world:get_component_table(nw.component.timer)
-    for id, timer in pairs(component_table) do
-        handle_timer(ctx, dt, ecs_world:entity(id), timer)
+function timer:handle_finished(ecs_world, id)
+    local cb = ecs_world:get(nw.component.on_timer_complete, id)
+    if cb then cb(self.world, ecs_world:entity(id)) end
+    local die = ecs_world:get(nw.component.die_on_timer_complete, id)
+    if die then entity(self.world):destroy(ecs_world:entity(id)) end
+end
+
+function timer:update(dt, ecs_world)
+    local timer_table = ecs_world:get_component_table(nw.component.timer)
+
+    local was_finished = {}
+    for id, timer in pairs(timer_table) do
+        was_finished[id] = self:handle_timer_update(ecs_world, id, timer, dt)
+    end
+
+    for id, finished in pairs(was_finished) do
+        if finished then self:handle_finished(ecs_world, id) end
     end
 end
 
-function rules.timer_completed(ctx, id, ecs_world)
-    if ecs_world:get(nw.component.die_on_timer_complete, id) then
-        ctx:emit("destroy", id)
+function timer.observables(ctx)
+    return {
+        update = ctx:listen("update"):collect()
+    }
+end
+
+function timer.handle_observables(ctx, obs, ...)
+    local worlds = {...}
+
+    for _, dt in ipairs(obs.update:pop()) do
+        for id, ecs_world in ipairs(worlds) do
+            timer.from_ctx(ctx):update(dt, ecs_world)
+        end
     end
 end
 
-return rules
+return timer.from_ctx
