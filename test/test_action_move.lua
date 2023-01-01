@@ -59,5 +59,4 @@ T("test_patrol", function(T)
     end
     T:assert(entity:get(nw.component.position).x == 100)
     T:assert(entity:get(nw.component.position).y == 100)
-
 end)
