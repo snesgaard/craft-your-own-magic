@@ -23,4 +23,17 @@ T("test_timer", function(T)
         timer():update(1.0, ecs_world)
         T:assert(dst.success)
     end)
+
+    T("name_timer", function(T)
+        local function timer_comp(c) return c end
+
+        T:assert(timer().is_done(item, timer_comp))
+
+        timer().named_timer(item, timer_comp, 3)
+        T:assert(not timer().is_done(item, timer_comp))
+
+        timer():update(3, ecs_world)
+
+        T:assert(timer().is_done(item, timer_comp))
+    end)
 end)
