@@ -7,6 +7,7 @@ decorate(nw.component, require "component", true)
 Frame.slice_to_pos = Spatial.centerbottom
 
 function love.load(args)
+    print("load", unpack(args))
     if args[1] == "test" then
         require "test"
         return love.event.quit()
