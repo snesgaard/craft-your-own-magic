@@ -44,14 +44,14 @@ T("test_decision", function(T)
         ctx:spin()
     end)
 
-    decision().handle_observables(ctx, {}, ecs_world)
+    decision().run_decision_and_task(ctx, {}, ecs_world)
 
     local item_task = item:get(nw.component.task)
     T:assert(item_task)
     T:assert(item_task:func() == task.A)
     T:assert(item:get(comp.A))
 
-    decision().handle_observables(ctx, {}, ecs_world)
+    decision().run_decision_and_task(ctx, {}, ecs_world)
 
     local item_task = item:get(nw.component.task)
     T:assert(item_task)

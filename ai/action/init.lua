@@ -34,7 +34,7 @@ end
 function rh.patrol(ctx, entity, patrol_positions, speed, wait_time)
     if #patrol_positions == 0 then return end
 
-    local init = patrol_initial_position(entity, patrol_positions)
+    local init = 1--patrol_initial_position(entity, patrol_positions)
     for i = init, #patrol_positions do
         local pos = patrol_positions[i]
         rh.move(ctx, entity, pos, speed)

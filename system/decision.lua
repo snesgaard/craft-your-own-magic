@@ -8,7 +8,7 @@ end
 
 local function pick_best_task(tasks_and_scores)
     table.sort(tasks_and_scores, sort_by_score)
-    local best_task = tasks_and_scores:head()
+    local best_task = tasks_and_scores:tail()
     if not best_task then return end
     return best_task
 end
@@ -54,9 +54,23 @@ function Decision.run_tasks(ctx, ecs_world)
     end
 end
 
-function Decision.handle_observables(ctx, obs, ecs_world)
+function Decision.run_decision_and_task(ctx, obs, ecs_world)
     Decision.run_decisions(ctx, ecs_world)
     Decision.run_tasks(ctx, ecs_world)
+end
+
+function Decision.observables(ctx)
+    return {
+        update = ctx:listen("update"):collect()
+    }
+end
+
+function Decision.handle_observables(ctx, obs, ...)
+    for _, dt in ipairs(obs.update:pop()) do
+        for _, ecs_world in ipairs({...}) do
+            Decision.run_decision_and_task(ctx, obs, ecs_world)
+        end
+    end
 end
 
 return Decision.from_ctx

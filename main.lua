@@ -13,7 +13,7 @@ function love.load(args)
     end
 
     world = nw.ecs.world()
-    world:push(require "scene.player")
+    world:push(require "scene.decision")
 end
 
 function love.update(dt)
