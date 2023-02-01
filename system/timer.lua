@@ -44,4 +44,16 @@ function timer.handle_observables(ctx, obs, ...)
     end
 end
 
+function timer.named_timer(entity, component, duration)
+    local timer_entity = entity:world():entity()
+        :set(nw.component.timer, duration)
+        :set(nw.component.die_on_timer_complete)
+    entity:set(component, timer_entity)
+end
+
+function timer.is_done(entity, component)
+    local timer_entity = entity:get(component)
+    return not timer_entity or not timer_entity:has(nw.component.timer)
+end
+
 return timer.from_ctx
