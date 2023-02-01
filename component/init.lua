@@ -95,10 +95,4 @@ function component.jump(height)
     return height
 end
 
-function component.task(t) return t or nw.task() end
-
-function component.decision(d) return d end
-
-function component.patrol(p) return p end
-
 return component

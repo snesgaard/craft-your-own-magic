@@ -1,4 +1,4 @@
-local Base = require "system.base"
+local Base = nw.system.base
 local CollisionHelper = Base()
 
 function CollisionHelper:invoke_on_collision(colinfo, item, other)

@@ -1,4 +1,4 @@
-local Base = require "system.base"
+local Base = nw.system.base
 local collision_helper = require "system.collision_helper"
 local Jump = Base()
 

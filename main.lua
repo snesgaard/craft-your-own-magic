@@ -1,20 +1,16 @@
 nw = require "nodeworks"
-animation = require "system.animation"
-require "coroutine_jump"
 
 decorate(nw.component, require "component", true)
 
 Frame.slice_to_pos = Spatial.centerbottom
 
 function love.load(args)
-    print("load", unpack(args))
     if args[1] == "test" then
         require "test"
         return love.event.quit()
     end
 
     world = nw.ecs.world()
-    world:push(require "scene.decision")
 end
 
 function love.update(dt)

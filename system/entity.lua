@@ -1,5 +1,4 @@
-local Base = require "system.base"
-
+local Base = nw.system.base
 local entity = Base()
 
 function entity:destroy(entity)

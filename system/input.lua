@@ -1,4 +1,4 @@
-local Base = require "system.base"
+local Base = nw.system.base
 local Input = Base()
 
 local function get_axis_dir(neg_down, pos_down)
