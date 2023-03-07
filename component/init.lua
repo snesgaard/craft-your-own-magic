@@ -95,4 +95,37 @@ function component.jump(height)
     return height
 end
 
+-- INPUT
+
+function component.keypressed(key) return key end
+
+function component.keyreleased(key) return key end
+
+function component.mousepressed(x, y, button, is_touch)
+    return {x = x, y = y, button = button, is_touch = is_touch}
+end
+
+function component.mousereleased(x, y, button, is_touch)
+    return {x = x, y = y, button = button, is_touch = is_touch}
+end
+
+function component.mousemoved(x, y, dx, dy)
+    return {x = x, y = y, dx = dx, dy = dy}
+end
+
+function component.element_clicked(id) return id end
+function component.element_released(id) return id end
+
+function component.pressed() return true end
+function component.released() return true end
+function component.is_down() return true end
+
+function component.mouse_rect(x, y, w, h) return spatial(x, y, w, h) end
+
+function component.update(dt) return dt end
+
+function component.slider(value, min, max)
+    return {value=value, min=min, max=max}
+end
+
 return component
