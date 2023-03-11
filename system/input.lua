@@ -22,4 +22,13 @@ function input.mousemoved(ecs_world, x, y, dx, dy)
     )
 end
 
+function input.is_pressed(ecs_world, key)
+    local t = ecs_world:get_component_table(nw.component.keypressed)
+    for _, v in pairs(t) do
+        if v == key then return true end
+    end
+
+    return false
+end
+
 return input

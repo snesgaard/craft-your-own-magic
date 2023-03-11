@@ -128,4 +128,12 @@ function component.slider(value, min, max)
     return {value=value, min=min, max=max}
 end
 
+function component.player_team() return true end
+
+function component.enemy_team() return true end
+
+function component.turn_order(l) return l end
+
+function component.board_index(i) return i end
+
 return component

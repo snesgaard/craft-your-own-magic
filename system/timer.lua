@@ -56,4 +56,12 @@ function timer.is_done(entity, component)
     return not timer_entity or not timer_entity:has(nw.component.timer)
 end
 
+function timer.spin(ecs_world)
+    local updates = ecs_world:get_component_table(nw.component.update)
+
+    for _, dt in pairs(updates) do
+        timer.from_ctx():update(dt, ecs_world)
+    end
+end
+
 return timer.from_ctx
