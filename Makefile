@@ -5,8 +5,8 @@ $(love_bin):
 
 download: $(love_bin)
 
-play: build
-	love .
+play: $(love_bin) build
+	$(love_bin) .
 	
 test: $(love_bin)
 	$(love_bin) . test
