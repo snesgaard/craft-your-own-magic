@@ -1,0 +1,15 @@
+local core = {}
+
+function core.damage(ecs_world, id, damage)
+    local hp = ecs_world:get(nw.component.health, id)
+    if not hp then return end
+
+    local real_damage = math.min(damage, hp.value)
+    hp.value = hp.value - real_damage
+    
+    nw.system.entity():emit(ecs_world, event.on_damage, id, real_damage)
+
+    return real_damage
+end
+
+return core

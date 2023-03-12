@@ -2,6 +2,7 @@ local input = require "system.input"
 local board = require "system.board"
 local timer = require "system.timer"
 local gui = require "gui"
+local combat = require "combat"
 
 local component = {}
 
@@ -96,8 +97,8 @@ function logic.player_turn(ecs_world, id)
 
     local target_id = target_data.target_list[target_data.index]
     if target_id then
-        local hp = ecs_world:get(nw.component.health, target_id)
-        hp.value = hp.value - 2
+        local dmg = love.math.random(1, 3)
+        combat.core.damage(ecs_world, target_id, dmg)
     end
 
     data:destroy()
@@ -181,14 +182,20 @@ function api.setup(ecs_world)
         :set(nw.component.color, 0.1, 0.3, 0.8)
         :set(nw.component.drawable, nw.drawable.target_marker)
         :set(nw.component.layer, 1)
+    
+    ecs_world:entity()
+        :assemble(gui.pop_up_numbers.assemble.damage, 100, 100, 5)
 end
 
 function api.spin(ecs_world)
-    nw.system.entity():spin(ecs_world)
-    logic.spin(ecs_world)
-    board.spin(ecs_world)
-    gui.spin(ecs_world)
-    timer().spin(ecs_world)
+    while nw.system.entity():spin(ecs_world) > 0 do
+        logic.spin(ecs_world)
+        board.spin(ecs_world)
+        combat.spin(ecs_world)
+        gui.spin(ecs_world)
+        
+        timer().spin(ecs_world)
+    end
 end
 
 return api
