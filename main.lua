@@ -28,6 +28,19 @@ end
 
 function love.draw()
     painter.draw(ecs_world)
+
+    gfx.push("all")
+    if battle.is_battle_over(ecs_world) then
+        local w, h = gfx.getWidth(), gfx.getHeight()
+        local shape = spatial(w / 2, h / 2):expand(300, 100)
+        gfx.setColor(1, 1, 1)
+        gfx.rectangle("fill", shape:unpack())
+        gfx.setColor(0, 0, 0)
+        local player_win = battle.is_team_alive(ecs_world, nw.component.player_team)
+        local text = player_win and "WIN :D" or "DEFEAT :("
+        nw.drawable.draw_text(text, shape, "center", "center")
+    end
+    gfx.pop()
 end
 
 function love.keypressed(key, scancode, isrepeat)

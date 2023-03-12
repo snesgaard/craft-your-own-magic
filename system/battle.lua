@@ -12,6 +12,7 @@ function component.targets(ecs_world, ability)
         target_list = ecs_world
             :get_component_table(nw.component[target_com])
             :keys()
+            :filter(function(id) return combat.core.is_alive(ecs_world, id) end)
             :sort(function(a, b)
                 local pa = math.abs(ecs_world:get(nw.component.board_index, a) or 0)
                 local pb = math.abs(ecs_world:get(nw.component.board_index, b) or 0)
@@ -85,7 +86,7 @@ function logic.player_turn(ecs_world, id)
     local menu = ecs_world:entity("menu")
 
     menu:ensure(nw.component.position, 100, 100)
-    menu:ensure(nw.component.linear_menu_state, list("attack", "heal", "defend"))
+    menu:ensure(nw.component.linear_menu_state, list("attack", "heal", "pass"))
     menu:ensure(nw.component.drawable, nw.drawable.vertical_menu)
 
     local ability = gui.menu.get_selected_item(menu)
@@ -121,7 +122,7 @@ function logic.player_turn(ecs_world, id)
     if target_id then
         if ability == "attack" then
             local dmg = love.math.random(1, 3)
-            combat.core.damage(ecs_world, target_id, dmg)
+            combat.core.damage(ecs_world, target_id, dmg * 1000)
         elseif ability == "heal" then
             combat.core.heal(ecs_world, target_id, 10)
         end
@@ -165,6 +166,11 @@ function logic.enemy_turn(ecs_world, id)
 end
 
 function logic.handle_turn(ecs_world, id)
+    if not combat.core.is_alive(ecs_world, id) then
+        print("Actor is dead: ", id)
+        return true
+    end
+
     if ecs_world:get(nw.component.player_team, id) then
         return logic.player_turn(ecs_world, id)
     elseif ecs_world:get(nw.component.enemy_team, id) then
@@ -175,7 +181,11 @@ function logic.handle_turn(ecs_world, id)
     end
 end
 
+local api = {}
+
 function logic.spin(ecs_world)
+    if api.is_battle_over(ecs_world) then return end
+
     local turn_order = ecs_world:entity(logic):get(nw.component.turn_order)
     local turn_order = turn_order or logic.initial_turn_order(ecs_world)
     ecs_world:entity(logic):set(nw.component.turn_order, turn_order)
@@ -188,7 +198,6 @@ function logic.spin(ecs_world)
     ecs_world:entity(logic):set(nw.component.turn_order, turn_order)
 end
 
-local api = {}
 
 function api.setup(ecs_world)
     local player = ecs_world:entity("player")
@@ -220,13 +229,21 @@ function api.setup(ecs_world)
         :set(nw.component.color, 0.1, 0.3, 0.8)
         :set(nw.component.drawable, nw.drawable.target_marker)
         :set(nw.component.layer, 1)
-    
-    --[[
-    ecs_world:entity()
-        :set(nw.component.position, 100, 100)
-        :set(nw.component.linear_menu_state, list("foo", "bar", "baz"))
-        :set(nw.component.drawable, nw.drawable.vertical_menu)
-        ]]--
+end
+
+function api.is_team_alive(ecs_world, comp)
+    local t = ecs_world:get_component_table(comp)
+
+    for id, _ in pairs(t) do
+        if combat.core.is_alive(ecs_world, id) then return true end
+    end
+
+    return false
+end
+
+function api.is_battle_over(ecs_world)
+    return not api.is_team_alive(ecs_world, nw.component.player_team)
+        or not api.is_team_alive(ecs_world, nw.component.enemy_team)
 end
 
 function api.spin(ecs_world)
@@ -238,6 +255,8 @@ function api.spin(ecs_world)
         
         timer().spin(ecs_world)
     end
+
+    return false
 end
 
 return api
