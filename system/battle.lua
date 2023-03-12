@@ -6,10 +6,11 @@ local combat = require "combat"
 
 local component = {}
 
-function component.targets(ecs_world)
+function component.targets(ecs_world, ability)
+    local target_com = ability == "attack" and "enemy_team" or "player_team"
     return {
         target_list = ecs_world
-            :get_component_table(nw.component.enemy_team)
+            :get_component_table(nw.component[target_com])
             :keys()
             :sort(function(a, b)
                 local pa = math.abs(ecs_world:get(nw.component.board_index, a) or 0)
@@ -20,6 +21,7 @@ function component.targets(ecs_world)
 end
 
 function component.flags(d) return d or {} end
+
 
 
 local cmp = {}
@@ -80,28 +82,53 @@ end
 
 function logic.player_turn(ecs_world, id)
     local data = ecs_world:entity(logic)
+    local menu = ecs_world:entity("menu")
 
-    local target_data = data:ensure(component.targets, ecs_world)
+    menu:ensure(nw.component.position, 100, 100)
+    menu:ensure(nw.component.linear_menu_state, list("attack", "heal", "defend"))
+    menu:ensure(nw.component.drawable, nw.drawable.vertical_menu)
+
+    local ability = gui.menu.get_selected_item(menu)
+    if not ability then return end
+
+    if flag(data, "ability_select") then
+        print("ability selected", ability)
+    end
+
+    local target_data = data:ensure(component.targets, ecs_world, ability)
 
     if logic.handle_target_selection(ecs_world, target_data) then
         local id = target_data.target_list[target_data.index]
         ecs_world:entity("marker")
             :set(nw.component.parent, id)
             :set(nw.component.color, 0.1, 0.3, 0.8)
-
     end
+
+    if input.is_pressed(ecs_world, "b") then
+        ecs_world:entity("marker"):set(nw.component.parent)
+        menu:get(nw.component.linear_menu_state).confirmed = false
+        data:remove(component.targets)
+        return false
+    end
+
 
     if not input.is_pressed(ecs_world, "space") then
         return false
     end
 
+
     local target_id = target_data.target_list[target_data.index]
     if target_id then
-        local dmg = love.math.random(1, 3)
-        combat.core.damage(ecs_world, target_id, dmg)
+        if ability == "attack" then
+            local dmg = love.math.random(1, 3)
+            combat.core.damage(ecs_world, target_id, dmg)
+        elseif ability == "heal" then
+            combat.core.heal(ecs_world, target_id, 10)
+        end
     end
 
     data:destroy()
+    menu:destroy()
 
     return true
 end
@@ -120,6 +147,17 @@ function logic.enemy_turn(ecs_world, id)
     if not t:done() then return false end
 
     data:destroy()
+
+    local target_id = ecs_world:get_component_table(nw.component.player_team)
+        :keys()
+        :shuffle()
+        :head()
+
+    if target_id then
+        combat.core.damage(ecs_world, target_id, 1)
+    else
+        print("target not found")
+    end
 
     print("end of enemy turn")
 
@@ -183,8 +221,12 @@ function api.setup(ecs_world)
         :set(nw.component.drawable, nw.drawable.target_marker)
         :set(nw.component.layer, 1)
     
+    --[[
     ecs_world:entity()
-        :assemble(gui.pop_up_numbers.assemble.damage, 100, 100, 5)
+        :set(nw.component.position, 100, 100)
+        :set(nw.component.linear_menu_state, list("foo", "bar", "baz"))
+        :set(nw.component.drawable, nw.drawable.vertical_menu)
+        ]]--
 end
 
 function api.spin(ecs_world)

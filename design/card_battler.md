@@ -18,3 +18,11 @@ Battle should end when an entity is defeated.
 No mouse control.
 
 Battle is implemented as a function ala behavior trees.
+
+# TODO
+
+- [] ability menu
+    - layout
+    - keyboard navigation / logic
+- [] combat end
+- [] ai actions

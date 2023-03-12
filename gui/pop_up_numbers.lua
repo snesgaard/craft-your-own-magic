@@ -19,9 +19,10 @@ function popup.spin(ecs_world)
     local t = ecs_world:get_component_table(event.on_damage)
     for _, on_damage in pairs(t) do
         local pos = ecs_world:get(nw.component.position, on_damage.target) or vec2()
-        print(pos, on_damage.damage)
+        local dx = love.math.random(-10, 10)
+        local dy = love.math.random(-10, 10)
         ecs_world:entity()
-            :assemble(assemble.damage, pos.x, pos.y - 50, on_damage.damage)
+            :assemble(assemble.damage, pos.x + dx, pos.y - 50 + dy, on_damage.damage)
     end
 end
 

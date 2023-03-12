@@ -136,4 +136,13 @@ function component.turn_order(l) return l end
 
 function component.board_index(i) return i end
 
+function component.linear_menu_state(items, index)
+    return {
+        index = index or 1,
+        items = items
+    }
+end
+
+function component.focus() return true end
+
 return component
