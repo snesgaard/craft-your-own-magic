@@ -3,6 +3,7 @@ local board = require "system.board"
 local timer = require "system.timer"
 local gui = require "gui"
 local combat = require "combat"
+local action = require "system.action_animation"
 
 local component = {}
 
@@ -185,6 +186,7 @@ local api = {}
 
 function logic.spin(ecs_world)
     if api.is_battle_over(ecs_world) then return end
+    if not action.empty(ecs_world) then return end
 
     local turn_order = ecs_world:entity(logic):get(nw.component.turn_order)
     local turn_order = turn_order or logic.initial_turn_order(ecs_world)
@@ -229,6 +231,25 @@ function api.setup(ecs_world)
         :set(nw.component.color, 0.1, 0.3, 0.8)
         :set(nw.component.drawable, nw.drawable.target_marker)
         :set(nw.component.layer, 1)
+    
+    ecs_world:entity("box")
+        :set(nw.component.position, 100, 400)
+        :set(nw.component.drawable, nw.drawable.ellipse)
+        :set(nw.component.scale, 100, 100)
+        :set(nw.component.color, 1, 0, 0, 0.5)
+        :set(nw.component.layer, 1)
+
+    action.submit(ecs_world, function(ecs_world)
+        local update = ecs_world:get_component_table(nw.component.update)
+        local box = ecs_world:entity("box")
+        local v = box:ensure(nw.component.position)
+
+        for _, dt in pairs(update) do
+            v.x = v.x + 100 * dt
+        end
+
+        return v.x > 500
+    end)
 end
 
 function api.is_team_alive(ecs_world, comp)
@@ -248,6 +269,7 @@ end
 
 function api.spin(ecs_world)
     while nw.system.entity():spin(ecs_world) > 0 do
+        action.spin(ecs_world)
         logic.spin(ecs_world)
         board.spin(ecs_world)
         combat.spin(ecs_world)

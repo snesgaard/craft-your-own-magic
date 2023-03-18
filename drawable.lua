@@ -96,4 +96,12 @@ function drawable.vertical_menu(entity)
     gfx.pop()
 end
 
+function drawable.ellipse(entity)
+    gfx.push("all")
+    nw.drawable.push_state(entity)
+    nw.drawable.push_transform(entity)
+    gfx.ellipse("fill", 0, 0, 1)
+    gfx.pop()
+end
+
 return drawable
