@@ -300,7 +300,6 @@ function api.setup(ecs_world)
         :set(nw.component.drawable, nw.drawable.board_actor)
 
     ecs_world:entity()
-        :set(nw.component.health, 5)
         :set(nw.component.enemy_team)
         :assemble(board.move_to_index, 3)
         :set(nw.component.drawable, nw.drawable.board_actor)
