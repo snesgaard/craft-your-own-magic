@@ -14,7 +14,9 @@ action_animation.parent_id = "__action_animation__"
 function action_animation.clean(ecs_world, id)
     local children = nw.system.parent().get_children(ecs_world:entity(id))
 
-    for child_id, _ in pairs(children) do ecs_world:destroy(child_id) end
+    for child_id, _ in pairs(children) do
+        action_animation.clean(ecs_world, child_id)
+    end
     ecs_world:destroy(id)
 end
 

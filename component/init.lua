@@ -145,4 +145,15 @@ end
 
 function component.focus() return true end
 
+function component.animated_action(func, ...)
+    return {
+        func = func,
+        args = {...}
+    }
+end
+
+function component.tween_callback(func, ...)
+    return func
+end
+
 return component

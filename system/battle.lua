@@ -4,6 +4,7 @@ local timer = require "system.timer"
 local gui = require "gui"
 local combat = require "combat"
 local action = require "system.action_animation"
+local tween = require "system.tween"
 
 local component = {}
 
@@ -122,8 +123,10 @@ function logic.player_turn(ecs_world, id)
     local target_id = target_data.target_list[target_data.index]
     if target_id then
         if ability == "attack" then
-            local dmg = love.math.random(1, 3)
-            combat.core.damage(ecs_world, target_id, dmg * 1000)
+            action.submit(ecs_world, logic.run_player_action, function()
+                local dmg = love.math.random(1, 3)
+                combat.core.damage(ecs_world, target_id, dmg * 1000)
+            end)
         elseif ability == "heal" then
             combat.core.heal(ecs_world, target_id, 10)
         end
@@ -131,6 +134,42 @@ function logic.player_turn(ecs_world, id)
 
     data:destroy()
     menu:destroy()
+
+    return true
+end
+
+function component.sphere(parent)
+    return nw.system.parent().spawn(parent)
+        :set(nw.component.drawable, nw.drawable.ellipse)
+        :set(nw.component.position, 100, 100)
+        :set(nw.component.scale, 1, 1)
+end
+
+function component.out_tween(parent)
+    return nw.system.parent().spawn(parent)
+        :set(nw.component.tween, 1, 100, 1)
+        :set(nw.component.tween_callback, function(_, v)
+            parent:set(nw.component.scale, v, v)
+        end)
+end
+
+function component.in_tween(parent)
+    return nw.system.parent().spawn(parent)
+        :set(nw.component.tween, 100, 1, 1)
+        :set(nw.component.tween_callback, function(_, v)
+            parent:set(nw.component.scale, v, v)
+        end)
+end
+
+function logic.run_player_action(ecs_world, id, func, ...)
+    local data = ecs_world:entity(id)
+    local sphere = data:ensure(component.sphere, data)
+    local out_tween = sphere:ensure(component.out_tween, sphere)
+    if not tween.is_done(out_tween) then return end
+    local in_tween = sphere:ensure(component.in_tween, sphere)
+    if not tween.is_done(in_tween) then return end
+
+    func(...)
 
     return true
 end
@@ -234,11 +273,13 @@ function api.setup(ecs_world)
     
     ecs_world:entity("box")
         :set(nw.component.position, 100, 400)
-        :set(nw.component.drawable, nw.drawable.ellipse)
+        :set(nw.component.drawable,      nw.drawable.ellipse)
         :set(nw.component.scale, 100, 100)
         :set(nw.component.color, 1, 0, 0, 0.5)
         :set(nw.component.layer, 1)
 
+    
+    --[[
     action.submit(ecs_world, function(ecs_world)
         local update = ecs_world:get_component_table(nw.component.update)
         local box = ecs_world:entity("box")
@@ -250,6 +291,7 @@ function api.setup(ecs_world)
 
         return v.x > 500
     end)
+    ]]--
 end
 
 function api.is_team_alive(ecs_world, comp)
@@ -270,6 +312,7 @@ end
 function api.spin(ecs_world)
     while nw.system.entity():spin(ecs_world) > 0 do
         action.spin(ecs_world)
+        tween.spin(ecs_world)
         logic.spin(ecs_world)
         board.spin(ecs_world)
         combat.spin(ecs_world)
