@@ -45,7 +45,7 @@ end
 function board.spin(ecs_world)
     for id, index in pairs(ecs_world:get_component_table(nw.component.board_index)) do
         local x, y = board.position_from_index(index)
-        ecs_world:set(nw.component.position, id, x, y)
+        ecs_world:ensure(nw.component.position, id, x, y)
     end
 end
 

@@ -123,10 +123,7 @@ function logic.player_turn(ecs_world, id)
     local target_id = target_data.target_list[target_data.index]
     if target_id then
         if ability == "attack" then
-            action.submit(ecs_world, logic.run_player_action, function()
-                local dmg = love.math.random(1, 3)
-                combat.core.damage(ecs_world, target_id, dmg * 1000)
-            end)
+            action.submit(ecs_world, logic.attack_action, id, target_id)
         elseif ability == "heal" then
             combat.core.heal(ecs_world, target_id, 10)
         end
@@ -134,6 +131,49 @@ function logic.player_turn(ecs_world, id)
 
     data:destroy()
     menu:destroy()
+
+    return true
+end
+
+function component.move_in_tween(parent, user, target)
+    local ecs_world = parent:world()
+    local user_pos = ecs_world:get(nw.component.position, user)
+    local target_pos = ecs_world:get(nw.component.position, target)
+    return nw.system.parent().spawn(parent)
+        :set(nw.component.tween, user_pos, target_pos, 0.2)
+        :set(nw.component.tween_callback, function(_, pos)
+            ecs_world:set(nw.component.position, user, pos.x, pos.y)
+        end)
+end
+
+function component.move_out_tween(parent, user)
+    local ecs_world = parent:world()
+    local pos = board.world_position(ecs_world, user)
+    local user_pos = ecs_world:get(nw.component.position, user)
+    local entity = nw.system.parent().spawn(parent)
+    if pos:has_value() then
+        local end_pos = vec2(pos:value())
+        entity
+            :set(nw.component.tween, user_pos, end_pos, 0.2)
+            :set(nw.component.tween_callback, function(_, p)
+                ecs_world:set(nw.component.position, user, p.x, p.y)
+            end)
+    end
+    return entity
+end
+
+function logic.attack_action(ecs_world, id, user, target)
+    local data = ecs_world:entity(id)
+    local move_in = data:ensure(component.move_in_tween, data, user, target)
+    if not tween.is_done(move_in) then return end
+
+    if flag(data, "deal_damage") then
+        local dmg = love.math.random(1, 3)
+        combat.core.damage(ecs_world, target, dmg * 1000)
+    end
+
+    local move_out = data:ensure(component.move_out_tween, data, user)
+    if not tween.is_done(move_out) then return end
 
     return true
 end
