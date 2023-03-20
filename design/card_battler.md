@@ -21,8 +21,38 @@ Battle is implemented as a function ala behavior trees.
 
 # TODO
 
-- [] ability menu
+- [X] ability menu
     - layout
     - keyboard navigation / logic
-- [] combat end
-- [] ai actions
+- [X] combat end
+- [X] ai actions
+
+# 19th March 2023
+
+Success! Made MVP on battler. It has got the following features:
+
+* Ability menu with keyboard navigation
+* Animation/ability system
+* Basic flow
+    * Turns
+    * Dying
+    * Ending
+* Basic abilities
+    * Damage
+    * Healing
+* tweens
+
+Flow is implemented as stated above, as functions which gradually stores and completes state. The secret recipe for storing progress is parenting and entities as components. The former means that cleaning up is fairly straight forward. The later allows using the :ensure operation for intilization and stored progress. Really powerful as it allows for both reactionary control flow and scripted flow.
+
+The next goal is to get some basic card game up and running. Thinking approach something ala Aeon's End with the delayed casting.
+
+To get there I'm thinking about the implementing the following:
+
+* Targeting system
+    * Ala menu, each targeting request is an entity
+
+* Ability system / data structure
+    * Data representation of abilities with targeting and effects
+
+* Deck system
+    * Base system for rules on shuffling drawing, discarding etc.
