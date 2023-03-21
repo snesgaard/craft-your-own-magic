@@ -6,7 +6,7 @@ function drawable.board_actor(entity)
     gfx.push("all")
 
     nw.drawable.push_transform(entity)
-    local w, h = 40, 100
+    local w, h = 20, 50
     gfx.rectangle("fill", -w / 2, -h, w, h)
 
     gfx.pop()

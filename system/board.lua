@@ -1,3 +1,5 @@
+local painter = require "painter"
+
 local board = {}
 
 function board.sign(x)
@@ -11,11 +13,10 @@ function board.sign(x)
 end
 
 function board.position_from_index(index, w)
-    local w = w or gfx.getWidth()
-    local o = 0
-    local x = w / 2 + o * board.sign(index) + 100 * index
-    local y = 400
-    return x, y
+    local o = 0.0
+    local x = 0.5 + o * board.sign(index) + 0.1 * index
+    local y = 0.75
+    return painter.norm_to_real(x, y)
 end
 
 function board.world_position(ecs_world, id)

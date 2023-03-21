@@ -4,7 +4,7 @@ local log = {}
 
 log.width = 300
 log.height = 200
-log.font = gfx.newFont()
+log.font = gfx.newFont("art/font/m5x7.ttf", 16, "mono")
 log.margin = 5
 log.fade_duration = 0
 log.fade_begin = 1
@@ -74,8 +74,9 @@ function log.draw(ecs_world)
     gfx.pop()
 end
 
-function log.info(ecs_world, message)
-    ecs_world:entity():set(nw.component.log_entry, message, log.level.info)
+function log.info(ecs_world, message, ...)
+    local msg = string.format(message, ...)
+    ecs_world:entity():set(nw.component.log_entry, msg, log.level.info)
 end
 
 return log

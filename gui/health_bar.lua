@@ -1,3 +1,5 @@
+local painter = require "painter"
+
 local component = {}
 
 component.health_relation = nw.component.relation(function(id) return id end)
@@ -77,10 +79,12 @@ function health_bar.drawable(entity)
 end
 
 function health_bar.assemble(entity, parent)
-    local w, h = 50, 6
+    local w, h = 50, 2
+    local w = painter.norm_to_real(0.075)
+    local dy = h * 3
     entity
         :set(component.bar_values, 1, 1)
-        :set(nw.component.mouse_rect, -w / 2, 20, w, h)
+        :set(nw.component.mouse_rect, -w / 2, dy, w, h)
         :set(nw.component.color, 0.8, 0.3, 0.1)
         :set(nw.component.layer, 2)
         :set(nw.component.drawable, health_bar.drawable)

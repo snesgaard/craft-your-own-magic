@@ -2,6 +2,13 @@ local painter = {}
 
 painter.scale = 4
 
+function painter.norm_to_real(nx, ny)
+    local w, h = gfx.getWidth(), gfx.getHeight()
+    local s = painter.scale
+
+    return (nx or 0) * w / s, (ny or 0) * h / s
+end
+
 local layers = {
     background = -1,
     player = 1,
@@ -36,6 +43,9 @@ function painter.draw(ecs_world)
         :keys()
         :map(get_entity, ecs_world)
         :sort(sort_by_layer)
+    
+    gfx.push()
+    gfx.scale(painter.scale, painter.scale)
 
     for _, entity in ipairs(entities) do
         local f = entity:get(nw.component.drawable)
@@ -43,6 +53,8 @@ function painter.draw(ecs_world)
         f(entity)
         gfx.pop()
     end
+
+    gfx.pop()
 end
 
 return painter
