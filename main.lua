@@ -9,6 +9,12 @@ decorate(nw.drawable, require "drawable", true)
 
 Frame.slice_to_pos = Spatial.centerbottom
 
+function flag(entity, flag_id)
+    local f = entity:ensure(nw.component.flag)
+    local v = f[flag_id]
+    f[flag_id] = true
+    return not v
+end
 
 function love.load(args)
     if args[1] == "test" then

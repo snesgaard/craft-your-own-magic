@@ -1,3 +1,5 @@
+local gui = require "gui"
+
 local drawable = {}
 
 function drawable.board_actor(entity)
@@ -11,10 +13,24 @@ function drawable.board_actor(entity)
 end
 
 function drawable.target_marker(entity)
-    
     local id = entity:get(nw.component.parent)
     
     if not id then return end
+    gfx.push("all")
+
+    local ecs_world = entity:world()
+    nw.drawable.push_transform(ecs_world:entity(id))
+    nw.drawable.push_state(entity)
+
+    gfx.circle("line", 0, 0, 10)
+
+    gfx.pop()
+end
+
+function drawable.single_target_marker(entity)
+    local id = gui.menu.get_selected_item(entity)
+    if not id then return end
+
     gfx.push("all")
 
     local ecs_world = entity:world()

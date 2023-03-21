@@ -143,6 +143,8 @@ function component.linear_menu_state(items, index)
     }
 end
 
+function component.keybinding(k) return k end
+
 function component.focus() return true end
 
 function component.animated_action(func, ...)
@@ -155,5 +157,7 @@ end
 function component.tween_callback(func, ...)
     return func
 end
+
+function component.flag() return {} end
 
 return component

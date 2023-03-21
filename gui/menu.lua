@@ -2,10 +2,17 @@ local input = require "system.input"
 
 local menu = {}
 
+local default_key_binding = {increase="down", decrease="up", confirm="space"}
+
 function menu.update_state(ecs_world, id, menu_state)
     if menu_state.confirmed then return end
 
-    if input.is_pressed(ecs_world, "down") then
+    local keybinding = ecs_world:get(nw.component.keybinding, id) or default_key_binding
+    keybinding.increase = keybinding.increase or default_key_binding.increase
+    keybinding.decrease = keybinding.decrease or default_key_binding.decrease
+    keybinding.confirm = keybinding.confirm or default_key_binding.confirm
+
+    if input.is_pressed(ecs_world, keybinding.increase) then
         if #menu_state.items <= menu_state.index then
             menu_state.index = 1
         else
@@ -13,7 +20,7 @@ function menu.update_state(ecs_world, id, menu_state)
         end 
     end
 
-    if input.is_pressed(ecs_world, "up") then
+    if input.is_pressed(ecs_world, keybinding.decrease) then
         if menu_state.index <= 1 then
             menu_state.index = #menu_state.items
         else
@@ -21,7 +28,7 @@ function menu.update_state(ecs_world, id, menu_state)
         end
     end
 
-    if input.is_pressed(ecs_world, "space") then
+    if input.is_pressed(ecs_world, keybinding.confirm) then
         menu_state.confirmed = true
     end
 end
@@ -35,8 +42,7 @@ end
 
 function menu.get_selected_item(entity)
     local menu_state = entity:get(nw.component.linear_menu_state)
-    if not menu_state or not menu_state.confirmed then return end
-    return  menu_state.items[menu_state.index]
+    return menu_state.items[menu_state.index]
 end
 
 return menu
