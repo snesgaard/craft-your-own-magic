@@ -160,4 +160,12 @@ end
 
 function component.flag() return {} end
 
+function component.log_entry(message, level)
+    return {
+        message = message,
+        level = level,
+        time = love.timer.getTime()
+    }
+end
+
 return component

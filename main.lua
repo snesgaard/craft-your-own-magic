@@ -3,6 +3,7 @@ input = require "system.input"
 battle = require "system.battle"
 painter = require "painter"
 event = require "event"
+log = require "system.log"
 
 decorate(nw.component, require "component", true)
 decorate(nw.drawable, require "drawable", true)
@@ -34,6 +35,7 @@ end
 
 function love.draw()
     painter.draw(ecs_world)
+    log.draw(ecs_world)
 
     gfx.push("all")
     if battle.is_battle_over(ecs_world) then

@@ -14,6 +14,8 @@ function cmp.equal(a, b) return a == b end
 
 local logic = {}
 
+logic.id = "logic"
+
 function logic.initial_turn_order(ecs_world)
     local players = ecs_world:get_component_table(nw.component.player_team):keys()
     local enemies = ecs_world:get_component_table(nw.component.enemy_team):keys()
@@ -46,85 +48,6 @@ function logic.player_turn(ecs_world, id)
     end
 
     return status
-end
-
-function component.move_in_tween(parent, user, target)
-    local ecs_world = parent:world()
-    local user_pos = ecs_world:get(nw.component.position, user)
-    local target_pos = ecs_world:get(nw.component.position, target)
-    return nw.system.parent().spawn(parent)
-        :set(nw.component.tween, user_pos, target_pos, 0.2)
-        :set(nw.component.tween_callback, function(_, pos)
-            ecs_world:set(nw.component.position, user, pos.x, pos.y)
-        end)
-end
-
-function component.move_out_tween(parent, user)
-    local ecs_world = parent:world()
-    local pos = board.world_position(ecs_world, user)
-    local user_pos = ecs_world:get(nw.component.position, user)
-    local entity = nw.system.parent().spawn(parent)
-    if pos:has_value() then
-        local end_pos = vec2(pos:value())
-        entity
-            :set(nw.component.tween, user_pos, end_pos, 0.2)
-            :set(nw.component.tween_callback, function(_, p)
-                ecs_world:set(nw.component.position, user, p.x, p.y)
-            end)
-    end
-    return entity
-end
-
-function logic.attack_action(ecs_world, id, user, target)
-    local data = ecs_world:entity(id)
-    local move_in = data:ensure(component.move_in_tween, data, user, target)
-    if not tween.is_done(move_in) then return end
-
-    if flag(data, "deal_damage") then
-        local dmg = love.math.random(1, 3)
-        combat.core.damage(ecs_world, target, dmg * 1000)
-    end
-
-    local move_out = data:ensure(component.move_out_tween, data, user)
-    if not tween.is_done(move_out) then return end
-
-    return true
-end
-
-function component.sphere(parent)
-    return nw.system.parent().spawn(parent)
-        :set(nw.component.drawable, nw.drawable.ellipse)
-        :set(nw.component.position, 100, 100)
-        :set(nw.component.scale, 1, 1)
-end
-
-function component.out_tween(parent)
-    return nw.system.parent().spawn(parent)
-        :set(nw.component.tween, 1, 100, 1)
-        :set(nw.component.tween_callback, function(_, v)
-            parent:set(nw.component.scale, v, v)
-        end)
-end
-
-function component.in_tween(parent)
-    return nw.system.parent().spawn(parent)
-        :set(nw.component.tween, 100, 1, 1)
-        :set(nw.component.tween_callback, function(_, v)
-            parent:set(nw.component.scale, v, v)
-        end)
-end
-
-function logic.run_player_action(ecs_world, id, func, ...)
-    local data = ecs_world:entity(id)
-    local sphere = data:ensure(component.sphere, data)
-    local out_tween = sphere:ensure(component.out_tween, sphere)
-    if not tween.is_done(out_tween) then return end
-    local in_tween = sphere:ensure(component.in_tween, sphere)
-    if not tween.is_done(in_tween) then return end
-
-    func(...)
-
-    return true
 end
 
 function logic.enemy_turn(ecs_world, id)
@@ -171,15 +94,28 @@ function logic.handle_turn(ecs_world, id)
     elseif ecs_world:get(nw.component.enemy_team, id) then
         return logic.enemy_turn(ecs_world, id)
     else
-        print("Not player enemy -> skipping")
+        print("Not player or enemy -> skipping")
         return true
     end
 end
 
-local api = {}
+function logic.is_team_alive(ecs_world, comp)
+    local t = ecs_world:get_component_table(comp)
 
+    for id, _ in pairs(t) do
+        if combat.core.is_alive(ecs_world, id) then return true end
+    end
+
+    return false
+end
+
+function logic.is_battle_over(ecs_world)
+    return not logic.is_team_alive(ecs_world, nw.component.player_team)
+        or not logic.is_team_alive(ecs_world, nw.component.enemy_team)
+end
+    
 function logic.spin(ecs_world)
-    if api.is_battle_over(ecs_world) then return end
+    if logic.is_battle_over(ecs_world) then return end
     if not action.empty(ecs_world) then return end
 
     local turn_order = ecs_world:entity(logic):get(nw.component.turn_order)
@@ -194,6 +130,47 @@ function logic.spin(ecs_world)
     ecs_world:entity(logic):set(nw.component.turn_order, turn_order)
 end
 
+function logic.round_begin(ecs_world)
+    local data = ecs_world:entity(logic.id)
+    if flag(data, "round_begin") then
+        log.info(ecs_world, "round begin")
+    end
+end
+
+function logic.player_turn(ecs_world)
+    local data = ecs_world:entity(logic.id)
+    if flag(data, "player_turn") then
+        log.info(ecs_world, "player turn")
+    end
+    return input.is_pressed(ecs_world, "space")
+end
+
+function logic.enemy_turn(ecs_world)
+    return true
+end
+
+function logic.round_end(ecs_world)
+    local data = ecs_world:entity(logic.id)
+    if flag(data, "round_end") then
+        log.info(ecs_world, "round end")
+    end
+
+    data:destroy()
+end
+
+function logic.spin(ecs_world)
+    if logic.is_battle_over(ecs_world) then return end
+    if not action.empty(ecs_world) then return end
+
+    logic.round_begin(ecs_world)
+
+    if not logic.player_turn(ecs_world) then return end
+    if not logic.enemy_turn(ecs_world) then return end
+
+    logic.round_end(ecs_world)
+end
+
+local api = {}
 
 function api.setup(ecs_world)
     local player = ecs_world:entity("player")
@@ -232,41 +209,16 @@ function api.setup(ecs_world)
         :set(nw.component.scale, 100, 100)
         :set(nw.component.color, 1, 0, 0, 0.5)
         :set(nw.component.layer, 1)
-
-    
-    --[[
-    action.submit(ecs_world, function(ecs_world)
-        local update = ecs_world:get_component_table(nw.component.update)
-        local box = ecs_world:entity("box")
-        local v = box:ensure(nw.component.position)
-
-        for _, dt in pairs(update) do
-            v.x = v.x + 100 * dt
-        end
-
-        return v.x > 500
-    end)
-    ]]--
 end
 
-function api.is_team_alive(ecs_world, comp)
-    local t = ecs_world:get_component_table(comp)
+api.is_team_alive = logic.is_team_alive
 
-    for id, _ in pairs(t) do
-        if combat.core.is_alive(ecs_world, id) then return true end
-    end
-
-    return false
-end
-
-function api.is_battle_over(ecs_world)
-    return not api.is_team_alive(ecs_world, nw.component.player_team)
-        or not api.is_team_alive(ecs_world, nw.component.enemy_team)
-end
+api.is_battle_over = logic.is_battle_over
 
 function api.spin(ecs_world)
     while nw.system.entity():spin(ecs_world) > 0 do
         action.spin(ecs_world)
+        log.spin(ecs_world)
         tween.spin(ecs_world)
         logic.spin(ecs_world)
         board.spin(ecs_world)

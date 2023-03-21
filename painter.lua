@@ -1,5 +1,7 @@
 local painter = {}
 
+painter.scale = 4
+
 local layers = {
     background = -1,
     player = 1,
