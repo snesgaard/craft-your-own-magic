@@ -141,7 +141,8 @@ end
 
 function logic.player_turn(ecs_world)
     local data = ecs_world:entity(logic.id)
-    local hand = ecs_world:ensure(nw.component.player_card_state, "player").hand
+    local card_state = ecs_world:ensure(nw.component.player_card_state, "player")
+    local hand = card_state.hand
     local menu = ecs_world:entity("card_menu")
         :assemble(nw.system.parent().set_parent, data)
 
@@ -179,9 +180,11 @@ function logic.player_turn(ecs_world)
     if status then
         nw.system.parent().destroy(data)
         ecs_world:destroy(ability)
+        local index = hand:argfind(ability)
+        if index then card_state.hand = hand:erase(index) end
     end
 
-    return status
+    return false
 end
 
 function logic.enemy_turn(ecs_world)
