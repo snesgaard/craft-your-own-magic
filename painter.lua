@@ -9,6 +9,16 @@ function painter.norm_to_real(nx, ny)
     return (nx or 0) * w / s, (ny or 0) * h / s
 end
 
+painter.default_font = {
+    path = "art/font/m5x7.ttf",
+}
+
+function painter.font(size)
+    local df = painter.default_font
+    df[size] = df[size] or gfx.newFont(df.path, size, "mono")
+    return df[size]
+end
+
 local layers = {
     background = -1,
     player = 1,
@@ -47,6 +57,13 @@ function painter.draw(ecs_world)
     gfx.push()
     gfx.scale(painter.scale, painter.scale)
 
+    painter.draw_text(
+        "fooobar baz", spatial(50, 50, 50, 50),
+        {
+            align="center", valign="center"
+        }
+    )
+
     for _, entity in ipairs(entities) do
         local f = entity:get(nw.component.drawable)
         gfx.push("all")
@@ -55,6 +72,38 @@ function painter.draw(ecs_world)
     end
 
     gfx.pop()
+end
+
+local function compute_valign(text, font, w, h, scale, valign)
+    local _, segs = font:getWrap(text, w / scale)
+    local th = #segs * font:getHeight() * scale
+    if valign == "center" then
+        return (h  - th) * 0.5
+    elseif valign == "bottom" then
+        return th
+    end
+
+    return 0
+end
+
+local DEFAULT_OPT = {
+    align = "left",
+    valign = "top",
+    scale = 4
+}
+
+function painter.draw_text(text, area, opt)
+    local opt = opt or DEFAULT_OPT
+    local align = opt.align or DEFAULT_OPT.align
+    local valign = opt.valign or DEFAULT_OPT.valign
+    local s = opt.scale or DEFAULT_OPT.scale
+    local font = opt.font or gfx.getFont()
+    local dy = compute_valign(text, font, area.w, area.h, 1.0 / s, valign)
+    gfx.printf(
+        text, font, area.x, area.y + dy,
+        area.w * s, align,
+        0, 1.0 / s, 1.0 / s
+    )
 end
 
 return painter

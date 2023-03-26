@@ -1,4 +1,5 @@
 local gui = require "gui"
+local painter = require "painter"
 
 local drawable = {}
 
@@ -85,10 +86,10 @@ function drawable.vertical_menu(entity)
     nw.drawable.push_state(entity)
     nw.drawable.push_transform(entity)
 
-    local item_shape = spatial(0, 0, 100, 20)
-    local item_margin = 5
+    local item_shape = spatial(0, 0, 30, 10)
+    local item_margin = 1
 
-    love.graphics.setLineWidth(5)
+    love.graphics.setLineWidth(1)
 
     for index, item in ipairs(menu_state.items) do
         if index == menu_state.index and not menu_state.confirmed then
@@ -104,7 +105,10 @@ function drawable.vertical_menu(entity)
         gfx.rectangle("fill", item_shape:unpack())
 
         gfx.setColor(0, 0, 0)
-        draw_text(item, item_shape, "center", "center")
+        painter.draw_text(
+            item, item_shape,
+            {align="center", valign="center", font=painter.font(24)}
+        )
         
         item_shape = item_shape:down(0, item_margin)
     end

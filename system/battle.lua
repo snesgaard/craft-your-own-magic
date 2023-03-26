@@ -25,6 +25,8 @@ end
 function logic.player_turn(ecs_world, id)
     local data = ecs_world:entity(logic)
     local menu = ecs_world:entity("menu")
+    local hand = ecs_world:ensure(nw.component.player_card_state, id).hand
+    print(hand)
 
     menu:ensure(nw.component.position, 100, 100)
     local menu_state = menu:ensure(nw.component.linear_menu_state, list("attack", "heal", "pass"))
@@ -139,10 +141,21 @@ end
 
 function logic.player_turn(ecs_world)
     local data = ecs_world:entity(logic.id)
+    local hand = ecs_world:ensure(nw.component.player_card_state, "player").hand
+    local menu = ecs_world:entity("card_menu"):assemble(nw.system.parent().set_parent, data)
+    menu:ensure(nw.component.position, 25, 25)
+    menu:ensure(nw.component.drawable, nw.drawable.vertical_menu)
+    menu:ensure(nw.component.linear_menu_state, hand)
+
     if flag(data, "player_turn") then
+        log.info(ecs_world, "hand %s", tostring(hand))
         log.info(ecs_world, "player turn")
     end
-    return input.is_pressed(ecs_world, "space")
+
+    if not input.is_pressed(ecs_world, "space") then return end
+    menu:destroy()
+
+    return true
 end
 
 function logic.enemy_turn(ecs_world)
@@ -178,6 +191,10 @@ function api.setup(ecs_world)
         :set(nw.component.player_team)
         :assemble(board.move_to_index, -1)
         :set(nw.component.drawable, nw.drawable.board_actor)
+        :set(nw.component.deck,
+            list("attack", "attack", "attack", "attack", "attack")
+            + list("heal", "heal", "heal", "heal", "heal")
+        )
 
     ecs_world:entity()
         :set(nw.component.health, 10)
@@ -192,7 +209,7 @@ function api.setup(ecs_world)
         :set(nw.component.drawable, nw.drawable.board_actor)
 
     ecs_world:entity()
-    :set(nw.component.health, 5)
+        :set(nw.component.health, 5)
         :set(nw.component.enemy_team)
         :assemble(board.move_to_index, 3)
         :set(nw.component.drawable, nw.drawable.board_actor)
@@ -209,6 +226,11 @@ function api.setup(ecs_world)
         :set(nw.component.scale, 100, 100)
         :set(nw.component.color, 1, 0, 0, 0.5)
         :set(nw.component.layer, 1)
+
+    combat.deck.setup_from_deck(ecs_world, "player")
+    for i = 1, 5 do
+        combat.deck.draw_card_from_deck(ecs_world, "player")
+    end
 end
 
 api.is_team_alive = logic.is_team_alive

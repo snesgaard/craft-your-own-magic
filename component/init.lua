@@ -168,4 +168,16 @@ function component.log_entry(message, level)
     }
 end
 
+function component.deck(d) return d or list() end
+
+function component.player_card_state(state)
+    return state or {
+        draw = list(),
+        discard = list(),
+        hand = list(),
+        incant = list(),
+        executed = list()
+    }
+end
+
 return component

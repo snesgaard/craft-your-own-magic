@@ -7,7 +7,6 @@ painter = require "painter"
 event = require "event"
 log = require "system.log"
 
-
 decorate(nw.component, require "component", true)
 decorate(nw.drawable, require "drawable", true)
 
@@ -32,8 +31,6 @@ function love.load(args)
     battle.setup(ecs_world)
 
     im = gfx.newImage("art/characters/atlas.png")
-
-    x = 0
 end
 
 function love.update(dt)
@@ -43,13 +40,6 @@ function love.update(dt)
 end
 
 function love.draw()
-
-    gfx.push()
-    gfx.scale(4, 4)
-    gfx.draw(im, 0, 0)
-    gfx.draw(im, x, im:getHeight())
-    gfx.pop()
-
     painter.draw(ecs_world)
     log.draw(ecs_world)
 
@@ -70,14 +60,6 @@ end
 function love.keypressed(key, scancode, isrepeat)
     if key == "escape" then love.event.quit() end
     input.keypressed(ecs_world, key)
-
-    if key == "right" then
-        x = x + 0.1
-        log.info(ecs_world, "increasing x  %f * 4 = %f", x, math.round(x * 4))
-    elseif key == "left" then
-        x = x - 0.1
-        log.info(ecs_world, "decreasing x  %f * 4 = %f", x, math.round(x * 4))
-    end
 end
 
 function love.mousepressed(x, y, button, isTouch)
