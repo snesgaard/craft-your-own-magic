@@ -142,20 +142,46 @@ end
 function logic.player_turn(ecs_world)
     local data = ecs_world:entity(logic.id)
     local hand = ecs_world:ensure(nw.component.player_card_state, "player").hand
-    local menu = ecs_world:entity("card_menu"):assemble(nw.system.parent().set_parent, data)
+    local menu = ecs_world:entity("card_menu")
+        :assemble(nw.system.parent().set_parent, data)
+
     menu:ensure(nw.component.position, 25, 25)
     menu:ensure(nw.component.drawable, nw.drawable.vertical_menu)
-    menu:ensure(nw.component.linear_menu_state, hand)
+    local menu_state = menu:ensure(nw.component.linear_menu_state, hand)
 
     if flag(data, "player_turn") then
         log.info(ecs_world, "hand %s", tostring(hand))
         log.info(ecs_world, "player turn")
     end
 
-    if not input.is_pressed(ecs_world, "space") then return end
-    menu:destroy()
+    local ability = gui.menu.get_selected_item(menu)
+    if not menu_state.confirmed then
+        return
+    end
 
-    return true
+    if input.is_pressed(ecs_world, "b") then
+        ecs_world:destroy(ability)
+        menu_state.confirmed = false
+        return
+    end
+
+    local status = false
+    if ability == "attack" then
+        local attack = require "ability.attack"
+        status = attack(ecs_world, ability, "player")
+    elseif ability == "heal" then
+        local heal = require "ability.heal"
+        status = heal(ecs_world, ability, "player")
+    else
+        log.info(ecs_world, "Unknown ability %s", ability)
+    end
+    
+    if status then
+        nw.system.parent().destroy(data)
+        ecs_world:destroy(ability)
+    end
+
+    return status
 end
 
 function logic.enemy_turn(ecs_world)

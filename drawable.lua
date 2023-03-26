@@ -72,7 +72,9 @@ function drawable.text(entity)
 
     local align = entity:get(nw.component.align) or "center"
     local valign = entity:get(nw.component.valign) or "center"
-    draw_text(text, mouse_rect, align, valign)
+    painter.draw_text(
+        text, mouse_rect, {align=align, valign=valign, font=painter.font(48)}
+    )
 
     gfx.pop()
 end

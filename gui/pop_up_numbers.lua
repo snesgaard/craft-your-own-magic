@@ -22,7 +22,7 @@ function popup.spin(ecs_world)
         local dx = love.math.random(-10, 10)
         local dy = love.math.random(-10, 10)
         ecs_world:entity()
-            :assemble(assemble.damage, pos.x + dx, pos.y - 50 + dy, on_damage.damage)
+            :assemble(assemble.damage, pos.x + dx, pos.y - 25 + dy, on_damage.damage)
     end
 end
 
