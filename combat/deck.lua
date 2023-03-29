@@ -55,4 +55,15 @@ function deck.move_discard_into_draw(ecs_world, id)
     state.discard = list()
 end
 
+function deck.draw_until(ecs_world, id, num)
+    local state = ecs_world:get(nw.component.player_card_state, id)
+    if not state then return end
+
+    for i = 1, num - state.hand:size() do
+        deck.draw_card_from_deck(ecs_world, id)
+    end
+
+    print("deck", state.draw)
+end
+
 return deck

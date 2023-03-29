@@ -139,9 +139,11 @@ function component.board_index(i) return i end
 function component.linear_menu_state(items, index)
     return {
         index = index or 1,
-        items = items
+        items = items or list()
     }
 end
+
+function component.linear_menu_to_text(func) return func or tostring end
 
 function component.keybinding(k) return k end
 
@@ -180,5 +182,26 @@ function component.player_card_state(state)
     }
 end
 
+function component.player_turn(user)
+    return {
+        user = user
+    }
+end
+
+function component.card_select_stage(user, cards)
+    return dict{
+        cards = cards,
+        confirmed = false,
+        user = user
+    }
+end
+
+function component.target_select_stage(user, ability, index)
+    return {
+        user = user,
+        ability = ability,
+        index = index
+    }
+end
 
 return component

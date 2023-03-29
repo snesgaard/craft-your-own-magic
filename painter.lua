@@ -57,13 +57,6 @@ function painter.draw(ecs_world)
     gfx.push()
     gfx.scale(painter.scale, painter.scale)
 
-    painter.draw_text(
-        "fooobar baz", spatial(50, 50, 50, 50),
-        {
-            align="center", valign="center"
-        }
-    )
-
     for _, entity in ipairs(entities) do
         local f = entity:get(nw.component.drawable)
         gfx.push("all")

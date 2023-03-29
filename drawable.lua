@@ -93,6 +93,8 @@ function drawable.vertical_menu(entity)
 
     love.graphics.setLineWidth(1)
 
+    local to_text = entity:ensure(nw.component.linear_menu_to_text)
+
     for index, item in ipairs(menu_state.items) do
         if index == menu_state.index and not menu_state.confirmed then
             gfx.setColor(0.8, 0.4, 0)
@@ -108,7 +110,7 @@ function drawable.vertical_menu(entity)
 
         gfx.setColor(0, 0, 0)
         painter.draw_text(
-            item, item_shape,
+            to_text(item), item_shape,
             {align="center", valign="center", font=painter.font(24)}
         )
         

@@ -19,6 +19,11 @@ function flag(entity, flag_id)
     return not v
 end
 
+function check_flag(entity, flag_id)
+    local f = entity:ensure(nw.component.flag)
+    return f[flag_id]
+end
+
 function math.round(x) return math.floor(x + 0.5) end
 
 function love.load(args)

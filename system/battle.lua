@@ -5,6 +5,7 @@ local gui = require "gui"
 local combat = require "combat"
 local action = require "system.action_animation"
 local tween = require "system.tween"
+local ability = require "ability"
 
 local component = {}
 
@@ -14,91 +15,15 @@ function cmp.equal(a, b) return a == b end
 
 local logic = {}
 
-logic.id = "logic"
+logic.id = {
+    main="logic/main",
+    player="logic/player"   
+}
 
 function logic.initial_turn_order(ecs_world)
     local players = ecs_world:get_component_table(nw.component.player_team):keys()
     local enemies = ecs_world:get_component_table(nw.component.enemy_team):keys()
     return players + enemies
-end
-
-function logic.player_turn(ecs_world, id)
-    local data = ecs_world:entity(logic)
-    local menu = ecs_world:entity("menu")
-    local hand = ecs_world:ensure(nw.component.player_card_state, id).hand
-    print(hand)
-
-    menu:ensure(nw.component.position, 100, 100)
-    local menu_state = menu:ensure(nw.component.linear_menu_state, list("attack", "heal", "pass"))
-    menu:ensure(nw.component.drawable, nw.drawable.vertical_menu)
-
-    if not menu_state.confirmed then return end
-    local ability = gui.menu.get_selected_item(menu)
-
-    local status = false
-    if ability == "attack" then
-        local attack = require "ability.attack"
-        status = attack(ecs_world, ability, id)
-    elseif ability == "heal" then
-        local heal = require "ability.heal"
-        status = heal(ecs_world, ability, id)
-    end
-
-    if status then
-        nw.system.entity():destroy(ecs_world, ability)
-        menu:destroy()
-    end
-
-    return status
-end
-
-function logic.enemy_turn(ecs_world, id)
-    local data = ecs_world:entity(logic)
-    local t = data:ensure(nw.component.timer, 0.3)
-
-    if flag(data, "entry") then
-        ecs_world:entity("marker")
-            :set(nw.component.parent, id)
-            :set(nw.component.color, 0.8, 0.2, 0.1)
-        print("enemy_turn_begin", id)
-    end
-
-    if not t:done() then return false end
-
-    data:destroy()
-
-    local target_id = ecs_world:get_component_table(nw.component.player_team)
-        :keys()
-        :shuffle()
-        :head()
-
-    if target_id then
-        combat.core.damage(ecs_world, target_id, 1)
-    else
-        print("target not found")
-    end
-
-    ecs_world:entity("marker"):set(nw.component.parent, nil)
-
-    print("end of enemy turn")
-
-    return true
-end
-
-function logic.handle_turn(ecs_world, id)
-    if not combat.core.is_alive(ecs_world, id) then
-        print("Actor is dead: ", id)
-        return true
-    end
-
-    if ecs_world:get(nw.component.player_team, id) then
-        return logic.player_turn(ecs_world, id)
-    elseif ecs_world:get(nw.component.enemy_team, id) then
-        return logic.enemy_turn(ecs_world, id)
-    else
-        print("Not player or enemy -> skipping")
-        return true
-    end
 end
 
 function logic.is_team_alive(ecs_world, comp)
@@ -115,76 +40,77 @@ function logic.is_battle_over(ecs_world)
     return not logic.is_team_alive(ecs_world, nw.component.player_team)
         or not logic.is_team_alive(ecs_world, nw.component.enemy_team)
 end
-    
-function logic.spin(ecs_world)
-    if logic.is_battle_over(ecs_world) then return end
-    if not action.empty(ecs_world) then return end
-
-    local turn_order = ecs_world:entity(logic):get(nw.component.turn_order)
-    local turn_order = turn_order or logic.initial_turn_order(ecs_world)
-    ecs_world:entity(logic):set(nw.component.turn_order, turn_order)
-
-    local next_turn = turn_order:head()
-
-    if not logic.handle_turn(ecs_world, next_turn) then return end
-
-    turn_order = turn_order:body() + list(turn_order:head())
-    ecs_world:entity(logic):set(nw.component.turn_order, turn_order)
-end
 
 function logic.round_begin(ecs_world)
-    local data = ecs_world:entity(logic.id)
+    local data = ecs_world:entity(logic.id.main)
     if flag(data, "round_begin") then
         log.info(ecs_world, "round begin")
+        combat.deck.draw_until(ecs_world, "player", 5)
     end
 end
 
-function logic.player_turn(ecs_world)
-    local data = ecs_world:entity(logic.id)
-    local card_state = ecs_world:ensure(nw.component.player_card_state, "player")
-    local hand = card_state.hand
-    local menu = ecs_world:entity("card_menu")
-        :assemble(nw.system.parent().set_parent, data)
+function logic.end_player_turn(card_state)
+    card_state.discard = card_state.discard + card_state.hand
+    card_state.hand = list()
+end
 
-    menu:ensure(nw.component.position, 25, 25)
-    menu:ensure(nw.component.drawable, nw.drawable.vertical_menu)
-    local menu_state = menu:ensure(nw.component.linear_menu_state, hand)
+function component.card_select_menu(data, cards)
+    return nw.system.parent().spawn(data)
+        :set(nw.component.position, 25, 25)
+        :set(nw.component.drawable, nw.drawable.vertical_menu)
+        :set(nw.component.linear_menu_state, cards)
+end
 
-    if flag(data, "player_turn") then
-        log.info(ecs_world, "hand %s", tostring(hand))
-        log.info(ecs_world, "player turn")
-    end
+function logic.pick_player_ability(ecs_world, cards)
+    local data = ecs_world:entity(logic.id.player)
+    local menu = data:ensure(component.card_select_menu, data, cards)
 
-    local ability = gui.menu.get_selected_item(menu)
-    if not menu_state.confirmed then
+    if input.is_pressed(ecs_world, "b") then 
+        gui.menu.unconfirm(menu)
         return
     end
 
-    if input.is_pressed(ecs_world, "b") then
-        ecs_world:destroy(ability)
-        menu_state.confirmed = false
-        return
+    if gui.menu.is_confirmed(menu) then
+        return gui.menu.get_selected_item(menu)
+    end
+end
+
+function logic.execute_player_ability(ecs_world, ability, index)
+    local ability_id = "ability"
+    if not ability then
+        nw.system.parent().destroy(ecs_world:entity(ability_id))
+        return 
     end
 
     local status = false
     if ability == "attack" then
         local attack = require "ability.attack"
-        status = attack(ecs_world, ability, "player")
+        status = attack(ecs_world, ability_id, "player")
     elseif ability == "heal" then
         local heal = require "ability.heal"
-        status = heal(ecs_world, ability, "player")
+        status = heal(ecs_world, ability_id, "player")
     else
         log.info(ecs_world, "Unknown ability %s", ability)
     end
     
-    if status then
-        nw.system.parent().destroy(data)
-        ecs_world:destroy(ability)
-        local index = hand:argfind(ability)
-        if index then card_state.hand = hand:erase(index) end
-    end
+    return status
+end
 
-    return false
+function logic.player_turn(ecs_world)
+    local data = ecs_world:entity(logic.id.main)
+    if input.is_pressed(ecs_world, "return") or check_flag(data, "player_turn_done") then
+        flag(data, "player_turn_done")
+        return true 
+    end
+    
+    local card_state = ecs_world:ensure(nw.component.player_card_state, "player")
+    local ability, index = logic.pick_player_ability(ecs_world, card_state.hand)
+    if not logic.execute_player_ability(ecs_world, ability) then return end
+
+    card_state.hand = card_state.hand:erase(index)
+    card_state.discard = card_state.discard:insert(ability)
+
+    nw.system.parent().destroy(ecs_world:entity(logic.id.player))
 end
 
 function logic.enemy_turn(ecs_world)
@@ -192,7 +118,7 @@ function logic.enemy_turn(ecs_world)
 end
 
 function logic.round_end(ecs_world)
-    local data = ecs_world:entity(logic.id)
+    local data = ecs_world:entity(logic.id.main)
     if flag(data, "round_end") then
         log.info(ecs_world, "round end")
     end
@@ -200,16 +126,97 @@ function logic.round_end(ecs_world)
     data:destroy()
 end
 
-function logic.spin(ecs_world)
-    if logic.is_battle_over(ecs_world) then return end
+function component.targets(ecs_world, user, target_type, side)
+    local is_player = ecs_world:get(nw.component.player_team, user)
+    local own_team = is_player and nw.component.player_team or nw.component.enemy_team
+    local other_team = is_player and nw.component.enemy_team or nw.component.player_team
+    local team_comp = side == "same" and own_team or other_team
+    return ecs_world
+        :get_component_table(team_comp)
+        :keys()
+        :filter(function(id) return combat.core.is_alive(ecs_world, id) end)
+        :sort(function(a, b)
+            local pa = math.abs(ecs_world:get(nw.component.board_index, a) or 0)
+            local pb = math.abs(ecs_world:get(nw.component.board_index, b) or 0)
+            return pa < pb
+        end)
+end
+
+function component.ability_select_stage(ecs_world, user, abilities, index)
+    print("ability", abilities)
+    return ecs_world:entity()
+        :set(nw.component.position, 25, 25)
+        :set(nw.component.drawable, nw.drawable.vertical_menu)
+        :set(nw.component.linear_menu_state, abilities, index)
+        :set(nw.component.linear_menu_to_text, function(item) return item.name end)
+end
+
+function component.target_select_stage(ecs_world, user, ability, index)
+    local targets = component.targets(ecs_world, user, ability.target, ability.side)
+    return ecs_world:entity()
+        :set(nw.component.drawable, nw.drawable.single_target_marker)
+        :set(nw.component.color, 0.1, 0.2, 0.8)
+        :set(nw.component.layer, 3)
+        :set(nw.component.keybinding, {increase="right", decrease="left"})
+        :set(nw.component.linear_menu_state, targets, index)
+end
+
+local function run_ability(ecs_world, id, ability, ...)
+    if not ability.action then return true end
+    return ability.action(ecs_world, id, ...)
+end
+
+function logic.handle_player_turn(ecs_world, id, request)
+    local user = request.user
+    local data = ecs_world:entity(id)
+
+    if input.is_pressed(ecs_world, "return") then return true end
+
+    local ability_stage = data:ensure(
+        component.ability_select_stage,
+        ecs_world, user, list(ability.heal, ability.attack)
+    )
+    if not gui.menu.is_confirmed(ability_stage) then return end
+
+    local select_ability, index = gui.menu.get_selected_item(ability_stage)
+    local target_stage = data:ensure(
+        component.target_select_stage, ecs_world, user, select_ability
+    )
+    if gui.menu.is_cancel(target_stage) then
+        data:remove(component.target_select_stage)
+        data:set(
+            component.ability_select_stage,
+            ecs_world, user, list(ability.heal, ability.attack), index
+        )
+        return
+    end
+
+    if not gui.menu.is_confirmed(target_stage) then return end
+
+    local target = gui.menu.get_selected_item(target_stage)
+
+    local action_stage = data:ensure(action.submit, ecs_world, run_ability, select_ability, index, target)
+
     if not action.empty(ecs_world) then return end
+    
+    data:destroy(id)
+    -- Queue new turn
+    ecs_world:entity():set(nw.component.player_turn, user)
 
-    logic.round_begin(ecs_world)
+    return true
+end
 
-    if not logic.player_turn(ecs_world) then return end
-    if not logic.enemy_turn(ecs_world) then return end
+local function should_destroy(id, request) return request.done end
 
-    logic.round_end(ecs_world)
+function logic.spin(ecs_world)
+    for id, request in pairs(ecs_world:get_component_table(nw.component.player_turn)) do
+        if not request.done then
+            request.done = logic.handle_player_turn(ecs_world, id, request)
+        end
+    end
+
+    local to_destroy = ecs_world:get_component_table(nw.component.player_turn):filter(should_destroy)
+    for id, _ in pairs(to_destroy) do ecs_world:destroy(id) end
 end
 
 local api = {}
@@ -257,9 +264,8 @@ function api.setup(ecs_world)
         :set(nw.component.layer, 1)
 
     combat.deck.setup_from_deck(ecs_world, "player")
-    for i = 1, 5 do
-        combat.deck.draw_card_from_deck(ecs_world, "player")
-    end
+    combat.deck.draw_until(ecs_world, "player", 5)
+    ecs_world:entity():set(nw.component.player_turn, "player")
 end
 
 api.is_team_alive = logic.is_team_alive
