@@ -143,6 +143,8 @@ function component.linear_menu_state(items, index)
     }
 end
 
+function component.linear_menu_filter(f) return f end
+
 function component.linear_menu_to_text(func) return func or tostring end
 
 function component.keybinding(k) return k end
@@ -202,6 +204,14 @@ function component.target_select_stage(user, ability, index)
         ability = ability,
         index = index
     }
+end
+
+function component.energy(level)
+    return level or 0
+end
+
+function component.enery_refill(level)
+    return level or 0
 end
 
 return component

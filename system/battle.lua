@@ -143,12 +143,14 @@ function component.targets(ecs_world, user, target_type, side)
 end
 
 function component.ability_select_stage(ecs_world, user, abilities, index)
-    print("ability", abilities)
     return ecs_world:entity()
         :set(nw.component.position, 25, 25)
         :set(nw.component.drawable, nw.drawable.vertical_menu)
         :set(nw.component.linear_menu_state, abilities, index)
         :set(nw.component.linear_menu_to_text, function(item) return item.name end)
+        :set(nw.component.linear_menu_filter, function(item)
+            return combat.energy.can_spent(ecs_world, user, 1)
+        end)
 end
 
 function component.target_select_stage(ecs_world, user, ability, index)
@@ -161,7 +163,8 @@ function component.target_select_stage(ecs_world, user, ability, index)
         :set(nw.component.linear_menu_state, targets, index)
 end
 
-local function run_ability(ecs_world, id, ability, ...)
+local function run_ability(ecs_world, id, user, ability, index, ...)
+    if not combat.energy.spent(ecs_world, user, 1) then return true end
     if not ability.action then return true end
     return ability.action(ecs_world, id, ...)
 end
@@ -174,11 +177,16 @@ function logic.handle_player_turn(ecs_world, id, request)
 
     local ability_stage = data:ensure(
         component.ability_select_stage,
-        ecs_world, user, list(ability.heal, ability.attack)
+        ecs_world, user, list(ability.heal, ability.attack, ability.attack)
     )
+    if gui.menu.is_cancel(ability_stage) then
+        gui.menu.reset(ability_stage)
+        return
+    end
     if not gui.menu.is_confirmed(ability_stage) then return end
 
     local select_ability, index = gui.menu.get_selected_item(ability_stage)
+
     local target_stage = data:ensure(
         component.target_select_stage, ecs_world, user, select_ability
     )
@@ -195,14 +203,17 @@ function logic.handle_player_turn(ecs_world, id, request)
 
     local target = gui.menu.get_selected_item(target_stage)
 
-    local action_stage = data:ensure(action.submit, ecs_world, run_ability, select_ability, index, target)
+    local action_stage = data:ensure(
+        action.submit,
+        ecs_world, run_ability, user, select_ability, index, target
+    )
 
     if not action.empty(ecs_world) then return end
     
     data:destroy(id)
+    ecs_world:set(nw.component.player_turn, id, user)
     -- Queue new turn
-    ecs_world:entity():set(nw.component.player_turn, user)
-
+    
     return true
 end
 
@@ -231,6 +242,7 @@ function api.setup(ecs_world)
             list("attack", "attack", "attack", "attack", "attack")
             + list("heal", "heal", "heal", "heal", "heal")
         )
+        :set(nw.component.energy, 3)
 
     ecs_world:entity()
         :set(nw.component.health, 10)
@@ -262,6 +274,11 @@ function api.setup(ecs_world)
         :set(nw.component.scale, 100, 100)
         :set(nw.component.color, 1, 0, 0, 0.5)
         :set(nw.component.layer, 1)
+    
+    ecs_world:entity("energy")
+        :set(nw.component.drawable, nw.drawable.energy_meter)
+        :set(nw.component.layer, 1)
+        :set(nw.component.parent, "player")
 
     combat.deck.setup_from_deck(ecs_world, "player")
     combat.deck.draw_until(ecs_world, "player", 5)

@@ -128,4 +128,32 @@ function drawable.ellipse(entity)
     gfx.pop()
 end
 
+local function read_energy(entity)
+    local parent = entity:get(nw.component.parent)
+    if not parent then return "NA" end
+    return entity:world():ensure(nw.component.energy, parent)
+end
+
+function drawable.energy_meter(entity)
+    local x, y = painter.norm_to_real(0, 1)
+    local area = entity:ensure(nw.component.mouse_rect, x + 5, y - 25, 20, 20)
+
+    gfx.push("all")
+
+    nw.drawable.push_transform(entity)
+    nw.drawable.push_state(entity)
+
+    local energy = read_energy(entity)
+    gfx.setColor(0.1, 0.6, 0.2)
+    gfx.ellipse(
+        "fill", area.w / 2 + area.x, area.h / 2 + area.y, area.w / 2, area.h / 2
+    )
+    gfx.setColor(1, 1, 1)
+    painter.draw_text(
+        tostring(energy), area, {align="center", valign="center", font=painter.font(64)}
+    )
+
+    gfx.pop()
+end
+
 return drawable

@@ -32,7 +32,10 @@ function menu.update_state(ecs_world, id, menu_state)
     end
 
     if input.is_pressed(ecs_world, keybinding.confirm) then
-        menu_state.confirmed = true
+        local f = ecs_world:get(nw.component.linear_menu_filter, id)
+        if not f or f(menu_state.items[menu_state.index]) then
+            menu_state.confirmed = true
+        end
     end
 
     if input.is_pressed(ecs_world, keybinding.cancel) then
@@ -60,10 +63,11 @@ function menu.is_confirmed(entity)
     return menu_state.confirmed
 end
 
-function menu.unconfirm(entity)
+function menu.reset(entity)
     local menu_state = entity:get(nw.component.linear_menu_state)
     if not menu_state then return end
     menu_state.confirmed = nil
+    menu_state.cancel = nil
 end
 
 function menu.is_cancel(entity)
