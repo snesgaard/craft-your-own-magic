@@ -55,15 +55,30 @@ function deck.move_discard_into_draw(ecs_world, id)
     state.discard = list()
 end
 
+function deck.shuffle_discard_into_draw(ecs_world, id)
+    deck.move_discard_into_draw(ecs_world, id)
+    deck.shuffle_draw(ecs_world, id)
+end
+
+function deck.from_hand_to_discard(ecs_world, id, index)
+    local state = ecs_world:get(nw.component.player_card_state, id)
+    if not state then return end
+    
+    local value = state.hand[index]
+    if not value then return end
+    state.hand = state.hand:erase(index)
+    state.discard = state.discard:insert(value)
+    return true
+end
+
 function deck.draw_until(ecs_world, id, num)
     local state = ecs_world:get(nw.component.player_card_state, id)
     if not state then return end
 
+    print("drawing cards", id, num)
     for i = 1, num - state.hand:size() do
         deck.draw_card_from_deck(ecs_world, id)
     end
-
-    print("deck", state.draw)
 end
 
 return deck

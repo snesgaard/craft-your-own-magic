@@ -38,7 +38,7 @@ function menu.update_state(ecs_world, id, menu_state)
         end
     end
 
-    if input.is_pressed(ecs_world, keybinding.cancel) then
+    if input.is_pressed(ecs_world, keybinding.cancel) and not ecs_world:get(nw.component.no_cancel, id) then
         menu_state.cancel = true
     end
 end

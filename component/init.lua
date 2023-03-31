@@ -214,4 +214,10 @@ function component.enery_refill(level)
     return level or 0
 end
 
+function component.enemy_turn() return {} end
+
+function component.turn(is_player) return {is_player = is_player} end
+
+function component.no_cancel() return true end
+
 return component

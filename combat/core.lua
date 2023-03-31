@@ -1,3 +1,4 @@
+local energy = require "combat.energy"
 local core = {}
 
 function core.is_alive(ecs_world, id)
@@ -28,5 +29,17 @@ function core.heal(ecs_world, id, heal)
 
     return real_heal
 end
+
+function core.turn_begin(ecs_world, is_player)
+    local comp = is_player and nw.component.player_team or nw.component.enemy_team
+    local entities = ecs_world:get_component_table(comp)
+    for id, _ in pairs(entities) do
+        local entity = ecs_world:entity(id)
+        if entity:has(nw.component.energy) then entity:set(nw.component.energy, 3) end
+    end
+    return true
+end
+
+function core.turn_end() return true end
 
 return core

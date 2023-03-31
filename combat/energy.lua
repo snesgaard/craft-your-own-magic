@@ -13,4 +13,8 @@ function energy.spent(ecs_world, id, amount)
     return true
 end
 
+function energy.refill(ecs_world, id)
+    ecs_world:set(nw.component.energy, id, 3)
+end
+
 return energy

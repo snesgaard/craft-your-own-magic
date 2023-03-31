@@ -44,6 +44,11 @@ function action_animation.empty(ecs_world)
    return nw.system.parent().get_children(ecs_world:entity(action_animation.parent_id)):empty()
 end
 
+function action_animation.is_done(ecs_world, id)
+    local a = ecs_world:get(component.animated_action, id)
+    return not a
+end
+
 function action_animation.submit(ecs_world, func, ...)
     return ecs_world:entity()
         :assemble(nw.system.parent().set_parent, ecs_world:entity(action_animation.parent_id))
