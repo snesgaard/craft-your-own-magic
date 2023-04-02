@@ -220,10 +220,12 @@ function component.turn(is_player) return {is_player = is_player} end
 
 function component.no_cancel() return true end
 
-function component.ai_state(draw, discard)
+function component.ai_state(draw, discard, exhaust)
     return {
         draw = draw or list(),
-        discard = discard or list()
+        discard = discard or list(),
+        exhaust = exhaust or list(),
+        intent = nil
     }
 end
 

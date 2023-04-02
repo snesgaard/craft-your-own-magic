@@ -92,7 +92,7 @@ function api.round_begin(ecs_world, id)
     -- prepare AI
     for id, deck in pairs(ecs_world:get_component_table(nw.component.ai_deck)) do
         local entity = ecs_world:entity(id)
-        local ai_state = entity:ensure(nw.component.ai_state, deck)
+        combat.ai.card_state_from_deck(ecs_world, id)
         combat.ai.prepare_next_action(ecs_world, id)
     end
     
@@ -103,13 +103,30 @@ function api.player_turn(ecs_world, id)
     local id = id or "player_turn"
     local data = ecs_world:entity(id)
     local team_comp = nw.component.player_team
+    if flag(data, "log") then log.info(ecs_world, "player_turn") end
     if not data:ensure(turn.turn_begin, ecs_world, team_comp) then return end
     if not data:ensure(player.turn, ecs_world, team_comp) then return end
     if not data:ensure(turn.turn_end, ecs_world, team_comp) then return end
     return data
 end
 
+local turn_taken = nw.component.relation(function(ecs_world, id)
+    local action = combat.ai.get_next_action(ecs_world, id)
+    local result = combat.ai.play_ability(ecs_world, id, action)
+    return true
+end)
+
 function api.enemy_turn(ecs_world, id)
+    local id = id or "enemy_turn"
+    local data = ecs_world:entity(id)
+
+    if flag(data, "log") then log.info(ecs_world, "enemy_turn") end
+
+    local ids = combat.target.get_targets_in_order(ecs_world, nw.component.enemy_team)
+    for _, id in ipairs(ids) do
+        if not data:ensure(turn_taken:ensure(id), ecs_world, id) then return end
+    end
+
     return true
 end
 

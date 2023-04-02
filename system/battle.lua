@@ -87,7 +87,7 @@ function api.setup(ecs_world)
         :set(nw.component.enemy_team)
         :assemble(board.move_to_index, 1)
         :set(nw.component.mouse_rect, -10, -50, 20, 50)
-        :set(nw.component.ai_deck, list(ability.attack, ability.attack))
+        :set(nw.component.ai_deck, require "ability.cultist")
         :set(nw.component.drawable, nw.drawable.board_actor)
 
     ecs_world:entity()
