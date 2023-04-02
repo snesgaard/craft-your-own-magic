@@ -88,6 +88,14 @@ local api = {}
 
 function api.round_begin(ecs_world, id)
     local data = ecs_world:entity(id or "round_begin")
+    
+    -- prepare AI
+    for id, deck in pairs(ecs_world:get_component_table(nw.component.ai_deck)) do
+        local entity = ecs_world:entity(id)
+        local ai_state = entity:ensure(nw.component.ai_state, deck)
+        combat.ai.prepare_next_action(ecs_world, id)
+    end
+    
     return true
 end
 

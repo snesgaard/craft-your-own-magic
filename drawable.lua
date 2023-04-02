@@ -1,5 +1,6 @@
 local gui = require "gui"
 local painter = require "painter"
+local combat = require "combat"
 
 local drawable = {}
 
@@ -11,6 +12,8 @@ function drawable.board_actor(entity)
     gfx.rectangle("fill", -w / 2, -h, w, h)
 
     gfx.pop()
+
+    drawable.ai_intent(entity)
 end
 
 function drawable.target_marker(entity)
@@ -151,6 +154,23 @@ function drawable.energy_meter(entity)
     gfx.setColor(1, 1, 1)
     painter.draw_text(
         tostring(energy), area, {align="center", valign="center", font=painter.font(64)}
+    )
+
+    gfx.pop()
+end
+
+function drawable.ai_intent(entity)
+    local action = combat.ai.get_next_action(entity:world(), entity.id)
+    local rect = entity:get(nw.component.mouse_rect)
+    if not action or not rect then return end
+
+    gfx.push("all")
+
+    nw.drawable.push_transform(entity)
+    local text_area = rect:up(0, 5)
+    gfx.setColor(1, 1, 1)
+    painter.draw_text(
+        tostring(action.name or "nonname"), text_area, {align="center", valign="bottom", font=painter.font(24)}
     )
 
     gfx.pop()

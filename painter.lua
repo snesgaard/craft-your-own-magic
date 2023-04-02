@@ -73,7 +73,7 @@ local function compute_valign(text, font, w, h, scale, valign)
     if valign == "center" then
         return (h  - th) * 0.5
     elseif valign == "bottom" then
-        return th
+        return h - th
     end
 
     return 0
