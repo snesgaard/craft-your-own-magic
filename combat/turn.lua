@@ -73,10 +73,13 @@ local turn = {}
 
 function turn.turn_begin(ecs_world, team_component)
     local actors = combat.target.get_targets_in_order(ecs_world, team_component)
+
     for _, id in ipairs(actors) do 
         combat.deck.draw_until(ecs_world, id, 5)
         combat.energy.refill(ecs_world, id)
+        combat.status.turn_begin(ecs_world, id)
     end
+
     return true
 end
 
@@ -122,6 +125,7 @@ function api.enemy_turn(ecs_world, id)
 
     if flag(data, "log") then log.info(ecs_world, "enemy_turn") end
 
+    if not data:ensure(turn.turn_begin, ecs_world, nw.component.enemy_team) then return end
     local ids = combat.target.get_targets_in_order(ecs_world, nw.component.enemy_team)
     for _, id in ipairs(ids) do
         if not data:ensure(turn_taken:ensure(id), ecs_world, id) then return end

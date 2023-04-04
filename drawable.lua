@@ -170,7 +170,8 @@ function drawable.ai_intent(entity)
     local text_area = rect:up(0, 5)
     gfx.setColor(1, 1, 1)
     painter.draw_text(
-        tostring(action.name or "nonname"), text_area, {align="center", valign="bottom", font=painter.font(24)}
+        tostring(action.name or "nonname"), text_area,
+        {align="center", valign="bottom", font=painter.font(24)}
     )
 
     gfx.pop()

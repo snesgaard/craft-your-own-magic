@@ -81,6 +81,7 @@ function api.setup(ecs_world)
             )
         )
         :set(nw.component.energy, 3)
+        :set(combat.status.strength, 3)
 
     ecs_world:entity()
         :set(nw.component.health, 10)

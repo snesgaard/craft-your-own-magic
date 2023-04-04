@@ -60,9 +60,16 @@ end
 
 local executor = {}
 
-executor["attack"] = function(ecs_world, node, user, targets)
+function executor.attack(ecs_world, node, user, targets)
     print("attacking:", user, targets, node.power)
     for _, id in ipairs(targets) do combat.core.damage(ecs_world, id, node.power) end
+end
+
+function executor.status(ecs_world, node, user, targets)
+    print("applying status:", node.status, targets)
+    for _, id in ipairs(targets) do
+        combat.core.apply_status(ecs_world, user, id, node.status, node.power)
+    end
 end
 
 function executor.node_func_from_type(call_type)

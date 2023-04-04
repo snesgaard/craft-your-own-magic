@@ -1,4 +1,5 @@
 local painter = require "painter"
+local combat = require "combat"
 
 local component = {}
 
@@ -53,42 +54,72 @@ function health_bar.spin(ecs_world)
     end
 end
 
-function health_bar.drawable(entity)
-    local hp = entity:get(component.bar_values)
-    local area = entity:get(nw.component.mouse_rect)
 
-    if not hp or not area then return end
+function health_bar.spin(ecs_world)
+    ecs_world:entity("healthbar_drawer")
+        :init(nw.component.layer, painter.layer.field_gui)
+        :init(nw.component.drawable, health_bar.drawable)
+end
 
+function health_bar.draw_health_bar(area, value, max)
     gfx.push("all")
 
-    local parent_id = nw.system.parent().get_parent(entity)
-    if parent_id then
-        local parent = entity:world():entity(parent_id)
-        nw.drawable.push_transform(parent)
-    end
-    nw.drawable.push_transform(entity)
-    nw.drawable.push_state(entity)
-
-    nw.drawable.push_color(entity, 0.5)
+    gfx.setColor(0.8, 0.3, 0.1, 0.5)
     gfx.rectangle("fill", area.x, area.y, area.w, area.h)
-    nw.drawable.push_color(entity)
-    local s = hp.value / hp.max
+    gfx.setColor(0.8, 0.3, 0.1)
+    local s = value / max
     gfx.rectangle("fill", area.x, area.y, area.w * s, area.h)
 
     gfx.pop()
 end
 
-function health_bar.assemble(entity, parent)
-    local w, h = 50, 2
-    local w = painter.norm_to_real(0.075)
-    local dy = h * 3
-    entity
-        :set(component.bar_values, 1, 1)
-        :set(nw.component.mouse_rect, -w / 2, dy, w, h)
-        :set(nw.component.color, 0.8, 0.3, 0.1)
-        :set(nw.component.layer, 2)
-        :set(nw.component.drawable, health_bar.drawable)
-        :assemble(nw.system.parent().set_parent, parent)
+local status_color = {
+    [combat.status.cultist_power] = {0.2, 0.4, 0.8},
+    [combat.status.strength] = {0.8, 0.4, 0.2}
+}
+
+local status_order = list(combat.status.cultist_power, combat.status.strength)
+
+local function draw_status_cell(color, cell, value)
+    if not value or value == 0 or not color then return false end
+
+    gfx.setColor(color)
+    gfx.rectangle("fill", cell:unpack())
+    gfx.setColor(1, 1, 1)
+    painter.draw_text(value, cell, {align="center", valign="center", font=painter.font(24)})
+    return true
+end
+
+function health_bar.draw_status_bar(entity, status_bar_shape)
+    local row = spatial(status_bar_shape.x, status_bar_shape.y, 6, 6)
+    local cell = row
+
+    for _, status in ipairs(status_order) do
+        local value = entity:get(status)
+        local color = status_color[status]
+        if draw_status_cell(color, cell, value) then cell = cell:right(2, 0) end
+    end
+end
+
+function health_bar.drawable(entity)
+    local ecs_world = entity:world()
+    gfx.push("all")
+
+    local health_bar_shape = spatial():expand(25, 2)
+    local status_bar_shape = health_bar_shape:down(0, 4, nil, 100)
+    gfx.setColor(0.8, 0.3, 0.1)
+    for id, hp in pairs(ecs_world:get_component_table(nw.component.health)) do
+        gfx.push("all")
+        local entity = ecs_world:entity(id)
+        nw.drawable.push_transform(entity)
+        gfx.translate(0, 10)
+        health_bar.draw_health_bar(health_bar_shape, hp.value, hp.max)
+        health_bar.draw_status_bar(entity, status_bar_shape)
+        gfx.pop()
+    end
+
+
+    gfx.pop()
 end
 
 return health_bar

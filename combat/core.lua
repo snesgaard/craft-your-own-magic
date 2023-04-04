@@ -1,4 +1,5 @@
 local energy = require "combat.energy"
+local combat = require "combat"
 local core = {}
 
 function core.is_alive(ecs_world, id)
@@ -13,9 +14,7 @@ function core.damage(ecs_world, id, damage)
     local real_damage = math.min(damage, hp.value)
     hp.value = hp.value - real_damage
     
-    nw.system.entity():emit(ecs_world, event.on_damage, id, real_damage)
-
-    return real_damage
+    return nw.system.entity():emit(ecs_world, event.on_damage, id, real_damage)
 end
 
 function core.heal(ecs_world, id, heal)
@@ -25,7 +24,6 @@ function core.heal(ecs_world, id, heal)
     local next_health = math.min(hp.max, hp.value + heal)
     local real_heal = next_health - hp.value
     hp.value = next_health
-    --nw.system.entity():emit(ecs_world, event.on_damage, id, real_damage)
 
     return real_heal
 end
@@ -41,5 +39,23 @@ function core.turn_begin(ecs_world, is_player)
 end
 
 function core.turn_end() return true end
+
+function core.apply_status(ecs_world, user, target, status, power)
+    if not power or power == 0 then return end
+
+    local status_comp = combat.status.from_string(status)
+    if not status_comp then
+        print("Unknown status", status)
+        return
+    end
+
+    local value = ecs_world:ensure(status_comp, target)
+    local next_value = value + power
+    ecs_world:set(status_comp, target, next_value)
+
+    return nw.system.entity():emit(
+        ecs_world, event.on_status_apply, user, target, status_comp, power
+    )
+end
 
 return core

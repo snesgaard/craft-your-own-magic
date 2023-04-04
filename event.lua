@@ -22,4 +22,15 @@ function event.on_shuffle_draw(user, before, after)
     }
 end
 
+function event.on_status_apply(user, target, status_comp, power, prev_value, next_value)
+    return {
+        user = user,
+        target = target,
+        status_comp = status_comp,
+        power = power,
+        prev_value = prev_value,
+        next_value = next_value
+    }
+end
+
 return event

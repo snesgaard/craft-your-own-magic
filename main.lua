@@ -42,6 +42,8 @@ function love.update(dt)
     battle.spin(ecs_world)
     nw.system.entity():emit(ecs_world, nw.component.update, dt)
     battle.spin(ecs_world)
+
+    require("lovebird").update()
 end
 
 function love.draw()

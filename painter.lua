@@ -22,8 +22,12 @@ end
 local layers = {
     background = -1,
     player = 1,
-    effects = 2
+    effects = 2,
+    field_gui = 3,
+    screen_gui = 4
 }
+
+painter.layer = layers
 
 local function sort_by_position(a, b)
     local pos_a = a:ensure(nw.component.position)
