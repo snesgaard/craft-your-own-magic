@@ -112,8 +112,8 @@ end
 
 local turn_taken = nw.component.relation(function(ecs_world, id)
     local action = combat.ai.get_next_action(ecs_world, id)
-    local result = combat.ai.play_ability(ecs_world, id, action)
-    return true
+    local ability_execution = combat.ai.ability_execution(ecs_world, id, action)
+    return combat.ai.run_all_ability(ability_execution)
 end)
 
 function api.enemy_turn(ecs_world, id)
@@ -127,7 +127,7 @@ function api.enemy_turn(ecs_world, id)
         if not data:ensure(turn_taken:ensure(id), ecs_world, id) then return end
     end
 
-    return true
+    return data
 end
 
 function api.round_end(ecs_world, id)

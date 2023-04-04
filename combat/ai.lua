@@ -13,15 +13,15 @@ function targeting.repeat_list(l, num)
 end
 
 targeting["all/enemy"] = function(ecs_world, user)
-    return target.get_opposite_team(ecs_world, user)
+    return combat.target.get_targets(ecs_world, user)
 end
 
 targeting["single/enemy"] = function(ecs_world, user)
-    return list(target.get_opposite_team(ecs_world, user):head())
+    return list(combat.target.get_targets(ecs_world, user):head())
 end
 
 targeting["single/enemy/random"] = function(ecs_world, user)
-    return target.get_opposite_team(ecs_world, user):shuffle():head()
+    return combat.target.get_targets(ecs_world, user):shuffle():head()
 end
 
 targeting["self"] = function(ecs_world, user)
@@ -60,8 +60,15 @@ end
 
 local executor = {}
 
+executor["attack"] = function(ecs_world, node, user, targets)
+    print("attacking:", user, targets, node.power)
+    for _, id in ipairs(targets) do combat.core.damage(ecs_world, id, node.power) end
+end
+
 function executor.node_func_from_type(call_type)
+    print("finding node type", call_type)
     if not call_type then return end
+    return executor[call_type]
 end
 
 local ai = {}
@@ -136,7 +143,7 @@ function ai.execute_node(ecs_world, user, node, target_table)
     local target = targeting.read_target_from_table(target_table, node.target)
     local func = executor.node_func_from_type(node.type)
     if not target or not func then return end
-    return func(ecs_world, node, user, targets)
+    return func(ecs_world, node, user, target)
 end
 
 function ai.evaluate_node(ecs_world, user, node, target_table, dst)
@@ -149,12 +156,63 @@ function ai.evaluate_node(ecs_world, user, node, target_table, dst)
     return dst
 end
 
+function ai.flatten_ability(node, dst)
+    local dst = dst or {}
+    table.insert(dst, node)
+    for _, c in ipairs(node) do ai.flatten_ability(c, dst) end
+    return dst
+end
+
 function ai.play_ability(ecs_world, user, ability)
     if not user then error("User was nil") end
     local dst = dict()
     if not ability then return dst end
     local target_table = targeting.select(ecs_world, user, ability)
     return ai.evaluate_node(ecs_world, user, ability, target_table, dst)
+end
+
+ai.execute_node_store = nw.component.relation(ai.execute_node)
+
+function ai.run_next(ecs_world, user, ability, id)
+    local data = ecs_world:entity(id)
+    if not user or not ability then error("User was nil") end
+    local target_table = data:ensure(targeting.select, ecs_world, user, ability)
+    local flatten = data:ensure(ai.flatten_ability, ability)
+
+    for _, node in ipairs(flatten) do
+        local comp = ai.execute_node_store:ensure(node)
+        if not data:has(comp) then
+            local result = data:ensure(comp, ecs_world, user, node, target_table)
+            if result then return result end
+        end
+    end
+end
+
+function ai.ability_execution(ecs_world, user, ability)
+    return ecs_world:entity():set(nw.component.ability_execution, user, ability)
+end
+
+function ai.run_next_ability(data)
+    local exec = data:get(nw.component.ability_execution)
+    if not exec then return end
+    local user, ability = exec.user, exec.ability
+    if not user or not ability then return end
+    print("running next for ability:", user, ability)
+    local target_table = data:ensure(targeting.select, ecs_world, user, ability)
+    local flatten = data:ensure(ai.flatten_ability, ability)
+
+    for _, node in ipairs(flatten) do
+        local comp = ai.execute_node_store:ensure(node)
+        if not data:has(comp) then
+            local result = data:ensure(comp, ecs_world, user, node, target_table)
+            if result then return result end
+        end
+    end
+end
+
+function ai.run_all_ability(data)
+    while ai.run_next_ability(data) do end
+    return data
 end
 
 return ai

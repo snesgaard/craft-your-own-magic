@@ -231,4 +231,12 @@ end
 
 function component.ai_deck(deck) return deck or list() end
 
+function component.ability_execution(user, ability)
+    print("staging", user, ability)
+    return {
+        ability = ability,
+        user = user
+    }
+end
+
 return component
