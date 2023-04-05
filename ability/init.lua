@@ -3,8 +3,8 @@ local combat = require "combat"
 local attack = {
     name = "Attack",
     target = "single",
-    action = function(ecs_world, id, target)
-        combat.core.damage(ecs_world, target, 1)
+    action = function(ecs_world, id, user, target)
+        combat.core.attack(ecs_world, user, target, 1)
         return true
     end
 }

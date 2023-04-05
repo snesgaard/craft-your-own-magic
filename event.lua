@@ -7,6 +7,13 @@ function event.on_damage(target, damage)
     }
 end
 
+function event.on_heal(target, heal)
+    return {
+        heal = heal,
+        target = target
+    }
+end
+
 function event.on_card_draw(user, card)
     return {
         user = user,

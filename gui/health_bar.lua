@@ -75,10 +75,13 @@ end
 
 local status_color = {
     [combat.status.cultist_power] = {0.2, 0.4, 0.8},
-    [combat.status.strength] = {0.8, 0.4, 0.2}
+    [combat.status.strength] = {0.8, 0.4, 0.2},
+    [combat.status.poison] = {0.2, 0.8, 0.4}
 }
 
-local status_order = list(combat.status.cultist_power, combat.status.strength)
+local status_order = list(
+    combat.status.cultist_power, combat.status.strength, combat.status.poison
+)
 
 local function draw_status_cell(color, cell, value)
     if not value or value == 0 or not color then return false end

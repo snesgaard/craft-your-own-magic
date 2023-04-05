@@ -35,7 +35,7 @@ function core.heal(ecs_world, id, heal)
     local real_heal = next_health - hp.value
     hp.value = next_health
 
-    return real_heal
+    return nw.system.entity():emit(ecs_world, event.on_heal, id, real_heal)
 end
 
 function core.turn_begin(ecs_world, is_player)

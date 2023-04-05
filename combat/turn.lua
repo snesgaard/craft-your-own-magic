@@ -37,7 +37,7 @@ function player.play_card(ecs_world, id, user, ability, index, ...)
     if not combat.energy.spent(ecs_world, user, 1) then return true end
     if not ability.action then return true end
     combat.deck.from_hand_to_discard(ecs_world, user, index)
-    return ability.action(ecs_world, id, ...)
+    return ability.action(ecs_world, id, user, ...)
 end
 
 function player.turn(ecs_world, id)
@@ -78,7 +78,7 @@ function turn.turn_begin(ecs_world, team_component)
         combat.deck.draw_until(ecs_world, id, 5)
         combat.energy.refill(ecs_world, id)
     end
-    
+
     combat.status.turn_begin(ecs_world, team_component)
 
     return true
