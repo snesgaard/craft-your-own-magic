@@ -15,4 +15,10 @@ function status.turn_begin(ecs_world, id)
     combat.core.apply_status(ecs_world, id, id, "strength", cultist_power)
 end
 
+function status.turn_begin(ecs_world, team_comp)
+    for id, power in ecs_world:join(status.cultist_power, team_comp) do
+        combat.core.apply_status(ecs_world, id, id, "strength", power)
+    end
+end
+
 return status

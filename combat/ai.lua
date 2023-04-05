@@ -62,7 +62,9 @@ local executor = {}
 
 function executor.attack(ecs_world, node, user, targets)
     print("attacking:", user, targets, node.power)
-    for _, id in ipairs(targets) do combat.core.damage(ecs_world, id, node.power) end
+    for _, target in ipairs(targets) do
+        combat.core.attack(ecs_world, user, target, node.power)
+    end
 end
 
 function executor.status(ecs_world, node, user, targets)

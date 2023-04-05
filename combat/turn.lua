@@ -77,8 +77,9 @@ function turn.turn_begin(ecs_world, team_component)
     for _, id in ipairs(actors) do 
         combat.deck.draw_until(ecs_world, id, 5)
         combat.energy.refill(ecs_world, id)
-        combat.status.turn_begin(ecs_world, id)
     end
+    
+    combat.status.turn_begin(ecs_world, team_component)
 
     return true
 end
@@ -130,6 +131,7 @@ function api.enemy_turn(ecs_world, id)
     for _, id in ipairs(ids) do
         if not data:ensure(turn_taken:ensure(id), ecs_world, id) then return end
     end
+    if not data:ensure(turn.turn_end, ecs_world, nw.component.enemy_team) then return end
 
     return data
 end

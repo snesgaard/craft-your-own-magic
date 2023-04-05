@@ -33,4 +33,12 @@ function event.on_status_apply(user, target, status_comp, power, prev_value, nex
     }
 end
 
+function event.on_attack(user, target, damage)
+    return {
+        user = user,
+        target = target,
+        damage = damage
+    }
+end
+
 return event

@@ -7,6 +7,16 @@ function core.is_alive(ecs_world, id)
     return hp and hp.value > 0
 end
 
+function core.attack(ecs_world, user, target, damage)
+    local str = ecs_world:get(combat.status.strength, user) or 0
+    local real_damage = damage + str
+    local on_damage = core.damage(ecs_world, target, real_damage)
+    if not on_damage then return end
+    return nw.system.entity():emit(
+        ecs_world, event.on_attack, user, target, on_damage.damage
+    )
+end
+
 function core.damage(ecs_world, id, damage)
     local hp = ecs_world:get(nw.component.health, id)
     if not hp then return end
