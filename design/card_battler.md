@@ -96,3 +96,21 @@ As for the graphical side of things:
 * Sprite for card
 * Healthbar GUI
 * Graphics for spell slots
+
+# 7th April 2023
+
+Reporting in. State of the game is that I have enemy AI up and running, basic gameflow and some basic mechanics in the form of status effects, attacking, healing etc.
+
+Ended up doing a major refactor of the control logic. Went full data driven programming, meaning the same function is always called and progress is retained using the ECS world state. A key invation that enabled this was ensuring that components .destroy method is called on removal, if any. This way I can use the ensure keyword the allocate entities for each step, and have them be automatically deleted later.
+
+Also figured out a way of fully representing abilities using data, no functions needed here. So far, it is only the AI that uses the format, need to refactor play abilities to also use this format.
+
+Mechanics wise ended up going for a simplier energy play-until-done ala hearthstone and slay the spire. Mostly to keep things simple, while I was figuring how to structure the gameflow.
+
+Which brings me to same future tasks:
+
+* Refactor player abilities to use data-drive format
+* Status icons should be temporally sorted
+* Animation integration with abitilies
+
+I'm thinking design-wise, I will stick to slay-the-spire and copy some of the enemy abilities and cards. Just to get a feeling for how flexible this format is.
