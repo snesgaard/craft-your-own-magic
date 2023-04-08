@@ -44,29 +44,14 @@ function player.turn(ecs_world, id)
     local user = "player"
     local data = ecs_world:entity(id or "player_turn")
 
-    if input.is_pressed(ecs_world, "return") then return data end
-    
-    local abilities = data:ensure(player.get_abilities_from_cards, ecs_world, user)
-    local ability_stage = data:ensure(
-        player.ability_stage,
-        ecs_world, user, abilities
-    )
-    if not gui.menu.is_confirmed(ability_stage) then return end
-    local ability, index = gui.menu.get_selected_item(ability_stage)
-
-    local target_stage = data:ensure(player.target_stage, ecs_world, user, ability)
-
-    if gui.menu.is_cancel(target_stage) then
-        gui.menu.reset(ability_stage)
-        data:remove(player.target_stage)
+    if input.is_pressed(ecs_world, "return") then
+        data:remove(combat.ai.execute_turn)
+        return data
     end
-    if not gui.menu.is_confirmed(target_stage) then return end
-    local target = gui.menu.get_selected_item(target_stage)
-
-    data:ensure(action.submit, ecs_world, player.play_card, user, ability, index, target)
-    if not action.empty(ecs_world) then return end
-
-    data:destroy()
+    
+    if data:ensure(combat.ai.execute_turn, ecs_world, "player") then
+        data:remove(combat.ai.execute_turn)
+    end
 end
 
 local turn = {}
@@ -115,9 +100,7 @@ function api.player_turn(ecs_world, id)
 end
 
 local turn_taken = nw.component.relation(function(ecs_world, id)
-    local action = combat.ai.get_next_action(ecs_world, id)
-    local ability_execution = combat.ai.ability_execution(ecs_world, id, action)
-    return combat.ai.run_all_ability(ability_execution)
+    return combat.ai.execute_turn(ecs_world, id)
 end)
 
 function api.enemy_turn(ecs_world, id)
@@ -129,6 +112,7 @@ function api.enemy_turn(ecs_world, id)
     if not data:ensure(turn.turn_begin, ecs_world, nw.component.enemy_team) then return end
     local ids = combat.target.get_targets_in_order(ecs_world, nw.component.enemy_team)
     for _, id in ipairs(ids) do
+        print("running turn", id)
         if not data:ensure(turn_taken:ensure(id), ecs_world, id) then return end
     end
     if not data:ensure(turn.turn_end, ecs_world, nw.component.enemy_team) then return end

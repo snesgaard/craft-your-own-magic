@@ -1,16 +1,7 @@
 local combat = require "combat"
+local action = require "system.action_animation"
 
 local targeting = {}
-
-function targeting.repeat_list(l, num)
-    local dst = l
-
-    for i = 1, num -1 do
-        dst = dst + l
-    end
-
-    return dst
-end
 
 targeting["all/enemy"] = function(ecs_world, user)
     return combat.target.get_targets(ecs_world, user)
@@ -21,7 +12,7 @@ targeting["single/enemy"] = function(ecs_world, user)
 end
 
 targeting["single/enemy/random"] = function(ecs_world, user)
-    return combat.target.get_targets(ecs_world, user):shuffle():head()
+    return list(combat.target.get_targets(ecs_world, user):shuffle():head())
 end
 
 targeting["self"] = function(ecs_world, user)
@@ -221,6 +212,38 @@ end
 
 function ai.run_all_ability(data)
     while ai.run_next_ability(data) do end
+    return data
+end
+
+function ai.run_action(ecs_world, data_id, user, ability, target)
+
+    return true
+end
+
+function ai.execute_turn(ecs_world, user)
+    -- Setup entity
+    local id = string.format("turn:%s", tostring(user))
+    local data = ecs_world:entity(id)
+
+    -- Select ability
+    local ability_data = data:ensure(combat.ability_select.component, ecs_world, user)
+    if not combat.ability_select.is_done(ability_data) then return end
+    local ability = combat.ability_select.get(ability_data)
+
+    -- Select target
+    local target_data = data:ensure(combat.target.component, ecs_world, user, ability)
+    if combat.target.is_cancel(target_data) then
+        data:remove(combat.target.component)
+        combat.ability_select.reset(ability_data)
+        return
+    end
+    if not combat.target.is_done(target_data) then return end
+    local target = combat.target.get(target_data)
+
+    -- Execute ability
+    local action_data = data:ensure(action.submit, ecs_world, combat.ability_execution, user, ability, target)
+    if not action.empty(ecs_world) then return end
+
     return data
 end
 

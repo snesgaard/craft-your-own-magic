@@ -46,6 +46,24 @@ function drawable.single_target_marker(entity)
     gfx.pop()
 end
 
+function drawable.target_marker(entity)
+    local targets = gui.menu.get_selected_item(entity)
+    if not targets then return end
+
+    gfx.push("all")
+    nw.drawable.push_state(entity)
+    
+    local ecs_world = entity:world()
+    for _, id in ipairs(targets) do
+        gfx.push()
+        nw.drawable.push_transform(ecs_world:entity(id))
+        gfx.circle("line", 0, 0, 10)
+        gfx.pop()
+    end
+
+    gfx.pop()
+end
+
 local function compute_vertical_offset(valign, font, h)
     if valign == "top" then
 		return 0

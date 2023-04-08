@@ -110,6 +110,8 @@ Mechanics wise ended up going for a simplier energy play-until-done ala hearthst
 Which brings me to same future tasks:
 
 * Refactor player abilities to use data-drive format
+    * Implement continue like pattern
+    * Re-implement AI targeting
 * Status icons should be temporally sorted
 * Animation integration with abitilies
 
