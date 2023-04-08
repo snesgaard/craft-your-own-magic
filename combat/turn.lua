@@ -43,9 +43,7 @@ end
 function player.turn(ecs_world, id)
     local user = "player"
     local data = ecs_world:entity(id or "player_turn")
-    if data:ensure(combat.ai.execute_turn, ecs_world, "player") then
-        return data
-    end
+    if data:ensure(combat.ai.execute_turn, ecs_world, "player") then return data end
 end
 
 local turn = {}
