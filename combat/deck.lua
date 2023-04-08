@@ -81,4 +81,16 @@ function deck.draw_until(ecs_world, id, num)
     end
 end
 
+function deck.play_card_from_hand(ecs_world, id, index)
+    local state = ecs_world:get(nw.component.player_card_state, id)
+    if not state then return false end
+
+    local card = state.hand[index]
+    if not card then return false end
+    state.hand = state.hand:erase(index)
+    state.discard = state.discard:insert(card)
+
+    return true
+end
+
 return deck

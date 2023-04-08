@@ -104,7 +104,6 @@ function api.enemy_turn(ecs_world, id)
     if not data:ensure(turn.turn_begin, ecs_world, nw.component.enemy_team) then return end
     local ids = combat.target.get_targets_in_order(ecs_world, nw.component.enemy_team)
     for _, id in ipairs(ids) do
-        print("running turn", id)
         if not data:ensure(turn_taken:ensure(id), ecs_world, id) then return end
     end
     if not data:ensure(turn.turn_end, ecs_world, nw.component.enemy_team) then return end

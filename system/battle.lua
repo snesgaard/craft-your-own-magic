@@ -90,7 +90,7 @@ function api.setup(ecs_world)
         :set(nw.component.mouse_rect, -10, -50, 20, 50)
         :set(nw.component.ai_deck, require "ability.cultist")
         :set(nw.component.drawable, nw.drawable.board_actor)
-        :set(combat.status.poison, 4)
+        :set(combat.status.poison, 2)
 
     ecs_world:entity()
         :set(nw.component.health, 7)
