@@ -43,14 +43,8 @@ end
 function player.turn(ecs_world, id)
     local user = "player"
     local data = ecs_world:entity(id or "player_turn")
-
-    if input.is_pressed(ecs_world, "return") then
-        data:remove(combat.ai.execute_turn)
-        return data
-    end
-    
     if data:ensure(combat.ai.execute_turn, ecs_world, "player") then
-        data:remove(combat.ai.execute_turn)
+        return data
     end
 end
 

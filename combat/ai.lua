@@ -216,14 +216,29 @@ function ai.run_all_ability(data)
 end
 
 function ai.run_action(ecs_world, data_id, user, ability, target)
-
     return true
+end
+
+function ai.is_player_controlled(ecs_world, id)
+    return ecs_world:get(nw.component.player_team, id)
+end
+
+function ai.should_abort(ecs_world, id)
+    if not ai.is_player_controlled(ecs_world, id) then return end
+
+    return input.is_pressed(ecs_world, "return")
 end
 
 function ai.execute_turn(ecs_world, user)
     -- Setup entity
     local id = string.format("turn:%s", tostring(user))
     local data = ecs_world:entity(id)
+
+    if ai.should_abort(ecs_world, user) then
+        data:remove(combat.ability_select.component)
+        data:remove(combat.target.component)
+        return data
+    end
 
     -- Select ability
     local ability_data = data:ensure(combat.ability_select.component, ecs_world, user)
@@ -244,7 +259,13 @@ function ai.execute_turn(ecs_world, user)
     local action_data = data:ensure(action.submit, ecs_world, combat.ability_execution, user, ability, target)
     if not action.empty(ecs_world) then return end
 
-    return data
+    -- Clear data if needed
+    if ai.is_player_controlled(ecs_world, user) then
+        data:destroy()
+        return
+    else
+        return data
+    end
 end
 
 return ai
