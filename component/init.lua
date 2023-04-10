@@ -239,4 +239,10 @@ function component.ability_execution(user, ability)
     }
 end
 
+function component.time(t) return t or 0 end
+
+function component.sprite_state(state) return state or "idle" end
+
+function component.sprite_state_map(map) return map or dict() end
+
 return component

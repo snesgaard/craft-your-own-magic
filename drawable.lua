@@ -4,12 +4,22 @@ local combat = require "combat"
 
 local drawable = {}
 
+local function get_frame(entity)
+    if entity:get(nw.component.player_team) then
+        return get_atlas("art/characters"):get_frame("witch")
+    else
+        return get_atlas("art/characters"):get_frame("barrel")
+    end
+end
+
 function drawable.board_actor(entity)
     gfx.push("all")
+    local frame = get_frame(entity)
 
     nw.drawable.push_transform(entity)
     local w, h = 20, 50
-    gfx.rectangle("fill", -w / 2, -h, w, h)
+    --gfx.rectangle("fill", -w / 2, -h, w, h)
+    frame:draw("body")
 
     gfx.pop()
 
@@ -191,6 +201,38 @@ function drawable.ai_intent(entity)
         tostring(action.name or "nonname"), text_area,
         {align="center", valign="bottom", font=painter.font(24)}
     )
+
+    gfx.pop()
+end
+
+function drawable.dagger_spray(entity)
+    local timer = entity:get(nw.component.timer)
+    if not timer or timer:done() then return end
+
+    local time = timer:inverse_normalized()
+
+    gfx.push("all")
+
+    nw.drawable.push_transform(entity)
+    nw.drawable.push_state(entity)
+
+    gfx.rectangle("fill", time * 100, 20, 10, 10)
+
+    gfx.pop()
+end
+
+function drawable.sprite(entity)
+    local state = entity:ensure(nw.component.sprite_state)
+    local state_map = entity:get(nw.component.sprite_state_map) or dict()
+    local frame = state_map[state]
+    if not frame then return end
+
+    gfx.push("all")
+
+    nw.drawable.push_transform(entity)
+    nw.drawable.push_state(entity)
+
+    frame:draw("body")
 
     gfx.pop()
 end

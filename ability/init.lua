@@ -5,10 +5,12 @@ local attack = {
     power = 3,
     target = "single/enemy",
     cost = 1,
+    attack = {
+        type = "attack",
+        power = 3
+    },
     run = function(ecs_world, data_id, user, targets, ability)
-        for _, target in ipairs(targets) do
-            combat.core.attack(ecs_world, user, target, ability.power)
-        end
+        combat.core.resolve(ecs_world, user, targets, ability.attack)
         return true
     end
 }

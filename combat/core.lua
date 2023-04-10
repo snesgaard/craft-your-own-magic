@@ -68,4 +68,27 @@ function core.apply_status(ecs_world, user, target, status, power)
     )
 end
 
+function core.resolve_single(ecs_world, user, target, node)
+    if node.type == "attack" then
+        return core.attack(ecs_world, user, target, node.power)
+    elseif node.type == "heal" then
+        return core.heal(ecs_world, user, target, node.power)
+    elseif node.type == "status" then
+        return core.apply_status(ecs_world, user, target, node.status, node.power)
+    else
+        log.info(ecs_world, "unknown node type %s", node.type)
+    end
+end
+
+function core.resolve(ecs_world, user, targets, node)
+    local result = list()
+
+    for _, target in ipairs(targets) do
+        local r = core.resolve_single(ecs_world, user, target, node)
+        if r then table.insert(result, r) end
+    end
+
+    return result
+end
+
 return core

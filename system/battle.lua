@@ -65,7 +65,7 @@ function api.setup(ecs_world)
         :set(nw.component.health, 10)
         :set(nw.component.player_team)
         :assemble(board.move_to_index, -1)
-        :set(nw.component.drawable, nw.drawable.board_actor)
+        :set(nw.component.drawable, nw.drawable.sprite)
         :set(nw.component.deck,
             list(
                 ability.attack,
@@ -82,6 +82,15 @@ function api.setup(ecs_world)
         )
         :set(nw.component.energy, 3)
         :set(combat.status.strength, 3)
+        :set(
+            nw.component.sprite_state_map,
+            dict{
+                idle=get_atlas("art/characters"):get_frame("witch/idle"),
+                cast=get_atlas("art/characters"):get_frame("witch/cast"),
+                dead=get_atlas("art/characters"):get_frame("witch/dead"),
+            }
+        )
+        :set(nw.component.sprite_state, "idle")
 
     ecs_world:entity("badboi")
         :set(nw.component.health, 10)
@@ -127,6 +136,7 @@ api.is_battle_over = logic.is_battle_over
 
 function api.spin(ecs_world)
     while nw.system.entity():spin(ecs_world) > 0 do
+        clock.spin(ecs_world)
         action.spin(ecs_world)
         log.spin(ecs_world)
         tween.spin(ecs_world)
