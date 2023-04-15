@@ -83,11 +83,11 @@ function api.setup(ecs_world)
         :set(nw.component.drawable, nw.drawable.sprite)
         :set(nw.component.deck,
             list(
-                ability.dagger_spray,
-                ability.dagger_spray,
-                ability.dagger_spray,
-                ability.dagger_spray,
-                ability.dagger_spray,
+                ability.bouncing_flask,
+                ability.bouncing_flask,
+                ability.bouncing_flask,
+                ability.bouncing_flask,
+                ability.bouncing_flask,
                 ability.heal,
                 ability.heal,
                 ability.heal,

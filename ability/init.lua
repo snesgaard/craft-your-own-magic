@@ -85,4 +85,18 @@ local dagger_spray = {
     end
 }
 
-return {attack=attack, heal=heal, dagger_spray=dagger_spray}
+local bouncing_flask = {
+    name = "Bouncing Flask",
+    cost = 2,
+    poison = {
+        type = "status",
+        status = "poison",
+        power = 3
+    },
+    target = "all/enemy",
+    run = function(ecs_world, data_id, user, targets, ability)
+        print(targets)
+    end
+}
+
+return {attack=attack, heal=heal, dagger_spray=dagger_spray, bouncing_flask=bouncing_flask}
