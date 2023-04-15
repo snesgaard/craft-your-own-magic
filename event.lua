@@ -1,9 +1,10 @@
 local event = {}
 
-function event.on_damage(target, damage)
+function event.on_damage(target, damage, was_alive)
     return {
         damage = damage,
-        target = target
+        target = target,
+        was_alive = was_alive
     }
 end
 

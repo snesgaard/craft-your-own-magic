@@ -62,6 +62,7 @@ function turn.turn_begin(ecs_world, team_component)
 end
 
 function turn.turn_end(ecs_world, team_component)
+    combat.status.turn_end(ecs_world, team_component)
     return true
 end
 

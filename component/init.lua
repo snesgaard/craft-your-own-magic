@@ -245,4 +245,6 @@ function component.sprite_state(state) return state or "idle" end
 
 function component.sprite_state_map(map) return map or dict() end
 
+function component.sfx_data(data) return data end
+
 return component

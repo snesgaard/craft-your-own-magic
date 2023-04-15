@@ -51,11 +51,14 @@ end
 
 local function get_entity(id, ecs_world) return ecs_world:entity(id) end
 
+local function is_visible(entity) return not entity:get(nw.component.hidden) end
+
 function painter.draw(ecs_world)
     local drawables = ecs_world:get_component_table(nw.component.drawable)
     local entities = drawables
         :keys()
         :map(get_entity, ecs_world)
+        :filter(is_visible)
         :sort(sort_by_layer)
     
     gfx.push()
@@ -67,6 +70,8 @@ function painter.draw(ecs_world)
         f(entity)
         gfx.pop()
     end
+
+    sfx.dagger_spray:run(love.timer.getTime() - 1)
 
     gfx.pop()
 end

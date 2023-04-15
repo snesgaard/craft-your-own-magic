@@ -7,6 +7,7 @@ painter = require "painter"
 event = require "event"
 log = require "system.log"
 clock = require "system.clock"
+sfx = require "sfx"
 
 decorate(nw.component, require "component", true)
 decorate(nw.drawable, require "drawable", true)

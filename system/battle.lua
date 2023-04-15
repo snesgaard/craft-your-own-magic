@@ -53,9 +53,24 @@ end
 
 function logic.spin(ecs_world)
     local id = "combat"
-    if combat_round(ecs_world, id) then
-        ecs_world:destroy(id)
-    end
+    if logic.is_battle_over(ecs_world) then return end
+    if combat_round(ecs_world, id) then ecs_world:destroy(id) end
+end
+
+local assemble = {}
+
+function assemble.box(entity)
+    entity
+        :set(nw.component.health, 10)
+        :set(nw.component.enemy_team)
+        :set(nw.component.mouse_rect, -10, -50, 20, 50)
+        :set(nw.component.ai_deck, require "ability.cultist")
+        :set(nw.component.drawable, nw.drawable.sprite)
+        :set(nw.component.sprite_state_map,
+            dict{
+                idle = get_atlas("art/characters"):get_frame("barrel")
+            }
+        )
 end
 
 local api = {}
@@ -68,11 +83,11 @@ function api.setup(ecs_world)
         :set(nw.component.drawable, nw.drawable.sprite)
         :set(nw.component.deck,
             list(
-                ability.attack,
-                ability.attack,
-                ability.attack,
-                ability.attack,
-                ability.attack,
+                ability.dagger_spray,
+                ability.dagger_spray,
+                ability.dagger_spray,
+                ability.dagger_spray,
+                ability.dagger_spray,
                 ability.heal,
                 ability.heal,
                 ability.heal,
@@ -81,7 +96,7 @@ function api.setup(ecs_world)
             )
         )
         :set(nw.component.energy, 3)
-        :set(combat.status.strength, 3)
+        :set(combat.status.strength, 1)
         :set(
             nw.component.sprite_state_map,
             dict{
@@ -93,31 +108,21 @@ function api.setup(ecs_world)
         :set(nw.component.sprite_state, "idle")
 
     ecs_world:entity("badboi")
-        :set(nw.component.health, 10)
-        :set(nw.component.enemy_team)
-        :assemble(board.move_to_index, 1)
-        :set(nw.component.mouse_rect, -10, -50, 20, 50)
-        :set(nw.component.ai_deck, require "ability.cultist")
-        :set(nw.component.drawable, nw.drawable.board_actor)
+        :assemble(assemble.box)
         :set(combat.status.poison, 2)
+        :assemble(board.move_to_index, 1)
 
     ecs_world:entity()
-        :set(nw.component.health, 7)
-        :set(nw.component.enemy_team)
+        :assemble(assemble.box)
         :assemble(board.move_to_index, 2)
-        :set(nw.component.mouse_rect, -10, -50, 20, 50)
-        :set(nw.component.drawable, nw.drawable.board_actor)
 
     ecs_world:entity()
-        :set(nw.component.health, 5)
-        :set(nw.component.enemy_team)
+        :assemble(assemble.box)
         :assemble(board.move_to_index, 3)
-        :set(nw.component.mouse_rect, -10, -50, 20, 50)
-        :set(nw.component.drawable, nw.drawable.board_actor)
     
     ecs_world:entity("box")
         :set(nw.component.position, 100, 400)
-        :set(nw.component.drawable,      nw.drawable.ellipse)
+        :set(nw.component.drawable, nw.drawable.ellipse)
         :set(nw.component.scale, 100, 100)
         :set(nw.component.color, 1, 0, 0, 0.5)
         :set(nw.component.layer, 1)

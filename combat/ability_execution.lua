@@ -8,6 +8,7 @@ end
 local function run_ability(ecs_world, data_id, user, target, ability_request)
     local ability = ability_request.ability or {}
     if not ability.run then return true end
+    if not target then return end
     return ability.run(ecs_world, data_id, user, target, ability)
 end
 

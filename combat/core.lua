@@ -21,13 +21,14 @@ function core.damage(ecs_world, id, damage)
     local hp = ecs_world:get(nw.component.health, id)
     if not hp then return end
 
+    local is_alive = core.is_alive(ecs_world, id)
     local real_damage = math.min(damage, hp.value)
     hp.value = hp.value - real_damage
     
-    return nw.system.entity():emit(ecs_world, event.on_damage, id, real_damage)
+    return nw.system.entity():emit(ecs_world, event.on_damage, id, real_damage, is_alive)
 end
 
-function core.heal(ecs_world, id, heal)
+function core.heal(ecs_world, user, id, heal)
     local hp = ecs_world:get(nw.component.health, id)
     if not hp then return end
 

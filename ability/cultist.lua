@@ -1,14 +1,18 @@
 local combat = require "combat"
+local anime = require "animation"
 
 local attack = {
     name = "Attack",
     power = 1,
     target = "single/enemy",
+    attack = {
+        type = "attack",
+        power = 1
+    },
     run = function(ecs_world, data_id, user, targets, ability)
-        for _, target in ipairs(targets) do
-            combat.core.attack(ecs_world, user, target, ability.power)
-        end
-        return true
+        return anime.generic_cast(ecs_world, data_id, user, function()
+            combat.core.resolve(ecs_world, user, targets, ability.attack)
+        end)
     end
 }
 
@@ -23,8 +27,9 @@ local buff = {
         power = 2,
     },
     run = function(ecs_world, data_id, user, targets, ability)
-        combat.core.resolve(ecs_world, user, targets, ability.status)
-        return true
+        return anime.generic_cast(ecs_world, data_id, user, function()
+            combat.core.resolve(ecs_world, user, targets, ability.status)
+        end)
     end
 }
 

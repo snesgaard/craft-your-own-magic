@@ -43,6 +43,10 @@ function player.reset(ability_data)
     return gui.menu.reset(ability_data)
 end
 
+function player.hide(ability_data)
+    ability_data:set(nw.component.visible, false)
+end
+
 local ai = {}
 
 function ai.component(ecs_world, user)
@@ -86,6 +90,11 @@ end
 
 function ability_select.reset(ability_data)
     if not ability_data.is_ai then return player.reset(ability_data) end
+end
+
+function ability_select.hide(ability_data)
+    if not ability_data.is_ai then player.hide(ability_data) end
+    return true
 end
 
 return ability_select

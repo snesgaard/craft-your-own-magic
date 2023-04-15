@@ -224,17 +224,28 @@ end
 function drawable.sprite(entity)
     local state = entity:ensure(nw.component.sprite_state)
     local state_map = entity:get(nw.component.sprite_state_map) or dict()
+    local is_alive = combat.core.is_alive(entity)
+
+    if entity:has(nw.component.health) and not is_alive then
+        state = "dead"
+    end
+
     local frame = state_map[state]
-    if not frame then return end
-
+    
     gfx.push("all")
-
+    
     nw.drawable.push_transform(entity)
     nw.drawable.push_state(entity)
-
-    frame:draw("body")
+    
+    if frame then 
+        frame:draw("body")
+    else
+        gfx.rectangle("fill", -10, -20, 20, 20)
+    end
 
     gfx.pop()
+
+    if is_alive then drawable.ai_intent(entity) end
 end
 
 return drawable

@@ -85,6 +85,10 @@ function ai.execute_turn(ecs_world, user)
     if not combat.target.is_done(target_data) then return end
     local target = combat.target.get(target_data)
 
+    -- Hide menus
+    combat.ability_select.hide(ability_data)
+    combat.target.hide(target_data)
+
     -- Execute ability
     local action_data = data:ensure(action.submit, ecs_world, combat.ability_execution, user, ability, target)
     if not action.empty(ecs_world) then return end

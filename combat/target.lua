@@ -90,6 +90,10 @@ function player.get(target_data)
     return gui.menu.get_selected_item(target_data)
 end
 
+function player.hide(target_data)
+    target_data:set(nw.component.hidden, true)
+end
+
 local ai = {}
 
 function ai.component(ecs_world, user, target_type)
@@ -145,6 +149,10 @@ function target.get(target_data)
     else
         return ai.get(target_data)
     end
+end
+
+function target.hide(target_data)
+    if not target_data.is_ai then player.hide(target_data) end
 end
 
 return target
