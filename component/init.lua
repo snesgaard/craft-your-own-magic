@@ -245,6 +245,22 @@ function component.sprite_state(state) return state or "idle" end
 
 function component.sprite_state_map(map) return map or dict() end
 
-function component.sfx_data(data) return data end
+function component.sfx_data(data, ...)
+    return {
+        data=data,
+        args = list(...)
+    }
+end
+
+function component.effect(...) return list(...) end
+
+function component.bouncing_flask_state(targets, count, user)
+    return {
+        potential_targets = targets,
+        count = count,
+        user = user,
+        target = nil,
+    }
+end
 
 return component

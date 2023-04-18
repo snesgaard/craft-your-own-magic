@@ -1,5 +1,6 @@
 local painter = require "painter"
 local combat = require "combat"
+local transform = require "system.transform"
 
 local component = {}
 
@@ -114,7 +115,8 @@ function health_bar.drawable(entity)
     for id, hp in pairs(ecs_world:get_component_table(nw.component.health)) do
         gfx.push("all")
         local entity = ecs_world:entity(id)
-        nw.drawable.push_transform(entity)
+        --nw.drawable.push_transform(entity)
+        gfx.translate(transform.position(entity))
         gfx.translate(0, 10)
         health_bar.draw_health_bar(health_bar_shape, hp.value, hp.max)
         health_bar.draw_status_bar(entity, status_bar_shape)

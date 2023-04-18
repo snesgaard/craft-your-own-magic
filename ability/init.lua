@@ -1,5 +1,7 @@
 local combat = require "combat"
 local anime = require "animation"
+local transform = require "system.transform"
+local bounce_flask_system = require "system.bouncing_flask"
 
 local attack = {
     name = "Attack",
@@ -72,7 +74,7 @@ local dagger_spray = {
     target = "all/enemy",
     cost = 1,
     sfx = function(ecs_world, user)
-        local pos = compute_cast_hitbox(ecs_world, user)
+        local pos = anime.compute_cast_hitbox(ecs_world, user):center()
         return sfx.play(ecs_world, sfx.dagger_spray)
             :set(nw.component.position, pos.x, pos.y)
     end,
@@ -87,16 +89,40 @@ local dagger_spray = {
 
 local bouncing_flask = {
     name = "Bouncing Flask",
-    cost = 2,
+    cost = 1,
     poison = {
         type = "status",
         status = "poison",
         power = 3
     },
+    attack = {
+        type = "attack",
+        power = 10
+    },
     target = "all/enemy",
-    run = function(ecs_world, data_id, user, targets, ability)
-        print(targets)
-    end
+    bounce_count = 3
 }
+
+function bouncing_flask.flask_sfx(ecs_world, user, targets, ability)
+    return ecs_world:entity()
+        :init(nw.component.bouncing_flask_state, targets, ability.bounce_count, user)
+        :init(nw.component.drawable, nw.drawable.ellipse)
+        :init(nw.component.effect, ability.poison)
+        :init(nw.component.layer, painter.layer.effects)
+        :init(nw.component.scale, 10, 10)
+end
+
+function bouncing_flask.run(ecs_world, data_id, user, targets, ability)
+    local data = ecs_world:entity(data_id)
+
+    ecs_world:set(nw.component.sprite_state, user, "cast")
+    local flask_sfx = data:ensure(bouncing_flask.flask_sfx, ecs_world, user, targets, ability)
+
+    if not bounce_flask_system.is_done(ecs_world, flask_sfx.id) then return end
+
+    ecs_world:set(nw.component.sprite_state, user, "idle")
+
+    return true
+end
 
 return {attack=attack, heal=heal, dagger_spray=dagger_spray, bouncing_flask=bouncing_flask}

@@ -1,8 +1,15 @@
 local gui = require "gui"
 local painter = require "painter"
 local combat = require "combat"
+local transform = require "system.transform"
 
 local drawable = {}
+
+drawable.old_push_transform = nw.drawable.push_transform
+
+function drawable.push_transform(entity)
+    drawable.old_push_transform(entity)
+end
 
 local function get_frame(entity)
     if entity:get(nw.component.player_team) then
@@ -194,7 +201,7 @@ function drawable.ai_intent(entity)
 
     gfx.push("all")
 
-    nw.drawable.push_transform(entity)
+    gfx.translate(transform.position(entity))
     local text_area = rect:up(0, 5)
     gfx.setColor(1, 1, 1)
     painter.draw_text(
@@ -234,7 +241,7 @@ function drawable.sprite(entity)
     
     gfx.push("all")
     
-    nw.drawable.push_transform(entity)
+    gfx.applyTransform(transform.get_with_team(entity))
     nw.drawable.push_state(entity)
     
     if frame then 

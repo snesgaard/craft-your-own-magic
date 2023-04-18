@@ -9,6 +9,8 @@ log = require "system.log"
 clock = require "system.clock"
 sfx = require "sfx"
 
+local anime = require "animation"
+
 decorate(nw.component, require "component", true)
 decorate(nw.drawable, require "drawable", true)
 
@@ -38,10 +40,6 @@ function love.load(args)
     battle.setup(ecs_world)
 
     im = gfx.newImage("art/characters/atlas.png")
-
-    ecs_world:entity()
-        :set(nw.component.drawable, nw.drawable.dagger_spray)
-        :set(nw.component.timer, 2.0)
 end
 
 function love.update(dt)

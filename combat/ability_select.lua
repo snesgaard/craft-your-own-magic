@@ -21,7 +21,7 @@ function player.component(ecs_world, user, index)
         :set(nw.component.linear_menu_to_text, function(item) return item.name end)
         :set(nw.component.no_cancel)
         :set(nw.component.linear_menu_filter, function(item)
-            return combat.energy.can_spent(ecs_world, user, 1)
+            return combat.energy.can_spent(ecs_world, user, item.cost or 1)
         end)
 end
 
