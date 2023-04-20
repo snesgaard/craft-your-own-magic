@@ -42,7 +42,7 @@ local heal = {
         power = 2
     },
     run = function(ecs_world, data_id, user, targets, ability)
-        return anime.generic_cast(ecs_world, data_id, user, function()
+        return animation_util.generic_cast(ecs_world, data_id, user, function()
             combat.core.resolve(ecs_world, user, targets, ability.heal)
         end)
     end
@@ -60,7 +60,7 @@ local dagger_spray = {
 }
 
 function dagger_spray.run(ecs_world, data_id, user, targets, ability)
-    return anime.generic_cast(ecs_world, data_id, user, function()
+    return animation_util.generic_cast(ecs_world, data_id, user, function()
         local data = ecs_world:entity(data_id)            
         combat.core.resolve(ecs_world, user, targets, ability.attack)
         data:ensure(ability.sfx, ecs_world, user)
@@ -68,7 +68,7 @@ function dagger_spray.run(ecs_world, data_id, user, targets, ability)
 end
 
 function dagger_spray.sfx(ecs_world, user)
-    local pos = anime.compute_cast_hitbox(ecs_world, user):center()
+    local pos = animation_util.compute_cast_hitbox(ecs_world, user):center()
     return sfx.play(ecs_world, sfx.dagger_spray)
         :set(nw.component.position, pos.x, pos.y)
 end
