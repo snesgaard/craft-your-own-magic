@@ -63,14 +63,18 @@ function dagger_spray.run(ecs_world, data_id, user, targets, ability)
     return animation_util.generic_cast(ecs_world, data_id, user, function()
         local data = ecs_world:entity(data_id)            
         combat.core.resolve(ecs_world, user, targets, ability.attack)
-        data:ensure(ability.sfx, ecs_world, user)
+        data:ensure(dagger_spray.sfx, ecs_world, user, targets)
     end)
 end
 
-function dagger_spray.sfx(ecs_world, user)
+function dagger_spray.sfx(ecs_world, user, targets)
     local pos = animation_util.compute_cast_hitbox(ecs_world, user):center()
-    return sfx.play(ecs_world, sfx.dagger_spray)
+    return ecs_world:entity()
         :set(nw.component.position, pos.x, pos.y)
+        :set(nw.component.dagger_spray_state, user, targets)
+        :set(nw.component.layer, painter.layer.effects)
+        :set(nw.component.drawable, nw.drawable.dagger_spray)
+        :set(nw.component.timer, 0.2)
 end
 
 local bouncing_flask = {
@@ -92,9 +96,9 @@ local bouncing_flask = {
 function bouncing_flask.flask_sfx(ecs_world, user, targets, ability)
     return ecs_world:entity()
         :init(nw.component.bouncing_flask_state, targets, ability.bounce_count, user)
-        :init(nw.component.drawable, nw.drawable.ellipse)
         :init(nw.component.effect, ability.poison, ability.attack)
         :init(nw.component.layer, painter.layer.effects)
+        :init(nw.component.drawable, nw.drawable.ellipse)
         :init(nw.component.scale, 10, 10)
 end
 

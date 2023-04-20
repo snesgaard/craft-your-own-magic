@@ -71,8 +71,6 @@ function painter.draw(ecs_world)
         gfx.pop()
     end
 
-    sfx.dagger_spray:run(love.timer.getTime() - 1)
-
     gfx.pop()
 end
 

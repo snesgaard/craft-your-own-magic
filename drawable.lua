@@ -255,4 +255,35 @@ function drawable.sprite(entity)
     if is_alive then drawable.ai_intent(entity) end
 end
 
+local dagger_spray_opt = {
+    range = 200,
+    num = 9,
+    spread = math.pi * 0.25
+}
+
+function drawable.dagger_spray(entity)
+    local timer = entity:get(nw.component.timer)
+    if not timer then return end
+
+    gfx.push("all")
+    nw.drawable.push_state(entity)
+    nw.drawable.push_transform(entity)
+    
+    local t = timer and timer:inverse_normalized() or 0
+    local alpha = ease.inExpo(t, 1, -1, 1)
+    local d = ease.linear(t, 0, dagger_spray_opt.range, 1)
+    nw.drawable.push_color(entity, alpha)
+
+    for i = 1, dagger_spray_opt.num do
+        local s = dagger_spray_opt.spread
+        local r = ease.linear(i - 1, -s / 2, s, dagger_spray_opt.num - 1)
+        gfx.push()
+        gfx.rotate(r)
+        gfx.ellipse("fill", d, 0, 4, 1)
+        gfx.pop()
+    end
+    
+    gfx.pop()
+end
+
 return drawable

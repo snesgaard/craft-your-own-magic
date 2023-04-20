@@ -11,6 +11,15 @@ function animation.generic_cast(ecs_world, data_id, user, func)
     return true
 end
 
+function animation.casting(ecs_world, data_id, user, sfx_assemble, ...)
+    local data = ecs_world:entity(data_id)
+    ecs_world:set(nw.component.sprite_state, user, "cast")
+    local sfx = data:ensure(sfx_assemble, ...)
+    if not sfx:has(nw.component.is_done) then return end
+    ecs_world:set(nw.component.sprite_state, user, "idle")
+    return true
+end
+
 function animation.ballistic_curve(time, init_pos, end_pos, gravity)
     local data = ecs_world
     local c = init_pos

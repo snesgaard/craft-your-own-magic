@@ -264,4 +264,11 @@ function component.bouncing_flask_state(targets, count, user)
     }
 end
 
+function component.dagger_spray_state(targets, user)
+    return {
+        targets = targets,
+        user = user
+    }
+end
+
 return component

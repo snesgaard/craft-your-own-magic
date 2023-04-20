@@ -1,5 +1,8 @@
 local animation_util = require "animation_util"
 local combat = require "combat"
+local system_timer = require "system.timer"
+
+--- BOUNCING FLASK---
 
 local bouncing_flask = {}
 
@@ -84,14 +87,44 @@ function bouncing_flask.compute_position(ecs_world, id, state)
     ecs_world:set(nw.component.position, id, pos.x, pos.y)
 end
 
+------
+
+---DAGGER SPRAY---
+
+local dagger_spray = {}
+
+function dagger_spray.spin(ecs_world)
+    for id, state in pairs(ecs_world:get_component_table(nw.component.dagger_spray_state)) do
+        dagger_spray.spin_state(ecs_world, id, state)
+    end
+end
+
+function dagger_spray.spin_state(ecs_world, id, state)
+    local data = ecs_world:entity(id)
+    if data:get(nw.component.is_done) then return end
+    -- Actiate effect
+    if flag(data, "invoked") then
+        local effects = ecs_world:ensure(nw.component.effect, id)
+        for _, effect in ipairs(effects) do
+            combat.core.resolve_single(ecs_world, state.user, state.target, effect)
+        end
+    end
+    -- Check if timer is done
+    local timer = data:ensure(nw.component.timer, 0.35)
+    if not system_timer().is_done(data) then return end
+    data:set(nw.component.is_done)
+end
+
+------
+
 local animation = {
     bouncing_flask = bouncing_flask
 }
 
 function animation.spin(ecs_world)
     local systems = list(
-        bouncing_flask
-        --dagger_spray
+        bouncing_flask,
+        dagger_spray
     )
 
     for _, sys in ipairs(systems) do sys.spin(ecs_world) end
