@@ -1,4 +1,4 @@
-local anime = require "animation"
+local anime = require "animation_util"
 local sys_timer = require "system.timer"
 
 local sfx = {}

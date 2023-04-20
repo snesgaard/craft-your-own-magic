@@ -38,7 +38,6 @@ end
 function animation.compute_body_hitbox(ecs_world, user)
     local pos = ecs_world:get(nw.component.position, user) or vec2()
     local cast_slice = animation.read_slice_from_frame(ecs_world, user, "idle", "body") or spatial()
-    print(cast_slice)
     return cast_slice:move(pos.x, pos.y)
 end
 

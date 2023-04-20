@@ -1,5 +1,5 @@
 local combat = require "combat"
-local anime = require "animation"
+local animation_util = require "animation_util"
 local transform = require "system.transform"
 local bounce_flask_system = require "system.bouncing_flask"
 
@@ -13,7 +13,7 @@ local attack = {
         power = 3
     },
     run = function(ecs_world, data_id, user, targets, ability)
-        return anime.generic_cast(ecs_world, data_id, user, function()
+        return animation_util.generic_cast(ecs_world, data_id, user, function()
             combat.core.resolve(ecs_world, user, targets, ability.attack)
         end)
     end
@@ -49,22 +49,6 @@ local heal = {
     end
 }
 
-local function read_slice_from_frame(ecs_world, user, sprite_state, slice_name)
-    local entity = ecs_world:entity(user)
-    local state_map = ecs_world:get(nw.component.sprite_state_map, user)
-    if not state_map then return end
-    local frame = state_map[slice_name]
-    if not frame then return end
-    local slice = frame:get_slice(slice_name, "body")
-    return slice
-end
-
-local function compute_cast_hitbox(ecs_world, user)
-    local pos = ecs_world:get(nw.component.position, user) or vec2()
-    local cast_slice = read_slice_from_frame(ecs_world, user, "cast", "cast") or spatial()
-    return pos + cast_slice:center()
-end
-
 local dagger_spray = {
     name = "Dagger Spray",
     attack = {
@@ -73,19 +57,22 @@ local dagger_spray = {
     },
     target = "all/enemy",
     cost = 1,
-    sfx = function(ecs_world, user)
-        local pos = anime.compute_cast_hitbox(ecs_world, user):center()
-        return sfx.play(ecs_world, sfx.dagger_spray)
-            :set(nw.component.position, pos.x, pos.y)
-    end,
-    run = function(ecs_world, data_id, user, targets, ability)
-        return anime.generic_cast(ecs_world, data_id, user, function()
-            local data = ecs_world:entity(data_id)            
-            combat.core.resolve(ecs_world, user, targets, ability.attack)
-            data:ensure(ability.sfx, ecs_world, user)
-        end)
-    end
+    count = 2,
 }
+
+function dagger_spray.run(ecs_world, data_id, user, targets, ability)
+    return anime.generic_cast(ecs_world, data_id, user, function()
+        local data = ecs_world:entity(data_id)            
+        combat.core.resolve(ecs_world, user, targets, ability.attack)
+        data:ensure(ability.sfx, ecs_world, user)
+    end)
+end
+
+function dagger_spray.sfx(ecs_world, user)
+    local pos = anime.compute_cast_hitbox(ecs_world, user):center()
+    return sfx.play(ecs_world, sfx.dagger_spray)
+        :set(nw.component.position, pos.x, pos.y)
+end
 
 local bouncing_flask = {
     name = "Bouncing Flask",

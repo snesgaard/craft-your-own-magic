@@ -1,5 +1,5 @@
 local transform = require "system.transform"
-local animation = require "animation"
+local animation_util = require "animation_util"
 local combat = require "combat"
 
 local bouncing_flask = {}
@@ -36,7 +36,7 @@ function bouncing_flask.compute_position_init(ecs_world, id, state)
     if state.target then
         return ecs_world:get(nw.component.position, id)
     elseif state.user then
-        return animation.compute_cast_hitbox(ecs_world, state.user):center()
+        return animation_util.compute_cast_hitbox(ecs_world, state.user):center()
     else
         return vec2()
     end
@@ -44,7 +44,7 @@ end
 
 function bouncing_flask.compute_position_end(ecs_world, id, state)
     if not state.target then vec2(0, 0) end
-    return animation.compute_body_hitbox(ecs_world, state.target):centertop()
+    return animation_util.compute_body_hitbox(ecs_world, state.target):centertop()
 end
 
 function bouncing_flask.do_bounce(ecs_world, id, state)
@@ -55,7 +55,7 @@ function bouncing_flask.do_bounce(ecs_world, id, state)
             combat.core.resolve_single(ecs_world, state.user, state.target, effect)
         end
     end
-    -- Reset animation
+    -- Reset animation_util
     local prev_target = state.target or state.user
     local prev_position = bouncing_flask.compute_position_init(ecs_world, id, state)
     local timer = ecs_world:ensure(nw.component.timer, id, 0.5)
@@ -80,7 +80,7 @@ function bouncing_flask.compute_position(ecs_world, id, state)
     local timer = ecs_world:get(nw.component.timer, id)
     if not timer then return end
     local t = timer:inverse_normalized()
-    local pos = animation.ballistic_curve(t, state.pos_init, state.pos_end)
+    local pos = animation_util.ballistic_curve(t, state.pos_init, state.pos_end)
     ecs_world:set(nw.component.position, id, pos.x, pos.y)
 end
 

@@ -1,5 +1,5 @@
 local combat = require "combat"
-local anime = require "animation"
+local anime = require "animation_util"
 
 local attack = {
     name = "Attack",

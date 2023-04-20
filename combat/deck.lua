@@ -75,7 +75,6 @@ function deck.draw_until(ecs_world, id, num)
     local state = ecs_world:get(nw.component.player_card_state, id)
     if not state then return end
 
-    print("drawing cards", id, num)
     for i = 1, num - state.hand:size() do
         deck.draw_card_from_deck(ecs_world, id)
     end

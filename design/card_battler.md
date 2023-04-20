@@ -109,10 +109,39 @@ Mechanics wise ended up going for a simplier energy play-until-done ala hearthst
 
 Which brings me to same future tasks:
 
-* Refactor player abilities to use data-drive format
+* <yes> Refactor player abilities to use data-drive format
     * Implement continue like pattern
     * Re-implement AI targeting
 * Status icons should be temporally sorted
 * Animation integration with abitilies
 
 I'm thinking design-wise, I will stick to slay-the-spire and copy some of the enemy abilities and cards. Just to get a feeling for how flexible this format is.
+
+# 18th April 2023
+
+A lot has happen since last log entry. So summarize
+
+* Initial animation integration with abilities
+* Merged player and AI turn taking into one data structure
+* Some basic abilities like dagger spray and bouncing flask
+* Some initial sprites for player character and balls
+
+The animation and ability integration turned out to be a lot more difficult than expected. Reason is that I kinda abandoned the ECS approach. Each ability had a run function which both governt how what effect abilities would have and controlled the animation side of things.
+
+This was fine for simple approaches, but for something like slay the spires bouncing flask, it was way too much. Creating a separate system for controlling the effect animation and delivery was much more straightforward.
+
+Thus this should the approach I take for other effects and animations. Stringing control together in the run function such as starting animations and checking for done is fine. But all the logic and state maintanence should be in separate systems.
+
+However this brings up the question of structure. I could potentially end of with many systems and animations, which would lead to a book keeping nightmare. A way to resolve this could be.
+
+* Having a giant animation file, with all systems ala component or event.
+* Mapping each animation to a specific state component, making iteration over all easy.
+
+Refactoring everything into this format is probably going to be a bit of a pain due to no tests.
+
+On the todo list:
+
+* refactor animations into systems/animation, this includes spell effects
+* remove sfx system
+* remove animation.lua
+* remove generic cast or refactor it into using sfx entities
