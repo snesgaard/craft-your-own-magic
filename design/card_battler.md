@@ -142,6 +142,7 @@ Refactoring everything into this format is probably going to be a bit of a pain 
 On the todo list:
 
 * refactor animations into systems/animation, this includes spell effects
+* remove bouncing flask system
 * remove sfx system
-* remove animation.lua
+* --remove animation.lua--
 * remove generic cast or refactor it into using sfx entities

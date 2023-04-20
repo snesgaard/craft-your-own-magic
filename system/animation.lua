@@ -1,3 +1,6 @@
+local animation_util = require "animation_util"
+local combat = require "combat"
+
 local bouncing_flask = {}
 
 function bouncing_flask.spin(ecs_world)
@@ -9,6 +12,7 @@ end
 
 function bouncing_flask.spin_state(ecs_world, id, state)
     if bouncing_flask.is_done(ecs_world, id, state) then
+        ecs_world:set(nw.component.is_done, id)
         ecs_world:set(nw.component.hidden, id)
         return
     end
@@ -32,7 +36,7 @@ function bouncing_flask.compute_position_init(ecs_world, id, state)
     if state.target then
         return ecs_world:get(nw.component.position, id)
     elseif state.user then
-        return animation.compute_cast_hitbox(ecs_world, state.user):center()
+        return animation_util.compute_cast_hitbox(ecs_world, state.user):center()
     else
         return vec2()
     end
@@ -40,7 +44,7 @@ end
 
 function bouncing_flask.compute_position_end(ecs_world, id, state)
     if not state.target then vec2(0, 0) end
-    return animation.compute_body_hitbox(ecs_world, state.target):centertop()
+    return animation_util.compute_body_hitbox(ecs_world, state.target):centertop()
 end
 
 function bouncing_flask.do_bounce(ecs_world, id, state)
@@ -76,38 +80,8 @@ function bouncing_flask.compute_position(ecs_world, id, state)
     local timer = ecs_world:get(nw.component.timer, id)
     if not timer then return end
     local t = timer:inverse_normalized()
-    local pos = animation.ballistic_curve(t, state.pos_init, state.pos_end)
+    local pos = animation_util.ballistic_curve(t, state.pos_init, state.pos_end)
     ecs_world:set(nw.component.position, id, pos.x, pos.y)
-end
-
-local dagger_sprite = {}
-
-function dagger_spray.spin(ecs_world)
-    for id, state in pairs(ecs_world:get_component_table(nw.component.dagger_spray_state)) do
-        dagger_spray.spin_once(ecs_world, id, state)
-    end
-end
-
-function dagger_spray.spin_once(ecs_world, id, state)
-    if dagger_spray.is_done(ecs_world, id, state) then
-        dagger_spray.trigger_effect(ecs_world, id, state)
-    end
-end
-
-function dagger_spray.trigger_effect(ecs_world, id, state)
-    local data = ecs_world:entity(id)
-    if not flag(data, "resolve") then return end
-    
-    local effects = ecs_world:ensure(nw.component.effect, id)
-    for _, effect in ipairs(effects) do
-        combat.core.resolve(ecs_world, state.user, state.target, effect)
-    end
-end
-
-function dagger_spray.is_done(ecs_world, id)
-    local timer = ecs_world:get(nw.component.timer, id)
-    if not timer then return true end
-    return timer:done()
 end
 
 local animation = {
@@ -116,8 +90,8 @@ local animation = {
 
 function animation.spin(ecs_world)
     local systems = list(
-        bouncing_flask,
-        dagger_spray
+        bouncing_flask
+        --dagger_spray
     )
 
     for _, sys in ipairs(systems) do sys.spin(ecs_world) end

@@ -6,7 +6,7 @@ local combat = require "combat"
 local action = require "system.action_animation"
 local tween = require "system.tween"
 local ability = require "ability"
-local bouncing_flask = require "system.bouncing_flask"
+local animation = require "system.animation"
 
 local component = {}
 
@@ -149,9 +149,8 @@ function api.spin(ecs_world)
         logic.spin(ecs_world)
         board.spin(ecs_world)
         combat.spin(ecs_world)
-        bouncing_flask.spin(ecs_world)
+        animation.spin(ecs_world)
         gui.spin(ecs_world)
-        
         timer().spin(ecs_world)
     end
 

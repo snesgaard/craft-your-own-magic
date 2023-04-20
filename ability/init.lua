@@ -1,7 +1,6 @@
 local combat = require "combat"
 local animation_util = require "animation_util"
 local transform = require "system.transform"
-local bounce_flask_system = require "system.bouncing_flask"
 
 local attack = {
     name = "Attack",
@@ -84,7 +83,7 @@ local bouncing_flask = {
     },
     attack = {
         type = "attack",
-        power = 10
+        power = 1
     },
     target = "all/enemy",
     bounce_count = 3
@@ -94,7 +93,7 @@ function bouncing_flask.flask_sfx(ecs_world, user, targets, ability)
     return ecs_world:entity()
         :init(nw.component.bouncing_flask_state, targets, ability.bounce_count, user)
         :init(nw.component.drawable, nw.drawable.ellipse)
-        :init(nw.component.effect, ability.poison)
+        :init(nw.component.effect, ability.poison, ability.attack)
         :init(nw.component.layer, painter.layer.effects)
         :init(nw.component.scale, 10, 10)
 end
@@ -105,7 +104,7 @@ function bouncing_flask.run(ecs_world, data_id, user, targets, ability)
     ecs_world:set(nw.component.sprite_state, user, "cast")
     local flask_sfx = data:ensure(bouncing_flask.flask_sfx, ecs_world, user, targets, ability)
 
-    if not bounce_flask_system.is_done(ecs_world, flask_sfx.id) then return end
+    if not flask_sfx:get(nw.component.is_done) then return end
 
     ecs_world:set(nw.component.sprite_state, user, "idle")
 

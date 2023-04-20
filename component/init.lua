@@ -119,6 +119,7 @@ function component.element_released(id) return id end
 function component.pressed() return true end
 function component.released() return true end
 function component.is_down() return true end
+function component.is_done() return true end
 
 function component.mouse_rect(x, y, w, h) return spatial(x, y, w, h) end
 
