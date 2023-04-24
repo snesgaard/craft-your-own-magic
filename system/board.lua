@@ -15,7 +15,7 @@ end
 function board.position_from_index(index, w)
     local o = 0.0
     local x = 0.35 + o * board.sign(index) + 0.135 * index
-    local y = 0.75
+    local y = 0.55
     return painter.norm_to_real(x, y)
 end
 

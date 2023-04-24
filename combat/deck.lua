@@ -29,7 +29,7 @@ function deck.draw_card_from_deck(ecs_world, id)
     state.draw = state.draw:body()
     state.hand = state.hand:insert(head)
 
-    nw.system.entity():emit(ecs_world, event.on_card_draw, id, head)
+    nw.system.entity():emit(ecs_world, event.on_card_draw, id, head, state.hand:size())
 
     return head
 end
@@ -88,6 +88,9 @@ function deck.play_card_from_hand(ecs_world, id, index)
     if not card then return false end
     state.hand = state.hand:erase(index)
     state.discard = state.discard:insert(card)
+
+    nw.system.entity()
+        :emit(ecs_world, event.on_card_play, id, card, index)
 
     return true
 end

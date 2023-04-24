@@ -15,10 +15,19 @@ function event.on_heal(target, heal)
     }
 end
 
-function event.on_card_draw(user, card)
+function event.on_card_draw(user, card, index)
     return {
         user = user,
         card = card,
+        index = index
+    }
+end
+
+function event.on_card_play(user, card, index)
+    return {
+        user = user,
+        card = card,
+        index = index
     }
 end
 

@@ -141,8 +141,50 @@ Refactoring everything into this format is probably going to be a bit of a pain 
 
 On the todo list:
 
-* refactor animations into systems/animation, this includes spell effects
-* remove bouncing flask system
-* remove sfx system
-* --remove animation.lua--
-* remove generic cast or refactor it into using sfx entities
+* ---refactor animations into systems/animation, this includes spell effects
+* ---remove bouncing flask system
+* ---remove sfx system
+* ---remove animation.lua--
+* ---remove generic cast or refactor it into using sfx entities
+
+20th April 2023
+
+Think I got the sfx animation method down. Went the system route. Works fairly well.
+
+Think I should test it by implementing other slay the spire cards. Another idea could be to update the GUI a bit. Either adding an explaination box or try to add the cards to the GUI.
+
+24th April 2023
+
+Have run into problems with the card rendering and animation system. Reason is twofold:
+
+* Cards are currently values without any unique IDs
+* Events are not ordered temporally
+
+To consequences of the former is that we only have the incides to track individual cards for the purposes of animations. The consequence of the latter is that we essentially have trouble determining the final state, if multiple events happen in the same frame.
+
+Take for instance if we have an empty hand and we get a draw card and discard card event. Depending on the ordering we either have 1 or 0 cards in hand after both.
+
+If we had either IDs or ordering we could definitely say what the final ordering should be.
+
+Another thing, which this also ties into to, is animation. Meaning sometimes we want to wait when invokating an action, for all reactions to complete. This is best illustrated by Hearthstone, where chains of reaction can be very long and very complex.
+
+Things like drawing and discarding cards are in some sense part of the mutation, animation chain of events.
+
+Read a post where it essentialy argue Hearthstone had an engine that running constructs a tree of actions. Each action such as card drawing, turn ending, spell casting. Would be triggered as a node. Entities in the game can then append actions either before or after the action has been completed. The action graph is then dynamically built.
+
+Another important detail is that each action has an associated viewer and handler method. The handler method performs the actual transformation of gamestate. The viewer method visualizes and animates the change in game state.
+
+This way the transformation and visualization are decoupled in a sense, such that transformation can be run without the visualization. However they are coupled enough that transformation and animation is synchronized when running in normal mode.
+
+If I were to employ this approach, the ordering and ID would be not relevant anymore. Since each action would only conclude upon visualization completion. Thus instead of relying on implicit catching of events, one would instead call the change directly in the visualizer. So the ordering would naturally follow the ordering of the gameplay actions.
+
+So for me, this could mean that upon invoking a card draw in the gameplay system, we also immediate code that a card draw is also animated. Then attach this to the action allowing us to.
+
+So essentially a phase contains a handler and a view method.
+
+An action consists of a sequence of phases. The document names prepare and perform phases.
+The former being where actions are prepared, meaning targets are selected etc. Perform actually carries out the gamestate change. Other entities can react to the conclusion of each phase. With prepare being essentially before and perform after the action has been carried out.
+
+If we ignore the view for a bit, it is important to note that each action reacts to the output of the handler.
+
+It should be noted that a phase could also be to queue one or more phases. For instance something like wallop would be an attack phase which also queues a block phase.

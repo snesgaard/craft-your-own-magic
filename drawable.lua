@@ -286,4 +286,20 @@ function drawable.dagger_spray(entity)
     gfx.pop()
 end
 
+local card_layout = {
+    body = spatial(-25, -75, 50, 75),
+
+}
+
+function drawable.card(entity)
+    gfx.push("all")
+    nw.drawable.push_transform(entity)
+    nw.drawable.push_state(entity)
+    gfx.setColor(0.2, 0.5, 0.1)
+    gfx.rectangle("line", card_layout.body:unpack())
+    gfx.setColor(1, 1, 1)
+    gfx.rectangle("fill", card_layout.body:unpack())
+    gfx.pop()
+end
+
 return drawable

@@ -34,9 +34,7 @@ function love.load(args)
     end
 
     ecs_world = nw.ecs.entity.create()
-    battle.setup(ecs_world)
-
-    im = gfx.newImage("art/characters/atlas.png")
+    battle.setup(ecs_world) 
 end
 
 function love.update(dt)
