@@ -1,5 +1,6 @@
 nw = require "nodeworks"
 painter = require "painter"
+constant = require "constant"
 stack = nw.ecs.stack
 
 -- System shortcuts
@@ -23,7 +24,7 @@ function love.load(args)
         return love.event.quit()
     end
 
-    collision.register("test", spatial(10, 10, 100, 100))
+    collision.register("test", spatial(-10, -10, 20, 20))
 end
 
 function love.update(dt)
@@ -33,7 +34,11 @@ end
 
 function love.draw()
     painter.draw()
+
+    gfx.push()
+    painter.push_transform()
     collision.draw()
+    gfx.pop()
 end
 
 function love.keypressed(key)

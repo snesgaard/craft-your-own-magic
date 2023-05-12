@@ -1,3 +1,5 @@
+local camera = require "system.camera"
+
 local painter = {}
 
 painter.scale = 4
@@ -48,9 +50,15 @@ local function draw_entity(ids)
     end
 end
 
+function painter.push_transform(id)
+    gfx.scale(painter.scale, painter.scale)
+    camera.push_transform()
+end
+
 function painter.draw()
     gfx.push()
-    gfx.scale(painter.scale, painter.scale)
+
+    painter.push_transform()
     stack.get_table(nw.component.drawable):keys()
         :filter(remove_hidden)
         :sort(sort_drawers)
