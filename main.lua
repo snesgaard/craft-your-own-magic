@@ -19,6 +19,10 @@ local function spin()
     end
 end
 
+local function default_collision_filter(item, other)
+    return "slide"
+end
+
 function love.load(args)
     if args[1] == "test" then
         require "test"
@@ -26,9 +30,11 @@ function love.load(args)
     end
 
     collision.register("test", spatial(-10, -10, 20, 20))
-    collision.register("test2", spatial(20, -10, 20, 40))
+    collision.register("test2", spatial():move(0, 30):expand(1000, 10))
 
     stack.set(nw.component.camera_tracking, constant.id.camera, 20)
+
+    collision.set_default_filter(default_collision_filter)
 end
 
 function love.update(dt)

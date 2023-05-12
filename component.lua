@@ -6,4 +6,8 @@ function component.camera_tracking(slack)
     }
 end
 
+function component.player_state(state)
+    return state or "idle"
+end
+
 return component
