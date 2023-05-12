@@ -7,6 +7,7 @@ stack = nw.ecs.stack
 event = nw.system.event
 input = nw.system.input
 collision = nw.system.collision
+camera = require "system.camera"
 
 decorate(nw.component, require "component", true)
 
@@ -25,10 +26,14 @@ function love.load(args)
     end
 
     collision.register("test", spatial(-10, -10, 20, 20))
+    collision.register("test2", spatial(20, -10, 20, 40))
+
+    stack.set(nw.component.camera_tracking, constant.id.camera, 20)
 end
 
 function love.update(dt)
     event.emit("update", dt)
+    camera.track("test")
     spin()
 end
 
@@ -43,6 +48,10 @@ end
 
 function love.keypressed(key)
     if key == "escape" then love.event.quit() end
+    if key == "right" then collision.move("test", 10, 0) end
+    if key == "left" then collision.move("test", -10, 0) end
+    if key == "up" then collision.move("test", 0, -10) end
+    if key == "down" then collision.move("test", 0, 10) end
     input.keypressed(key)
 end
 
