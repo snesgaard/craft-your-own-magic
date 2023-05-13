@@ -7,8 +7,10 @@ stack = nw.ecs.stack
 event = nw.system.event
 input = nw.system.input
 collision = nw.system.collision
+timer = nw.system.timer
 camera = require "system.camera"
 motion = require "system.motion"
+clock = require "system.clock"
 
 decorate(nw.component, require "component", true)
 
@@ -16,12 +18,20 @@ Frame.slice_to_pos = Spatial.centerbottom
 
 local function spin()
     while event.spin() > 0 do
+        clock.spin()
         motion.spin()
+        nw.system.timer.spin()
+        require("system.player_control").spin()
     end
 end
 
 local function default_collision_filter(item, other)
     return "slide"
+end
+
+function weak_assemble(arg, tag)
+    local id = nw.ecs.id.weak(tag)
+    return stack.assemble(arg, id)
 end
 
 function love.load(args)
@@ -32,20 +42,20 @@ function love.load(args)
 
     stack.assemble(
         {
-            {nw.component.gravity, 0, 100}
+            {nw.component.gravity, 0, 100},
+            {nw.component.player_state, "idle"}
         },
         "test"
     )
 
-
     collision.register("test", spatial(-10, -10, 20, 20))
 
+    for i = -100, 100 do
+        local h, w = 20, 20
+        collision.register(nw.ecs.id.strong("tile"), spatial():move(i * w, 40):expand(w, h))
+    end
 
-    collision.register("test2", spatial():move(0, 30):expand(1000, 10))
-    collision.register("test3", spatial():move(0, -40):expand(1000, 10))
-
-    stack.set(nw.component.camera_tracking, constant.id.camera, 20)
-
+    stack.set(nw.component.camera_tracking, constant.id.camera, 10)
     collision.set_default_filter(default_collision_filter)
 end
 
@@ -66,10 +76,6 @@ end
 
 function love.keypressed(key)
     if key == "escape" then love.event.quit() end
-    if key == "right" then collision.move("test", 10, 0) end
-    if key == "left" then collision.move("test", -10, 0) end
-    if key == "up" then collision.move("test", 0, -20) end
-    if key == "down" then collision.move("test", 0, 10) end
     input.keypressed(key)
 end
 
