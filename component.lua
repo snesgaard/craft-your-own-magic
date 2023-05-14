@@ -30,4 +30,6 @@ function component.jump_request(timeout)
     }
 end
 
+function component.tilelayer(t) return t end
+
 return component

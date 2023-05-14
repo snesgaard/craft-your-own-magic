@@ -11,8 +11,10 @@ timer = nw.system.timer
 camera = require "system.camera"
 motion = require "system.motion"
 clock = require "system.clock"
+tiled = require "tiled"
 
 decorate(nw.component, require "component", true)
+decorate(nw.drawable, require "drawable", true)
 
 Frame.slice_to_pos = Spatial.centerbottom
 
@@ -35,33 +37,23 @@ function weak_assemble(arg, tag)
 end
 
 function love.load(args)
+    map = tiled.load("art/maps/build/test.lua")
+
+    local spawn = dict(tiled.object(map, "camera_spawn"))
+
     if args[1] == "test" then
         require "test"
         return love.event.quit()
     end
 
-    stack.assemble(
-        {
-            {nw.component.gravity, 0, 100},
-            {nw.component.player_state, "idle"}
-        },
-        "test"
-    )
-
-    collision.register("test", spatial(-10, -10, 20, 20))
-
-    for i = -100, 100 do
-        local h, w = 20, 20
-        collision.register(nw.ecs.id.strong("tile"), spatial():move(i * w, 40):expand(w, h))
-    end
-
     stack.set(nw.component.camera_tracking, constant.id.camera, 10)
+    stack.set(nw.component.position, constant.id.camera, spawn.x, spawn.y)
+
     collision.set_default_filter(default_collision_filter)
 end
 
 function love.update(dt)
     event.emit("update", dt)
-    camera.track("test")
     spin()
 end
 

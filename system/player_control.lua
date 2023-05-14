@@ -111,9 +111,9 @@ local player_control = {}
 
 function player_control.spin()
     for id, state in stack.view_table(nw.component.player_state) do
-        jump.spin(id, state)
         flip.spin(id, state)
         horizontal_movement.spin(id, state)
+        jump.spin(id, state)
         dash.spin(id, state)
     end
 end
