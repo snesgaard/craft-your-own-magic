@@ -1,3 +1,4 @@
 **/build/*
 art/**/atlas.png
 art/**/atlas.json
+art/**/*.tiled-session
