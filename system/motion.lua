@@ -24,7 +24,7 @@ function motion.spin_velocity(id, v, dt)
 end
 
 local function handle_collision(colinfo)
-    local id = colinfo.item.id
+    local id = colinfo.item
 
     if colinfo.type == "slide" then
         local nx, ny = colinfo.normal.x, colinfo.normal.y

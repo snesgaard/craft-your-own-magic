@@ -6,15 +6,14 @@ local function load_tilelayer(index, layer)
     if layer.type ~= "tilelayer" then return end
 
     for _, chunk in ipairs(layer.chunks) do
+    
+        chunk.ids = list()
         for y, row in pairs(chunk.data) do
             for x, tile in pairs(row) do
                 local id = nw.ecs.id.weak("tile")
-                local pos = vec2(
-                    (chunk.x + x - 1) * tile.width, (chunk.y + y - 1) * tile.height
-                )
-
                 collision.register(id, spatial(0, 0, tile.width, tile.height))
-                collision.warp_to(id, pos.x, pos.y)
+                collision.warp_to(id, (chunk.x + x - 1) * tile.width, (chunk.y + y - 1) * tile.height)
+                table.insert(chunk.ids, id)
             end
         end
     end
@@ -30,16 +29,50 @@ local function load_tilelayer(index, layer)
     )
 end
 
-local function load_objectgroup(index, layer)
-    if layer.type ~= "objectgroup" then return end
+local function unload_tilelayer(index, layer)
+    if layer.type ~= "tilelayer" then return end
 
-    for _, object in ipairs(layer.objects) do
-        tiled.load_object(object, index, layer)
+    stack.destroy(layer)
+
+    for _, chunk in ipairs(layer.chunks) do
+        for _, id in ipairs(chunk.ids or list()) do stack.destroy(id) end
+        chunk.ids = nil
     end
 end
 
+local function load_objectgroup(index, layer)
+    if layer.type ~= "objectgroup" then return end
+
+    layer.ids = list()
+    for _, object in ipairs(layer.objects) do
+        local id = tiled.load_object(object, index, layer)
+        if id then table.insert(layer.ids, id) end
+    end
+end
+
+local function unload_objectgroup(index, layer)
+    if layer.type ~= "objectgroup" then return end
+
+    for _, id in ipairs(layer.ids or list()) do stack.destroy(id) end
+    layer.ids = nil
+end
+
 function tiled.load_object(object, index, layer)
-    --print("load", dict(object))
+    local f = tiled.type_loader[object.type]
+    if not f then
+        print("No loader for type", object.type)
+        return
+    end
+    return f(object, index, layer)
+end
+
+local type_loader = {}
+tiled.type_loader = type_loader
+
+function type_loader.foobar(object, index, layer)
+    collision.register(object.id, spatial(object.x, object.y, object.width, object.height))
+
+    return object.id
 end
 
 function tiled.load(path)

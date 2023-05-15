@@ -50,6 +50,8 @@ function love.load(args)
     stack.set(nw.component.position, constant.id.camera, spawn.x, spawn.y)
 
     collision.set_default_filter(default_collision_filter)
+
+    collision.register(nw.ecs.id.weak("test_id"), spatial(0, 0, 100, 100))
 end
 
 function love.update(dt)
@@ -68,6 +70,7 @@ end
 
 function love.keypressed(key)
     if key == "escape" then love.event.quit() end
+    if key == "g" then collectgarbage() end
     input.keypressed(key)
 end
 

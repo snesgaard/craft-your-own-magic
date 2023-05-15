@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="1" nextlayerid="3" nextobjectid="2">
+<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="1" nextlayerid="3" nextobjectid="3">
  <tileset firstgid="1" source="../tileset/ground.tsx"/>
  <layer id="1" name="geometry" width="30" height="20">
   <data encoding="csv">
@@ -81,5 +81,6 @@
   <object id="1" name="camera_spawn" type="camera_spawn" x="-36" y="-51">
    <point/>
   </object>
+  <object id="2" type="foobar" x="4.33333" y="-138" width="25" height="19.6667"/>
  </objectgroup>
 </map>
