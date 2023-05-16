@@ -23,4 +23,17 @@ function drawable.bump_body(id)
     gfx.pop()
 end
 
+function drawable.frame(id)
+    local f = stack.get(nw.component.frame, id)
+    if not f then return end
+
+    gfx.push("all")
+
+    nw.drawable.push_transform(id)
+    nw.drawable.push_state(id)
+    frame:draw("body")
+
+    gfx.pop()
+end
+
 return drawable

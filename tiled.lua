@@ -82,7 +82,7 @@ function type_loader.foobar(object, index, layer)
             {nw.component.gravity, 0, 100},
             {nw.component.player_controlled},
             {nw.component.camera_should_track},
-            {nw.component.drawable, nw.drawable.bump_body},
+            {nw.component.drawable, nw.drawable.frame},
             {nw.component.layer, index}
         },
         id

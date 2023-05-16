@@ -49,4 +49,8 @@ function component.skip_motion() return true end
 
 function component.target(...) return list(...) end
 
+function component.die_on_state_change(id, state)
+    return {id = id, state = state}
+end
+
 return component
