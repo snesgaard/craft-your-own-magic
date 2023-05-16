@@ -24,12 +24,16 @@ local function spin()
         clock.spin()
         motion.spin()
         timer.spin()
-        require("system.sprite_state").spin()
         require("system.player_control").spin()
+        require("system.sprite_state").spin()
     end
 end
 
 local function default_collision_filter(item, other)
+    if stack.get(nw.component.is_ghost, item) or stack.get(nw.component.is_ghost, other) then
+        return "cross"
+    end
+
     return "slide"
 end
 
@@ -72,7 +76,7 @@ function love.draw()
 
     gfx.push()
     painter.push_transform()
-    --collision.draw()
+    collision.draw()
     gfx.pop()
 end
 

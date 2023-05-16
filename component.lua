@@ -55,4 +55,6 @@ function component.die_on_state_change(id, state)
     return {id = id, state = state}
 end
 
+function component.is_ghost() return true end
+
 return component
