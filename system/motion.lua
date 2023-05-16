@@ -1,7 +1,9 @@
 local motion = {}
 
 function motion.should_skip(id)
-    local state = stack.get(nw.component.player_state, id)
+    if not stack.get(nw.component.player_controlled) then return end 
+
+    local state = stack.get(nw.component.sprite_state, id)
     if not state then return end
 
     return state.name == "dash"
@@ -25,12 +27,11 @@ end
 
 local function handle_collision(colinfo)
     local id = colinfo.item
-
     if colinfo.type == "slide" then
         local nx, ny = colinfo.normal.x, colinfo.normal.y
         local v = stack.get(nw.component.velocity, id)
-        if v.x * nx < 0 then v.x = 0 end
-        if v.y * ny < 0 then v.y = 0 end
+        if v and v.x * nx < 0 then v.x = 0 end
+        if v and v.y * ny < 0 then v.y = 0 end
 
         if ny < 0 then
             stack.set(nw.component.on_ground, id)

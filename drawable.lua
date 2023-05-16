@@ -13,4 +13,14 @@ function drawable.tilelayer(id)
     gfx.pop()
 end
 
+function drawable.bump_body(id)
+    local x, y, w, h = collision.get_world_hitbox(id)
+    if not x then return end
+
+    gfx.push("all")
+    nw.drawable.push_state(id)
+    gfx.rectangle("fill", x, y, w, h)
+    gfx.pop()
+end
+
 return drawable

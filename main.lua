@@ -57,6 +57,12 @@ end
 function love.update(dt)
     event.emit("update", dt)
     spin()
+
+    -- HACK: Funky camera tracking!
+    for id, _ in stack.view_table(nw.component.camera_should_track) do
+        camera.track(id, constant.id.camera)
+        break
+    end
 end
 
 function love.draw()
@@ -64,7 +70,7 @@ function love.draw()
 
     gfx.push()
     painter.push_transform()
-    collision.draw()
+    --collision.draw()
     gfx.pop()
 end
 

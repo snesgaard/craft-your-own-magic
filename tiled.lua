@@ -70,9 +70,25 @@ local type_loader = {}
 tiled.type_loader = type_loader
 
 function type_loader.foobar(object, index, layer)
-    collision.register(object.id, spatial(object.x, object.y, object.width, object.height))
+    local id = object.id
 
-    return object.id
+    local x, h, w, h = object.x, object.y, object.width, object.height
+    local w, h = 16, 16
+    collision.register(id, spatial(-w / 2, -h, w, h))
+    collision.warp_to(id, object.x, object.y)
+
+    stack.assemble(
+        {
+            {nw.component.gravity, 0, 100},
+            {nw.component.player_controlled},
+            {nw.component.camera_should_track},
+            {nw.component.drawable, nw.drawable.bump_body},
+            {nw.component.layer, index}
+        },
+        id
+    )
+
+    return id
 end
 
 function tiled.load(path)

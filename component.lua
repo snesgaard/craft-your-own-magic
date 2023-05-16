@@ -6,13 +6,15 @@ function component.camera_tracking(slack)
     }
 end
 
-function component.player_state(key)
+function component.sprite_state(key)
     return {
-        name = key,
+        name = key or "idle",
         data = nw.ecs.id.weak("statedata"),
         time = clock.get()
     }
 end
+
+function component.player_controlled() return true end
 
 function component.on_ground(timeout)
     return {
@@ -31,5 +33,7 @@ function component.jump_request(timeout)
 end
 
 function component.tilelayer(t) return t end
+
+function component.camera_should_track() return true end
 
 return component

@@ -81,7 +81,7 @@ end
 function dash.input(id, state)
     if not dash.can_dash(id, state) then return end
     for _, key in event.view("keypressed") do
-        if key == "d" then stack.set(nw.component.player_state, id, "dash") end
+        if key == "d" then stack.set(nw.component.sprite_state, id, "dash") end
     end
 end
 
@@ -104,13 +104,14 @@ function dash.spin(id, state)
 
     if t < dash.duration then return end
 
-    stack.set(nw.component.player_state, id, "idle")
+    stack.set(nw.component.sprite_state, id, "idle")
 end
 
 local player_control = {}
 
 function player_control.spin()
-    for id, state in stack.view_table(nw.component.player_state) do
+    for id, _ in stack.view_table(nw.component.player_controlled) do
+        local state = stack.ensure(nw.component.sprite_state, id)
         flip.spin(id, state)
         horizontal_movement.spin(id, state)
         jump.spin(id, state)
