@@ -36,4 +36,17 @@ function component.tilelayer(t) return t end
 
 function component.camera_should_track() return true end
 
+function component.timer(duration, time)
+    return {
+        duration = duration,
+        time = time or clock.get()
+    }
+end
+
+function component.die_on_timer_done() return true end
+
+function component.skip_motion() return true end
+
+function component.target(...) return list(...) end
+
 return component

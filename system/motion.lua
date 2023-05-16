@@ -1,12 +1,11 @@
 local motion = {}
 
+-- TODO: Consider reimplementing this with a full lookup computation at the start of spin
 function motion.should_skip(id)
-    if not stack.get(nw.component.player_controlled) then return end 
-
-    local state = stack.get(nw.component.sprite_state, id)
-    if not state then return end
-
-    return state.name == "dash"
+    for status_id, should_skip in stack.view_table(nw.component.skip_motion) do
+        local target = stack.ensure(nw.component.target, status_id)
+        if target:argfind(id) and should_skip then return true end
+    end
 end
 
 function motion.spin_gravity(id, g, dt)
@@ -45,6 +44,7 @@ end
 
 function motion.spin()
     for _, dt in event.view("update") do
+        
         for id, gravity in stack.view_table(nw.component.gravity) do
             motion.spin_gravity(id, gravity, dt)
         end

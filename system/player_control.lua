@@ -85,14 +85,26 @@ function dash.input(id, state)
     end
 end
 
+function dash.skip_motion(owner)
+    return weak_assemble(
+        {
+            {nw.component.skip_motion},
+            {nw.component.timer, dash.duration},
+            {nw.component.die_on_timer_done},
+            {nw.component.target, owner}
+        },
+        "skip_motion"
+    )
+end
+
 function dash.spin(id, state)
     dash.input(id, state)
 
     if state.name ~= "dash" then return end
-
     -- Remove gravity
     stack.remove(nw.component.velocity, id)
-
+    stack.ensure(dash.skip_motion, state.data, id)
+    
     local p = stack.ensure(dash.position, state.data, id)
     local dp = stack.ensure(dash.position_change, state.data, id)
     local t = clock.get() - state.time

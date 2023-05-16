@@ -11,6 +11,7 @@ timer = nw.system.timer
 camera = require "system.camera"
 motion = require "system.motion"
 clock = require "system.clock"
+timer = require "system.timer"
 tiled = require "tiled"
 
 decorate(nw.component, require "component", true)
@@ -22,7 +23,7 @@ local function spin()
     while event.spin() > 0 do
         clock.spin()
         motion.spin()
-        nw.system.timer.spin()
+        timer.spin()
         require("system.player_control").spin()
     end
 end
