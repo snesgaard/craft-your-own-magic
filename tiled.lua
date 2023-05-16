@@ -77,12 +77,20 @@ function type_loader.foobar(object, index, layer)
     collision.register(id, spatial(-w / 2, -h, w, h))
     collision.warp_to(id, object.x, object.y)
 
+    local sprite_state_map = dict{
+        idle = Video.from_atlas("art/characters", "shield_boi/walk"):speed(0.5):loop(),
+        walk = Video.from_atlas("art/characters", "shield_boi/walk"):loop(),
+        dash = Video.from_atlas("art/characters", "shield_boi/walk"):speed(2):loop(),
+        bash = Video.from_atlas("art/characters", "shield_boi/bash"):once(),
+    }
+
     stack.assemble(
         {
             {nw.component.gravity, 0, 100},
             {nw.component.player_controlled},
             {nw.component.camera_should_track},
             {nw.component.drawable, nw.drawable.frame},
+            {nw.component.sprite_state_map, sprite_state_map},  
             {nw.component.layer, index}
         },
         id

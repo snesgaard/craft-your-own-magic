@@ -31,7 +31,7 @@ function drawable.frame(id)
 
     nw.drawable.push_transform(id)
     nw.drawable.push_state(id)
-    frame:draw("body")
+    f:draw("body")
 
     gfx.pop()
 end

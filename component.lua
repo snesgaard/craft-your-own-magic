@@ -14,6 +14,8 @@ function component.sprite_state(key)
     }
 end
 
+function component.sprite_state_map(map) return map or dict() end
+
 function component.player_controlled() return true end
 
 function component.on_ground(timeout)

@@ -24,6 +24,7 @@ local function spin()
         clock.spin()
         motion.spin()
         timer.spin()
+        require("system.sprite_state").spin()
         require("system.player_control").spin()
     end
 end
