@@ -13,6 +13,7 @@ motion = require "system.motion"
 clock = require "system.clock"
 timer = require "system.timer"
 tiled = require "tiled"
+sprite_state = require "system.sprite_state"
 
 decorate(nw.component, require "component", true)
 decorate(nw.drawable, require "drawable", true)
@@ -24,8 +25,9 @@ local function spin()
         clock.spin()
         motion.spin()
         timer.spin()
+        require("system.collision_resolver").spin()
         require("system.player_control").spin()
-        require("system.sprite_state").spin()
+        sprite_state.spin()
     end
 end
 
@@ -39,7 +41,8 @@ end
 
 function weak_assemble(arg, tag)
     local id = nw.ecs.id.weak(tag)
-    return stack.assemble(arg, id)
+    stack.assemble(arg, id)
+    return id
 end
 
 function love.load(args)

@@ -70,7 +70,7 @@ local type_loader = {}
 tiled.type_loader = type_loader
 
 function type_loader.foobar(object, index, layer)
-    local id = object.id
+    local id = nw.ecs.id.strong("foobar")
 
     local x, h, w, h = object.x, object.y, object.width, object.height
     local w, h = 16, 16

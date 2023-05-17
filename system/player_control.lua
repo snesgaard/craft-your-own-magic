@@ -91,7 +91,8 @@ function dash.skip_motion(owner)
             {nw.component.skip_motion},
             {nw.component.timer, dash.duration},
             {nw.component.die_on_timer_done},
-            {nw.component.target, owner}
+            {nw.component.target, owner},
+            {nw.component.die_on_state_change, owner, "dash"}
         },
         "skip_motion"
     )
@@ -119,6 +120,42 @@ function dash.spin(id, state)
     stack.set(nw.component.sprite_state, id, "idle")
 end
 
+local bash = {}
+
+function bash.collision_resolver(owner, magic, name)
+    return weak_assemble(
+        {
+            {nw.component.hitbox_attention(owner), "bash"},
+            {nw.component.magic, magic},
+            {nw.component.effect, "test"},
+            {nw.component.power, 3},
+
+        },
+        "bash"
+    )
+end
+
+function bash.input(id, state)
+    if not motion.is_on_ground(id) then return end
+    if state.name ~= "idle" then return end
+
+    for _, key in event.view("keypressed") do
+        if key == "a" then
+            stack.set(nw.component.sprite_state, id, "bash")
+        end
+    end
+end
+
+function bash.spin(id, state)
+    bash.input(id, state)
+    if state.name ~= "bash" then return end
+
+    stack.ensure(bash.collision_resolver, state.data, id, state.magic)
+    if not sprite_state.is_done(id) then return end
+
+    stack.set(nw.component.sprite_state, id, "idle")
+end
+
 local player_control = {}
 
 function player_control.spin()
@@ -128,6 +165,7 @@ function player_control.spin()
         horizontal_movement.spin(id, state)
         jump.spin(id, state)
         dash.spin(id, state)
+        bash.spin(id, state)
     end
 end
 
