@@ -22,7 +22,7 @@ There's two temporary status effects in here which is state predicated. First th
 The first solution that comes to mind is setting state flags. Meaning setting a .is_invulnerable componenet and a skip_motion component. While this is fairly simple, it presents a problem in that these must be explicitly turned on or off on entering or exiting the state. So if the dash state is exitted unexpectly, these will remain.
 
 Another way is to have some function which explicitly checks the state, but this can easily get out of hand.
-
+draenei
 The best approach I think is to create a separate entity which contains the relevant flags and explicit lifetime conditions. Meaning they die either on state change or when a timer expires. This way, the only thing we have to keep track of, is creating the entity and holding a reference.
 
 Example:
@@ -93,3 +93,55 @@ weak_assemble(
 Now this can be created by the sprite_state system complete seperate from the sprite_animation system, which is great! Second the also resolves the multiple effects pr hitbox issue.
 
 The only potential issue is that if two of these somehow accidentially exists simultanuous (e.g. from previous state) we could get double resolution. However this can be solved by associating the sprite_state with some magic unique value, and only trigger on collision matching this value.
+
+# 2023-05-17
+
+So I have basically implemented all of the above (expect for the state_change thing). Which means I have a lot of the shaffolding needed to make some stuff!
+
+Have also implemented one-way platforms as part of bump collision response.
+
+## AI as action and intent
+The next challenge I think is going to be enemy AI. How to model and implement it.
+Here I want to try and separate things into "actions" and "intent".
+
+An action is some function of the AI which aims to alter the gamestate somehow. This could be things like:
+
+* move
+* idle
+* melee attack
+* shoot gun
+* jump
+* hit-stun
+* etc.
+
+Intent is the overall goal which the agent wishes to accomplish.
+This is could be:
+
+* Hit the player with a melee attack
+* Follow patrol
+* Stand still for 6 seconds.
+
+The AI then perform one or several actions in order to achieve the goal.
+For instance in order to achieve goal "hit player" the agent may perform moves until it is in range, then perform a melee attack action.
+
+One way of accomplishing this is to treat the agent as a sort of FSM puppet. Meaning it can be in one or more states which represents the actions the agent can perform.
+The "intent" system then manipulates the FSM puppet as a way of implementing the actions.
+
+## Other method of hitbox collision effects
+
+An alternative means of implementing hitbox collision resolution would be to assume that the hitbox always exists. Meaning upon creation of the entity, the hitbox is also created as a child entity.
+It is not entered into the collision system, but rather already populated with data necessary for collision resolution. For instance if we have a bash hitbox, on creation we might do something like this:
+
+```lua
+bash_id = weak_assembly(
+    {
+        {nw.component.damage, 3},
+        {nw.component.owner, owner},
+        {nw.component.flaming},
+        {nw.component.only_once_pr_activation}
+    },
+    "bash"
+)
+```
+
+The animation system is still responsible for moving, reshaping and activating the hitbox. But all the auxcillerary data is populated upon creation.
