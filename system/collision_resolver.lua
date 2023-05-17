@@ -31,12 +31,14 @@ function effects.attack(user, target, power)
 end
 
 function effects.test(user, target, power)
-    print("test", target)
+    stack.destroy(target)
 end
 
 local collision_resolver = {}
 
 function collision_resolver.trigger_effect(effect_id, user_id, target_id)
+    if user_id == target_id then return end
+
     local memory = stack.ensure(nw.component.effect_trigger_memory, effect_id)
     if memory[target_id] then return end
     memory[target_id] = true

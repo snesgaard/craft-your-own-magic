@@ -79,13 +79,14 @@ function love.draw()
 
     gfx.push()
     painter.push_transform()
-    collision.draw()
+    if show_collision then collision.draw() end
     gfx.pop()
 end
 
 function love.keypressed(key)
     if key == "escape" then love.event.quit() end
     if key == "g" then collectgarbage() end
+    if key == "c" then show_collision = not show_collision end
     input.keypressed(key)
 end
 
