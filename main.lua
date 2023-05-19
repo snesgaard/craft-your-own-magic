@@ -13,7 +13,11 @@ motion = require "system.motion"
 clock = require "system.clock"
 timer = require "system.timer"
 tiled = require "tiled"
-sprite_state = require "system.sprite_state"
+
+ai = require "system.ai"
+script = require "system.script"
+puppet_control = require "system.puppet_control"
+puppet_animator = require "system.puppet_animator"
 
 decorate(nw.component, require "component", true)
 decorate(nw.drawable, require "drawable", true)
@@ -25,9 +29,12 @@ local function spin()
         clock.spin()
         motion.spin()
         timer.spin()
+        --- AI and actor control
+        script.spin()
+        puppet_control.spin()
+        puppet_animator.spin()
+        ---
         require("system.collision_resolver").spin()
-        require("system.player_control").spin()
-        sprite_state.spin()
     end
 end
 
@@ -60,7 +67,16 @@ function love.load(args)
 
     collision.set_default_filter(default_collision_filter)
 
-    collision.register(nw.ecs.id.weak("test_id"), spatial(0, 0, 100, 100))
+    stack.assemble(
+        {
+            {nw.component.is_ghost},
+            {nw.component.drawable, nw.drawable.bump_body},
+            {nw.component.layer, 1000}
+        },  
+        "aiboi"
+    )
+    collision.register("aiboi", spatial(0, 0, 10, 10))
+    collision.warp_to("aiboi", 0, -100)
 end
 
 function love.update(dt)

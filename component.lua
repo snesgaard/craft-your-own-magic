@@ -29,6 +29,16 @@ end
 function component.time(t) return t or 0 end
 
 function component.jump_request(timeout)
+    function component.sprite_state(key)
+        return {
+            name = key or "idle",
+            data = nw.ecs.id.weak("statedata"),
+            time = clock.get(),
+            magic = {}
+        }
+    end
+    
+    function component.sprite_state_map(map) return map or dict() end
     return {
         time = clock.get(),
         timeout = timeout or 0.3
@@ -71,5 +81,43 @@ function component.owner(id) return id end
 function component.name(n) return n end
 
 function component.effect_trigger_memory() return dict() end
+
+component.puppet = nw.component.relation(function(...) return list(...) end)
+
+component.script = nw.component.relation(function(...) return list(...) end)
+
+function component.move_intent(x) return x or 0 end
+
+function component.puppet_state(key)
+    return {
+        name = key or "idle",
+        data = nw.ecs.id.weak("statedata"),
+        time = clock.get(),
+        magic = {}
+    }
+end
+
+function component.puppet_state_map(map) return map or dict() end
+
+function component.dash_intent(d)
+    local id = nw.ecs.id.weak("dash_intent")
+    stack.set(nw.component.timer, id, d or 0.2)
+    return id
+end
+
+function component.jump_intent(d)
+    local id = nw.ecs.id.weak("jump_intent")
+    stack.set(nw.component.timer, id, d or 0.2)
+    return id
+end
+
+function component.attack_intent(d)
+    return weak_assemble(
+        {
+            {nw.component.timer, d or 0.2}
+        },
+        "attack_intent"
+    )
+end
 
 return component

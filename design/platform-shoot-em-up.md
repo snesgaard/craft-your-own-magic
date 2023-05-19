@@ -144,4 +144,6 @@ bash_id = weak_assembly(
 )
 ```
 
-The animation system is still responsible for moving, reshaping and activating the hitbox. But all the auxcillerary data is populated upon creation.
+The animation system is still responsible for moving, reshaping and activating the hitbox. But all the auxcillerary data is populated upon creation. If different animations results in different damage/effects then the resulting hitboxes must have unique names, but that is a reasonable restriction.
+
+Last note. In trying to model the decision making AI, i accidentally ended up making something very close to behavior tress. Funny how that works out sometimes :P
