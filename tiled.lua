@@ -73,20 +73,23 @@ function type_loader.foobar(object, index, layer)
     local id = nw.ecs.id.strong("foobar")
 
     local x, h, w, h = object.x, object.y, object.width, object.height
-    local w, h = 16, 16
+    local w, h = 8, 28
     collision.register(id, spatial(-w / 2, -h, w, h))
     collision.warp_to(id, object.x, object.y)
 
     local sprite_state_map = dict{
-        idle = Video.from_atlas("art/characters", "shield_boi/walk"):speed(0.5):loop(),
-        walk = Video.from_atlas("art/characters", "shield_boi/walk"):loop(),
-        dash = Video.from_atlas("art/characters", "shield_boi/walk"):speed(2):loop(),
-        bash = Video.from_atlas("art/characters", "shield_boi/bash"):once(),
+        idle = Video.from_atlas("art/characters", "mc-boxer/idle"):speed(0.5):loop(),
+        walk = Video.from_atlas("art/characters", "mc-boxer/run"):loop(),
+        dash = Video.from_atlas("art/characters", "mc-boxer/idle"):speed(2):loop(),
+        bash = Video.from_atlas("art/characters", "mc-boxer/punch_a"):once(),
+        --ascend = Video.from_atlas("art/characters", "mc/ascend"):loop(),
+        --descend = Video.from_atlas("art/characters", "mc/descend"):loop(),
+        cast = Video.from_atlas("art/characters", "mc/cast"):once()
     }
 
     stack.assemble(
         {
-            {nw.component.gravity, 0, 100},
+            {nw.component.gravity},
             {nw.component.player_controlled},
             {nw.component.camera_should_track},
             {nw.component.drawable, nw.drawable.frame},

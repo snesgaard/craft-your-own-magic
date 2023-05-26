@@ -71,7 +71,8 @@ function love.load(args)
         {
             {nw.component.is_ghost},
             {nw.component.drawable, nw.drawable.bump_body},
-            {nw.component.layer, 1000}
+            {nw.component.layer, 1000},
+            {nw.component.script("patrolbox")}
         },  
         "aiboi"
     )

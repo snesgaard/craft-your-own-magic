@@ -120,4 +120,26 @@ function component.attack_intent(d)
     )
 end
 
+function component.cast_intent(d)
+    return weak_assemble(
+        {
+            {nw.component.timer, d or 0.2}
+        },
+        "cast_intent"
+    )
+end
+
+function component.hitstun_intent(d)
+    return weak_assemble(
+        {
+            {nw.component.timer, d or 0.2}
+        },
+        "hitstun_intent"
+    )
+end
+
+function component.gravity(gx, gy)
+    return vec2(gx or 0, gy or 600)
+end
+
 return component

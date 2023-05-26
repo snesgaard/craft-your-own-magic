@@ -147,3 +147,157 @@ bash_id = weak_assembly(
 The animation system is still responsible for moving, reshaping and activating the hitbox. But all the auxcillerary data is populated upon creation. If different animations results in different damage/effects then the resulting hitboxes must have unique names, but that is a reasonable restriction.
 
 Last note. In trying to model the decision making AI, i accidentally ended up making something very close to behavior tress. Funny how that works out sometimes :P
+
+# 2023-05-20
+
+So basically got both the pupper concept and scripting up and working. Works as intended. So now there's intent with automatic input buffering and works perfectly.
+
+Only question is what's next? Kinda wanted to create something ala Metal Slug, something without to many stats. More focues on bullets and dodging and combat screens.
+That brings up the question:
+
+* Setting and visual style
+* Enemy design and behavior
+* Level design
+
+An interesting note on on enemy and level design. A post on reddit made a point of these not being separatable in a platform focused game. Both work together.
+They form a puzzle which the player must solve. Either by avoiding or hitting them. Also mentioned that the best platformers enemies can also be tools for progression e.g. super mario and shovel knight jumping boost enemies.
+
+Essentially it all boils down to how the players abilities interact with the enemies and the level itself.
+
+So if I were to speculate, one should probably start with the basic player abilities:
+
+* Move horizontally
+* Jump
+* Dash
+* Melee hit
+* Ranged hit
+
+One must know these in order to place obstacles. Next is probably enemy design and behavior e.g.:
+
+* Move
+* Shoot
+
+Actually I think it is important to settle on a single, unique mechanic to focus the design on. For instance for shovel knight, it is the shovel. Hit with it, use it to jump on enemies etc. For mario the game is largely focused on jump. Is how you dispact enemies and progress. Hollow knight has the nail, whihc is similar to the shovel. Also other abilities, but that comes in later.
+
+An idea could be the Cubemancer. You summon cubes. These are used for either attacking enemies (drop from sky) or creating platforms.
+
+Just watched the first level of shovel knight. It basically introduces the core mechanics available to the player:
+
+* Move horizontally
+* Jumping
+* Hitting
+* Jump with shovel down
+
+Also introduces the following level elements:
+
+* Some terrain can be destroyed via hitting
+    * Reveal passages
+    * Reveal items
+* Enemies:
+    * Beetle
+    * Skeleton
+
+A good core mechanic should have multiple uses. For instance the shovel hit in shovel knight:
+
+* Kill enemies
+* Reveal passages
+* Deflect projectiles
+* Activate switches
+
+Also the shovel jump can:
+
+* Kill enemies
+* Activate objects
+* Destroy geometry
+* Bounce off enemies and other objects
+
+Jumping can:
+
+* Avoid enemies
+* Reach higher floors and objects
+
+Ideas for mechanics:
+
+Dynamite:
+
+* Kill enemies
+* Push and gain elevation
+* Destroy objects
+* Activate objects
+
+Square:
+
+* Kill enemies (on impact)
+* Block projectiles
+* Gain elevation
+
+Dash:
+
+* Reset jump
+* Avoid attacks
+* Horizontal motion, without ground
+
+Jump:
+
+* Gain elevation
+* Avoid attacks
+* Reset dash
+
+In general want some intense metal slug experience.
+
+Speaking of which, it has the following core mechanics:
+
+* Move
+* Shoot
+* Jump
+* Duck
+
+# 2023-05-23
+
+Okay I have decided to just experiment with character moveset. When I find something interesting either combat or platforming I design around it.
+
+Speaking of which I need to compute the jump height -> gravity -> velocity algorithm again. Consider:
+
+y = g * x ^ 2 + v * x
+y' = 2 * g * x + v
+
+meaning the highest point is given by:
+
+0 = 2 * g * x + v
+x = - v / (2 * g)
+
+Inserting this into the original equation gives:
+
+y = g * v ^ 2 / 4 / g ^ 2 - v ^ 2 / 2 / g
+
+y = (g / 4 / g ^2 - 1 / 2 / g) * v ^ 2
+y = (1 / 4 / g - 1 / 2 / g) * v ^ 2
+
+y = 1 / (4 * g) * v ^ 2
+v = 2 * sqrt(y * g)
+Now in terms of v
+
+# 2023-05-24
+
+So have made some initial character movesets and animations. Was kinda fun. But stil hasen't brought me closer to what to do. I'm leaning towards platformer. Not for technical reasons, but rather design.
+
+I really have no idea where to start or stop. Kinda get the idea of the level design process. You create a rough idea of the challenges/problems you present the player, and go from there.
+
+But in order to do that you must have:
+
+* Main character moveset
+* Enemies
+* Obstacles and props
+* General rules
+* A theme
+
+This is kinda where I am stuck. Don't really know where to start. Either on moveset or theme or enemies. All I know is that I want general platforming capability.
+
+* Tiles
+* Jumping
+* Horizontal moves
+* Character driven
+
+Anyways back to my thoughts. The reason I want a platformer is to keep things simple. Simple enemies and stuff. I dont relaly know how to design around or design more complicated enemy AI for a brawler. Also I like fast paced movement.
+
+I think I like somehting like a goblin shaman mc or something. Also had an idea of using spawned blocks for platforming and combat. Regardless the core moveset is the most important. The game must be beatable with it. Otherwise it would be more of a metroidvania.

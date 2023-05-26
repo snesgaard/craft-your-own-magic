@@ -30,6 +30,12 @@ function ai.sequence_forget_failure(data, ...)
     return status
 end
 
+function ai.sequence_forget(data, ...)
+    local status = ai.sequence(data, ...)
+    if status ~= "pending" then stack.remove(task_status, data) end
+    return status
+end
+
 function ai.select(data, ...)
     local tasks = {...}
     local task_status = stack.ensure(task_status, data)

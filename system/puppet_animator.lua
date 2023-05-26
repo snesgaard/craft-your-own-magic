@@ -1,8 +1,18 @@
 local state_resolver = {}
 
 function state_resolver.idle(id, state_map, state)
+    local on_ground = motion.is_on_ground(id)
     local move_intent = stack.get(nw.component.move_intent, id) or 0
-    return move_intent ~= 0 and state_map.walk or state_map.idle
+    if on_ground then
+        return move_intent ~= 0 and state_map.walk or state_map.idle
+    else
+        local v = stack.ensure(nw.component.velocity, id)
+        if v.y < 0 then
+            return state_map.ascend
+        else
+            return state_map.descend
+        end
+    end
 end
 
 function state_resolver.DEFAULT(id, state_map, state)
