@@ -301,3 +301,10 @@ This is kinda where I am stuck. Don't really know where to start. Either on move
 Anyways back to my thoughts. The reason I want a platformer is to keep things simple. Simple enemies and stuff. I dont relaly know how to design around or design more complicated enemy AI for a brawler. Also I like fast paced movement.
 
 I think I like somehting like a goblin shaman mc or something. Also had an idea of using spawned blocks for platforming and combat. Regardless the core moveset is the most important. The game must be beatable with it. Otherwise it would be more of a metroidvania.
+
+* Move
+* Jump
+* Dash
+* Strike
+* Down-strike in air
+

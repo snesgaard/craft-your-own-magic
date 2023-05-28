@@ -69,7 +69,7 @@ end
 local type_loader = {}
 tiled.type_loader = type_loader
 
-function type_loader.foobar(object, index, layer)
+function type_loader.mc_basic(object, index, layer)
     local id = nw.ecs.id.strong("foobar")
 
     local x, h, w, h = object.x, object.y, object.width, object.height
@@ -78,12 +78,12 @@ function type_loader.foobar(object, index, layer)
     collision.warp_to(id, object.x, object.y)
 
     local sprite_state_map = dict{
-        idle = Video.from_atlas("art/characters", "mc-boxer/idle"):speed(0.5):loop(),
-        walk = Video.from_atlas("art/characters", "mc-boxer/run"):loop(),
-        dash = Video.from_atlas("art/characters", "mc-boxer/idle"):speed(2):loop(),
-        bash = Video.from_atlas("art/characters", "mc-boxer/punch_a"):once(),
-        --ascend = Video.from_atlas("art/characters", "mc/ascend"):loop(),
-        --descend = Video.from_atlas("art/characters", "mc/descend"):loop(),
+        idle = Video.from_atlas("art/characters", "mc/idle"):speed(0.5):loop(),
+        walk = Video.from_atlas("art/characters", "mc/run"):loop(),
+        dash = Video.from_atlas("art/characters", "mc/dash"):speed(2):loop(),
+        bash = Video.from_atlas("art/characters", "mc/attack"):once(),
+        ascend = Video.from_atlas("art/characters", "mc/ascend"):loop(),
+        descend = Video.from_atlas("art/characters", "mc/descend"):loop(),
         cast = Video.from_atlas("art/characters", "mc/cast"):once()
     }
 
@@ -98,6 +98,69 @@ function type_loader.foobar(object, index, layer)
             {nw.component.script("player")},
             {nw.component.puppet("player")},
             {nw.component.layer, index}
+        },
+        id
+    )
+
+    return id
+end
+
+function type_loader.generic(object, index, layer)
+    local id = nw.ecs.id.strong("generic")
+
+    local c = {
+        {nw.component.layer, index}
+    }
+    local p = object.properties
+
+    if p.drawable then
+        table.insert(c, {nw.component.drawable, nw.drawable[p.drawable]})
+    end
+
+    if p.ghost then
+        table.insert(c, {nw.component.is_ghost})
+    end
+
+    if p.collision then
+        local x, h, w, h = object.x, object.y, object.width, object.height
+        collision.register(id, spatial(0, 0, w, h))
+    end
+    collision.warp_to(id, object.x, object.y)
+
+    stack.assemble(c, id)
+
+    return id
+end
+
+function type_loader.mc_boxer(object, index, layer)
+    local id = nw.ecs.id.strong("mc-boxer")
+
+    local x, h, w, h = object.x, object.y, object.width, object.height
+    local w, h = 8, 28
+    collision.register(id, spatial(-w / 2, -h, w, h))
+    collision.warp_to(id, object.x, object.y)
+
+    local sprite_state_map = dict{
+        idle = Video.from_atlas("art/characters", "mc-boxer/idle"):loop(),
+        walk = Video.from_atlas("art/characters", "mc-boxer/run"):loop(),
+        charge = Video.from_atlas("art/characters", "mc-boxer/charge"):loop(),
+        fly_punch_h = Video.from_atlas("art/characters", "mc-boxer/fly_punch_h"):loop(),
+        fly_punch_v = Video.from_atlas("art/characters", "mc-boxer/fly_punch_v"):loop(),
+        ascend = Video.from_atlas("art/characters", "mc-boxer/idle"):loop(),
+        descend = Video.from_atlas("art/characters", "mc-boxer/idle"):loop(),
+    }
+
+    stack.assemble(
+        {
+            {nw.component.gravity},
+            {nw.component.player_controlled},
+            {nw.component.camera_should_track},
+            {nw.component.drawable, nw.drawable.frame},
+            {nw.component.puppet_state_map, sprite_state_map},  
+            {nw.component.puppet_state, "idle"},
+            {nw.component.script("boxer-player")},
+            {nw.component.puppet("boxer-player")},
+            {nw.component.layer, index},
         },
         id
     )

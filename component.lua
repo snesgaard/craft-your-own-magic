@@ -88,12 +88,13 @@ component.script = nw.component.relation(function(...) return list(...) end)
 
 function component.move_intent(x) return x or 0 end
 
-function component.puppet_state(key)
+function component.puppet_state(key, args)
     return {
         name = key or "idle",
         data = nw.ecs.id.weak("statedata"),
         time = clock.get(),
-        magic = {}
+        magic = {},
+        args = args,
     }
 end
 
@@ -140,6 +141,35 @@ end
 
 function component.gravity(gx, gy)
     return vec2(gx or 0, gy or 600)
+end
+
+function component.punch_intent(is_down, d)
+    local duration = d
+    if not d then
+        duration = is_down and 0.2 or 10000
+    end
+
+    local id = {is_down = is_down}
+
+    stack.assemble(
+        {
+            {nw.component.timer, duration}
+        },
+        id
+    )
+
+    return id
+end
+
+component.can_dash = fixed(true)
+
+function component.dash_cooldown(d)
+    return weak_assemble(
+        {
+            {nw.component.timer, d or 0.4}
+        },
+        "dash_cooldown"
+    )
 end
 
 return component

@@ -15,6 +15,14 @@ function state_resolver.idle(id, state_map, state)
     end
 end
 
+function state_resolver.fly_punch(id, state_map, state)
+    if state.args.vertical then
+        return state_map.fly_punch_v
+    else
+        return state_map.fly_punch_h
+    end
+end
+
 function state_resolver.DEFAULT(id, state_map, state)
     return state_map[state.name]
 end

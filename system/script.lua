@@ -35,6 +35,36 @@ function patrol_box.spin()
     end
 end
 
+local player_boxer = {}
+
+function player_boxer.spin_once(id)
+    for _, key in event.view("keypressed") do
+        if key == "space" then
+            stack.set(nw.component.jump_intent, id)
+        elseif key == "a" then
+            stack.set(nw.component.punch_intent, id, true)
+        elseif key == "d" then
+            stack.set(nw.component.dash_intent, id)
+        end
+    end
+
+    for _, key in event.view("keyreleased") do
+        if key == "a" then
+            stack.set(nw.component.punch_intent, id, false)
+        end
+    end 
+
+    for _, dt in event.view("update") do
+        stack.set(nw.component.move_intent, id, input.get_direction_x())
+    end
+end
+
+function player_boxer.spin()
+    for id, _ in stack.view_table(nw.component.script("boxer-player")) do
+        player_boxer.spin_once(id)
+    end 
+end
+
 local player = {}
 
 function player.spin_once(id)
@@ -65,6 +95,7 @@ local script = {}
 
 function script.spin()
     player.spin()
+    player_boxer.spin()
     patrol_box.spin()
 end
 

@@ -19,6 +19,8 @@ script = require "system.script"
 puppet_control = require "system.puppet_control"
 puppet_animator = require "system.puppet_animator"
 
+function fixed(v) return function() return v end end
+
 decorate(nw.component, require "component", true)
 decorate(nw.drawable, require "drawable", true)
 

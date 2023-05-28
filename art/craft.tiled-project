@@ -8,5 +8,23 @@
         "."
     ],
     "propertyTypes": [
+        {
+            "color": "#ff00ff7f",
+            "drawFill": true,
+            "id": 1,
+            "members": [
+                {
+                    "name": "ghost",
+                    "type": "bool",
+                    "value": true
+                }
+            ],
+            "name": "generic",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        }
     ]
 }
