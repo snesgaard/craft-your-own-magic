@@ -31,6 +31,12 @@ function drawable.frame(id)
 
     nw.drawable.push_transform(id)
     nw.drawable.push_state(id)
+
+    local state = stack.get(nw.component.puppet_state, id)
+    if state and state.name == "charge" and clock.get() - state.time > 0.4 then
+        gfx.setColor(0, 0, 1)
+    end
+
     f:draw("body")
 
     gfx.pop()

@@ -23,10 +23,16 @@ function jump.velocity_from_height_and_gravity(h, g)
 end
 
 function jump.can(id, state)
-    return motion.is_on_ground(id) and not state.no_jump
+    local vy = stack.ensure(nw.component.velocity, id).y
+    return (motion.is_on_ground(id) or stack.get(nw.component.jump_extra, id)) and not state.no_jump and vy > -10
+end
+
+function jump.extra(id)
+    if motion.is_on_ground(id) then stack.set(nw.component.jump_extra, id) end
 end
 
 function jump.spin(id, state)
+    jump.extra(id)
     if not jump.can(id, state) then return end
 
     local intent = stack.get(nw.component.jump_intent, id)
@@ -36,8 +42,13 @@ function jump.spin(id, state)
     local h = 40
     local v = jump.velocity_from_height_and_gravity(h, g.y)
 
+    if motion.is_on_ground(id) then
+        motion.clear_on_ground(id)
+    else
+        stack.remove(nw.component.jump_extra, id)
+    end
+
     stack.set(nw.component.velocity, id, 0, -v)
-    motion.clear_on_ground(id)
     stack.remove(nw.component.jump_intent, id)
     stack.set(nw.component.puppet_state, id, "idle")
 end
@@ -283,9 +294,14 @@ function boxer.fly_punch.intent(id, state)
     local intent = stack.get(nw.component.punch_intent, id)
     if not intent or timer.is_done(intent) or intent.is_down then return end
 
-    local vertical = input.get_direction_y() < 0
-    stack.set(nw.component.puppet_state, id, "fly_punch", {vertical = vertical})
-    stack.remove(nw.component.punch_intent, id)
+    if clock.get() - state.time <= 0.4 then
+        stack.set(nw.component.puppet_state, id, "idle")
+    else
+        local vertical = input.get_direction_y() < 0
+        stack.set(nw.component.puppet_state, id, "fly_punch", {vertical = vertical})
+        stack.remove(nw.component.punch_intent, id)
+    end
+
 end
 
 function boxer.fly_punch.spin(id, state)
@@ -310,6 +326,39 @@ function boxer.fly_punch.spin(id, state)
     stack.set(nw.component.puppet_state, id, "idle")
 end
 
+boxer.punch = {}
+
+function boxer.punch.can(id, state)
+    return state.name == "idle" or state.name == "punch_a" or state.name == "punch_b"
+end
+
+function boxer.punch.should(id, state)
+    local intent = stack.get(nw.component.attack_intent, id)
+    if not intent or timer.is_done(intent) then return end
+    stack.remove(nw.component.attack_intent, id)
+    return true
+end
+
+function boxer.intent(id, state)
+    if not boxer.punch.can(id, state) then return end
+    if not boxer.punch.should(id, state) then return end
+    
+    if state.name == "punch_a" then
+        stack.set(nw.component.puppet_state, id, "punch_b")
+    else
+        stack.set(nw.component.puppet_state, id, "punch_a")
+    end
+end
+
+function boxer.punch.spin(id, state)
+    boxer.intent(id, state)
+    if state.name ~= "punch_a" and state.name ~= "punch_b" then return end
+    stack.ensure(nw.component.velocity, id).x = 0
+    if not puppet_animator.is_done(id) then return end
+
+    stack.set(nw.component.puppet_state, id, "idle")
+end
+
 function boxer.spin()
     for id, _ in stack.view_table(nw.component.puppet("boxer-player")) do
         local state = stack.ensure(nw.component.puppet_state, id)
@@ -319,6 +368,7 @@ function boxer.spin()
         dash.spin(id, state)
         boxer.charge.spin(id, state)
         boxer.fly_punch.spin(id, state)
+        boxer.punch.spin(id, state)
     end
 end
 

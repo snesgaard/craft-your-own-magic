@@ -176,4 +176,6 @@ function component.breakable() return true end
 
 function component.breaker() return true end
 
+function component.jump_extra() return true end
+
 return component

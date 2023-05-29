@@ -142,6 +142,8 @@ function type_loader.mc_boxer(object, index, layer)
         fly_punch_v = Video.from_atlas("art/characters", "mc-boxer/fly_punch_v"):loop(),
         ascend = Video.from_atlas("art/characters", "mc-boxer/idle"):loop(),
         descend = Video.from_atlas("art/characters", "mc-boxer/idle"):loop(),
+        punch_a = Video.from_atlas("art/characters", "mc-boxer/punch_a"):speed(0.5):once(),
+        punch_b = Video.from_atlas("art/characters", "mc-boxer/punch_b"):speed(0.5):once(),
     }
 
     stack.assemble(

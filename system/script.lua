@@ -45,6 +45,8 @@ function player_boxer.spin_once(id)
             stack.set(nw.component.punch_intent, id, true)
         elseif key == "d" then
             stack.set(nw.component.dash_intent, id)
+        elseif key == "s" then
+            stack.set(nw.component.attack_intent, id)
         end
     end
 
