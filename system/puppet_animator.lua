@@ -31,7 +31,7 @@ local function slice_ids()
     return {}
 end
 
-local function create_slice_hitboxes(id, key, slice, magic)
+local function create_slice_hitboxes(id, key, slice, magic, properties)
     -- Slice collision detection
     local slice_ids = stack.ensure(slice_ids, id)
     slice_ids[key] = slice_ids[key] or nw.ecs.id.weak(key)
@@ -39,10 +39,15 @@ local function create_slice_hitboxes(id, key, slice, magic)
 
     local p = stack.get(nw.component.position, id) or vec2()
 
-    stack.set(nw.component.is_ghost, s_id)
-    stack.set(nw.component.magic, s_id, magic)
-    stack.set(nw.component.name, s_id, key)
-    stack.set(nw.component.owner, s_id, id)
+    local predefined_c = {
+        {nw.component.is_ghost},
+        {nw.component.magic, magic},
+        {nw.component.name, key},
+        {nw.component.ownder, id}
+    }
+
+    stack.assemble(predefined_c, s_id)
+    stack.assemble(tiled.assemble_from_properties(properties), s_id)
 
     collision.register(s_id, slice)
     collision.warp_to(s_id, p.x, p.y)
@@ -73,10 +78,9 @@ function puppet_animator.spin_once(id, state, dt)
 
     -- Set frame
     stack.set(nw.component.frame, id, frame)
-
-
+    
     for key, slice in pairs(frame.slices) do
-        create_slice_hitboxes(id, key, frame:get_slice(key, "body"), state.magic)
+        create_slice_hitboxes(id, key, frame:get_slice(key, "body"), state.magic, frame.slice_data[key])
     end
 end
 

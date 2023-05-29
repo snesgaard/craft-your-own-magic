@@ -113,13 +113,7 @@ function type_loader.generic(object, index, layer)
     }
     local p = object.properties
 
-    if p.drawable then
-        table.insert(c, {nw.component.drawable, nw.drawable[p.drawable]})
-    end
-
-    if p.ghost then
-        table.insert(c, {nw.component.is_ghost})
-    end
+    print(dict(p), id)
 
     if p.collision then
         local x, h, w, h = object.x, object.y, object.width, object.height
@@ -127,7 +121,7 @@ function type_loader.generic(object, index, layer)
     end
     collision.warp_to(id, object.x, object.y)
 
-    stack.assemble(c, id)
+    stack.assemble(tiled.assemble_from_properties(p), id)
 
     return id
 end
@@ -166,6 +160,19 @@ function type_loader.mc_boxer(object, index, layer)
     )
 
     return id
+end
+
+function tiled.assemble_from_properties(properties)
+    local c = list()
+    local p = properties
+    if not p then return c end
+
+    if p.drawable then table.insert(c, {nw.component.drawable, nw.drawable[p.drawable]}) end
+    if p.ghost then table.insert(c, {nw.component.is_ghost}) end
+    if p.breakable then table.insert(c, {nw.component.breakable}) end
+    if p.breaker then table.insert(c, {nw.component.breaker}) end
+
+    return c
 end
 
 function tiled.load(path)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="1" nextlayerid="3" nextobjectid="4">
+<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="1" nextlayerid="3" nextobjectid="5">
  <tileset firstgid="1" source="../tileset/ground.tsx"/>
  <layer id="1" name="geometry" width="30" height="20">
   <data encoding="csv">
@@ -105,7 +105,13 @@
     <property name="breakable" type="bool" value="true"/>
     <property name="collision" type="bool" value="true"/>
     <property name="drawable" value="bump_body"/>
-    <property name="ghost" type="bool" value="false"/>
+   </properties>
+  </object>
+  <object id="4" type="generic" x="107.333" y="-193" width="10.6667" height="44.3333">
+   <properties>
+    <property name="breakable" type="bool" value="true"/>
+    <property name="collision" type="bool" value="true"/>
+    <property name="drawable" value="bump_body"/>
    </properties>
   </object>
  </objectgroup>

@@ -65,6 +65,10 @@ function collision_resolver.handle_collision(item, other, colinfo)
             collision_resolver.trigger_effect(effect_id, owner, target)
         end
     end
+
+    if stack.get(nw.component.breaker, item) and stack.get(nw.component.breakable, other) then
+        stack.destroy(other)
+    end
 end
 
 function collision_resolver.spin()

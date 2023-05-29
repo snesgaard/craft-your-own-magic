@@ -14,9 +14,19 @@
             "id": 1,
             "members": [
                 {
-                    "name": "ghost",
+                    "name": "breakable",
                     "type": "bool",
                     "value": true
+                },
+                {
+                    "name": "collision",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "drawable",
+                    "type": "string",
+                    "value": "bump_body"
                 }
             ],
             "name": "generic",
