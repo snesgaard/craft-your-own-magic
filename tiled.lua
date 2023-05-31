@@ -2,6 +2,25 @@ local sti = nw.third.sti
 
 local tiled = {}
 
+tiled.project_path = "art/craft.tiled-project"
+
+tiled.project_object_properties = {}
+
+function tiled.load_project(p)
+    local f = love.filesystem.read(p or tiled.project_path)
+    local data = nw.third.json.decode(f)
+    for _, prop_type in ipairs(data.propertyTypes or {}) do
+        local properties = dict()
+        for _, m in ipairs(prop_type.members) do
+            properties[m.name] = m.value 
+        end
+
+        if List.argfind(prop_type.useAs, "object") then
+            tiled.project_object_properties[prop_type.name] = properties
+        end
+    end
+end
+
 local function load_tilelayer(index, layer)
     if layer.type ~= "tilelayer" then return end
 
@@ -108,17 +127,16 @@ end
 function type_loader.generic(object, index, layer)
     local id = nw.ecs.id.strong("generic")
 
-    local c = {
-        {nw.component.layer, index}
-    }
-    local p = object.properties
+    local pp = tiled.project_object_properties.generic or dict()
+    local p = Dictionary.fuse(object.properties, pp)
 
-    print(dict(p), id)
+    print(p.breakable, object.name)
 
     if p.collision then
         local x, h, w, h = object.x, object.y, object.width, object.height
         collision.register(id, spatial(0, 0, w, h))
     end
+
     collision.warp_to(id, object.x, object.y)
 
     stack.assemble(tiled.assemble_from_properties(p), id)
@@ -208,5 +226,7 @@ function tiled.object(map, name)
         if object then return object end
     end
 end
+
+tiled.load_project()
 
 return tiled

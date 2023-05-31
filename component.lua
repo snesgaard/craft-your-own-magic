@@ -172,7 +172,9 @@ function component.dash_cooldown(d)
     )
 end
 
-function component.breakable() return true end
+function component.breakable(v)
+    return v == nil and true or v
+end
 
 function component.breaker() return true end
 

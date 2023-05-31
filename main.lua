@@ -13,6 +13,7 @@ motion = require "system.motion"
 clock = require "system.clock"
 timer = require "system.timer"
 tiled = require "tiled"
+sfx = require "system.sfx"
 
 ai = require "system.ai"
 script = require "system.script"
@@ -31,6 +32,7 @@ local function spin()
         clock.spin()
         motion.spin()
         timer.spin()
+        sfx.spin()
         --- AI and actor control
         script.spin()
         puppet_control.spin()

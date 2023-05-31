@@ -48,6 +48,8 @@ function jump.spin(id, state)
         stack.remove(nw.component.jump_extra, id)
     end
 
+    event.emit("jump", id, stack.get(nw.component.position, id) or vec2)
+
     stack.set(nw.component.velocity, id, 0, -v)
     stack.remove(nw.component.jump_intent, id)
     stack.set(nw.component.puppet_state, id, "idle")
@@ -256,7 +258,14 @@ end
 
 local boxer = {}
 
-boxer.charge = {}
+boxer.charge = {
+    min_duration = 0.2
+}
+
+function boxer.charge.is_done(state)
+    local t = clock.get() - state.time
+    return boxer.charge.min_duration <= t
+end
 
 function boxer.charge.can(id, state)
     return state.name == "idle"
@@ -294,8 +303,8 @@ function boxer.fly_punch.intent(id, state)
     local intent = stack.get(nw.component.punch_intent, id)
     if not intent or timer.is_done(intent) or intent.is_down then return end
 
-    if clock.get() - state.time <= 0.4 then
-        stack.set(nw.component.puppet_state, id, "idle")
+    if not boxer.charge.is_done(state) then
+        stack.set(nw.component.puppet_state, id, "punch_a")
     else
         local vertical = input.get_direction_y() < 0
         stack.set(nw.component.puppet_state, id, "fly_punch", {vertical = vertical})
@@ -372,7 +381,7 @@ function boxer.spin()
     end
 end
 
-local puppet_control = {}
+local puppet_control = {boxer=boxer}
 
 function puppet_control.spin()
     player_puppet.spin()
