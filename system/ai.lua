@@ -60,4 +60,13 @@ function ai.run(data, task)
     return run_task(data, unpack(task))
 end
 
+function ai.action(data, func, ...)
+    func(...)
+    return "success"
+end
+
+function ai.condition(data, func, ...)
+    return func(...) and "success" or "failure"
+end
+
 return ai

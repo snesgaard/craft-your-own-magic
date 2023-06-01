@@ -88,6 +88,8 @@ component.script = nw.component.relation(function(...) return list(...) end)
 
 function component.move_intent(x) return x or 0 end
 
+function component.move_speed(x) return x or 0 end
+
 function component.puppet_state(key, args)
     return {
         name = key or "idle",

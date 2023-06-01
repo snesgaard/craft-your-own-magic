@@ -9,7 +9,6 @@ function motion.should_skip(id)
 end
 
 function motion.should_skip(id)
-    print(stack.get(nw.component.skip_motion, id))
     return (stack.get(nw.component.skip_motion, id) or 0) > 0
 end
 
@@ -47,15 +46,24 @@ function motion.spin_move(cols)
     List.foreach(cols, handle_collision)
 end
 
+function motion.move_intent(dt)
+    for id, intent in stack.view_table(nw.component.move_intent) do
+        local speed = stack.get(nw.component.move_speed, id) or 0
+        collision.move(id, speed * dt * intent, 0)
+    end
+end
+
 function motion.spin()
-    for _, dt in event.view("update") do
-        
+    for _, dt in event.view("update") do 
         for id, gravity in stack.view_table(nw.component.gravity) do
             motion.spin_gravity(id, gravity, dt)
         end
+
         for id, velocity in stack.view_table(nw.component.velocity) do
             motion.spin_velocity(id, velocity, dt)
         end
+
+        motion.move_intent(dt)
     end
 
     for _, ax, ay, cols in event.view("move") do

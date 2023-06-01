@@ -142,6 +142,26 @@ function type_loader.generic(object, index, layer)
     return id
 end
 
+function type_loader.edge_patrol(object, index, layer)
+    local id = nw.ecs.id.strong("edge_patorl")
+
+    local p = object.properties
+    
+    local w, h  = 10, 5
+    collision.register(id, spatial(-w / 2, -h, w, h))
+    collision.warp_to(id, object.x, object.y)
+
+    local c = list(
+        {nw.component.drawable, nw.drawable.bump_body},
+        {nw.component.gravity},
+        {nw.component.script("edge_patrol")},
+        {nw.component.move_speed, 30}
+    )
+    stack.assemble(c, id)
+
+    return id
+end
+
 function type_loader.mc_boxer(object, index, layer)
     local id = nw.ecs.id.strong("mc-boxer")
 

@@ -35,6 +35,87 @@ function patrol_box.spin()
     end
 end
 
+local edge_patrol = {}
+
+function edge_patrol.set_move_intent(_, id, v)
+    stack.set(nw.component.move_intent, id, v)
+    return "success"
+end
+
+function edge_patrol.hit_edge(id)
+    for _, x, y, cols in event.view("move") do
+        for _, colinfo in ipairs(cols) do
+            if colinfo.item == id and colinfo.normal.x ~= 0 and colinfo.type == "slide" then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+function edge_patrol.is_sensor_in_contact(_, id)
+    local no_ground = #collision.query_local(id, spatial(10, 0, 1, 1)) == 0
+    local edge = edge_patrol.hit_edge(id)
+    return (edge or no_ground) and "success" or "failure"
+end
+
+function edge_patrol.flip(_, id)
+    for _, dt in event.view("update") do
+        collision.flip(id)
+        return "success"
+    end
+
+    return "pending"
+end
+
+function edge_patrol.deactivate_ground(_, id)
+    return motion.is_on_ground(id) and "failure" or "success"
+end
+
+--[[
+local attack_task = {
+    ai.sequence,
+        {edge_patrol.acquire_target, id},
+        {edge_patrol.rng_roll, id}
+        {ai.select,
+            {ai.sequence,
+                {ai.condition, rng_check, id, 0.1},
+                normal_attack(id)
+            },
+            {ai.sequence,
+                {ai.condition, rng_check, id, 0.3},
+                ranged_attack(id)
+            },
+            retreat(id)
+        },
+}
+]]--
+
+function edge_patrol.spin_once(id, args)
+    edge_patrol.is_sensor_in_contact("fafa", id)
+    local task = {
+        ai.stateless_select,
+            {edge_patrol.deactivate_ground, id},
+            {ai.sequence_forget,
+                {edge_patrol.is_sensor_in_contact, id},
+                {edge_patrol.set_move_intent, id, 0},
+                {edge_patrol.flip, id}
+            },
+            {ai.sequence_forget,
+                {edge_patrol.set_move_intent, id, stack.get(nw.component.mirror, id) and -1 or 1}
+            },
+    }
+
+    ai.run(args, task)
+end
+
+function edge_patrol.spin()
+    for id, args in stack.view_table(nw.component.script("edge_patrol")) do
+        edge_patrol.spin_once(id, args)
+    end
+end
+
 local player_boxer = {}
 
 function player_boxer.spin_once(id)
@@ -99,6 +180,7 @@ function script.spin()
     player.spin()
     player_boxer.spin()
     patrol_box.spin()
+    edge_patrol.spin()
 end
 
 return script 
