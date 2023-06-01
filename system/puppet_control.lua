@@ -48,7 +48,7 @@ function jump.spin(id, state)
         stack.remove(nw.component.jump_extra, id)
     end
 
-    event.emit("jump", id, stack.get(nw.component.position, id) or vec2)
+    event.emit("jump", id, stack.get(nw.component.position, id) or vec2())
 
     stack.set(nw.component.velocity, id, 0, -v)
     stack.remove(nw.component.jump_intent, id)
@@ -124,7 +124,7 @@ function dash.spin(id, state)
     stack.remove(nw.component.velocity, id)
     stack.remove(nw.component.can_dash, id)
     stack.ensure(dash.skip_motion, state.data, id)
-    
+
     local p = stack.ensure(dash.position, state.data, id)
     local dp = stack.ensure(dash.position_change, state.data, id)
     local t = clock.get() - state.time

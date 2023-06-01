@@ -130,8 +130,6 @@ function type_loader.generic(object, index, layer)
     local pp = tiled.project_object_properties.generic or dict()
     local p = Dictionary.fuse(object.properties, pp)
 
-    print(p.breakable, object.name)
-
     if p.collision then
         local x, h, w, h = object.x, object.y, object.width, object.height
         collision.register(id, spatial(0, 0, w, h))
