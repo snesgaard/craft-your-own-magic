@@ -56,15 +56,21 @@ local function create_slice_hitboxes(id, key, slice, magic, properties)
     local _, _, cols = collision.move(s_id, 0, 0)
 end
 
-local function clean_hitboxes(id)
+local function clean_hitboxes(id, frame_slices, magic)
     local slice_ids = stack.ensure(slice_ids, id)
-    for _, id in pairs(slice_ids) do stack.destroy(id) end
+    for _, id in pairs(slice_ids) do
+        local prev_magic = stack.get(nw.component.magic, id)
+        if prev_magic and prev_magic ~= magic then
+            stack.destroy(id)
+        else
+            collision.unregister(id)
+        end
+    end
 end
 
 local puppet_animator = {}
 
 function puppet_animator.spin_once(id, state, dt)
-    clean_hitboxes(id)
     local state_map = stack.get(nw.component.puppet_state_map, id) or dict()
     local state_time = state.time
     
@@ -72,15 +78,18 @@ function puppet_animator.spin_once(id, state, dt)
     local video = f(id, state_map, state)
     if not video then return end
     local time = clock.get() - state_time
-
+    
     local frame = video:frame(time)
     if not frame then return end
-
+    
     -- Set frame
     stack.set(nw.component.frame, id, frame)
     
+    clean_hitboxes(id, frame.slices, state.magic)
     for key, slice in pairs(frame.slices) do
-        create_slice_hitboxes(id, key, frame:get_slice(key, "body"), state.magic, frame.slice_data[key])
+        create_slice_hitboxes(
+            id, key, frame:get_slice(key, "body"), state.magic, frame.slice_data[key]
+        )
     end
 end
 
