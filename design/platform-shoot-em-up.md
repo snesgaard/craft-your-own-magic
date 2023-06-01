@@ -381,3 +381,5 @@ Anyways think this is too hard for me to figure out for now. Instead should focu
     * Try out the component and cleanup component approach
 
 The goal is to do the demoing. The danger in continuing the whole effect discussion is that I easily get stuck in an inifite lopp, incapable of figuring out which pros outwiehgts which cons.
+
+Actually just tried the cleanup approach. Wasn't actually all that hard to replicate and it is much more straightforward. Goes to show I shouldn't think generally, but rather on specific needs.
