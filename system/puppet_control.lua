@@ -85,17 +85,24 @@ function dash.position_change(id, distance, is_vertical)
     end
 end
 
-function dash.skip_motion(owner, d)
+function dash.cleanup_value(v) return v or 0 end
+
+function dash.cleanup_timer(d)
     return weak_assemble(
         {
-            {nw.component.skip_motion},
-            {nw.component.timer, d or dash.duration},
-            {nw.component.die_on_timer_done},
-            {nw.component.target, owner},
-            {nw.component.die_on_state_change, owner, "dash"}
+            {nw.component.timer, d or dash.duration}
         },
-        "skip_motion"
+        "dash_timer"
     )
+end
+
+function dash.skip_motion(id, duration)
+    stack.map(nw.component.skip_motion, id, add, 1)
+
+    stack.map(dash.cleanup_value, id, add, 1)
+    stack.set(dash.cleanup_timer, id, duration)
+
+    return true
 end
 
 dash.duration = 0.15
@@ -109,7 +116,19 @@ function dash.on_ground(id, state)
     if motion.is_on_ground(id) then stack.set(nw.component.can_dash, id) end
 end
 
+function dash.cleanup(id, state)
+    local v = stack.get(dash.cleanup_value, id)
+    if not v then return end
+    local t = stack.get(dash.cleanup_timer, id)
+    if not timer.is_done(t) then return end
+
+    stack.map(nw.component.skip_motion, id, sub, v)
+    stack.remove(dash.cleanup_value, id)
+    stack.remove(dash.cleanup_timer, id)
+end
+
 function dash.spin(id, state)
+    dash.cleanup(id)
     dash.on_ground(id)
     
     if dash.can(id, state) then
@@ -123,7 +142,7 @@ function dash.spin(id, state)
 
     stack.remove(nw.component.velocity, id)
     stack.remove(nw.component.can_dash, id)
-    stack.ensure(dash.skip_motion, state.data, id)
+    stack.ensure(dash.skip_motion, state.data, id, dash.duration)
 
     local p = stack.ensure(dash.position, state.data, id)
     local dp = stack.ensure(dash.position_change, state.data, id)

@@ -58,7 +58,7 @@ end
 
 function component.die_on_timer_done() return true end
 
-function component.skip_motion() return true end
+function component.skip_motion(v) return v or 0 end
 
 function component.target(...) return list(...) end
 

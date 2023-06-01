@@ -8,6 +8,11 @@ function motion.should_skip(id)
     end
 end
 
+function motion.should_skip(id)
+    print(stack.get(nw.component.skip_motion, id))
+    return (stack.get(nw.component.skip_motion, id) or 0) > 0
+end
+
 function motion.spin_gravity(id, g, dt)
     if motion.should_skip(id) then return end
 
