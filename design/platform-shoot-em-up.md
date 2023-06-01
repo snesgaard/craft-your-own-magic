@@ -308,3 +308,76 @@ I think I like somehting like a goblin shaman mc or something. Also had an idea 
 * Strike
 * Down-strike in air
 
+# 2023-06-01
+
+So I have implemented the basic player mechanics. Went with a rocket-fist concept about charging and flying punches. Also figured out how to store and configure hitbox information (slice data in Aseprite). So the next step is probably enemy AI and enemies in general. There are two components to this:
+
+* Enemy behavior
+* Combat system
+
+The behavior or script is how the enemy behaves. Which moves it makes based onw hat conditions. This should just be super simple like shovel knight or Skul. Sensors are probably going to be fairly important here. These are basically hitboxes that check certain regions in the world and return which objects overlaps with it. This way line of sight can be implemented, along with things like walking until an edge is met.
+
+Another thing that has been on my mind is in general how to handle buffs and other changes in state: as components or as separate entities.
+
+Take something like a poison effect ala Slay the Spire. Fundementally it needs a timer and a numerical value. The timer determines when the poison ticks and the numerical value determines how much damage is dealt pr tick. We can either model this as a component which contains the number and a timestamp, or a separate entity which contains the number, a target and a timer.
+
+Advantage of the component apporach is that it is much easier to understand and manipulate. Say we want to compute the total level of poison affecting the player. We would have to locate all entities with poison numerical value. Then filter based on their target. In the component based approach you simply read the number.
+
+For more conditional lifetime, we can again think of Slay the Spire. Take for instance the temporary strength buffs. Instead of creating some complicated buff entity with conditional lifetime, it instead creates two pieces of data. One is the actual strength increase. The other is a strength weakening component with the same numcerical value. The game is then coded in such a way that when the turn ends the weakening component is subtrated from the strength and removed.
+
+A similar situation can be thought of in terms of a player dash. In this state the player has two effects put on it:
+
+* skip motion
+* invincibility
+
+We can model this in the same manner. We create the actual data and some auxeliary data that tells the system to remove the original data on state change (decrement the numerical values).
+
+```lua
+stack.set(nw.component.invincibility, id)
+stack.set(nw.component.remove_on_state_change, id, "invincibility")
+```
+
+```lua
+stack.map(nw.component.invincibility, id, add, 1)
+stack.set(nw.component.on_state_change, id, "invincibility", "sub", 1)
+-- or more complicate condition
+stack.set(nw.component.after_time_or_state_change, id, 0.2, "invincibility", "sub", 1)
+```
+
+```lua
+stack.set(nw.component.invincibility, id)
+stack.assemble(
+    {
+        {nw.component.target, id}
+        {nw.component.operation, "invincibility", "remove"},
+        {nw.component.trigger, "state_change", id}
+    },
+    buff_id
+)
+```
+I like option 2 the best. Short and very readable. It just becomes a bit problomatic if something like this has multiple conditions. E.g. if invincibility should be removed after either 200ms or on state change. This would effectively require a unique component for unique combination of conditions case.
+
+In terms of option 3, one can simply add more trigger conditions that can work independently. The problems is of course that it reintroduces the whole buff as entity approach.
+
+Another apporach would be to take a rules based approach instead. Meaning no temporary modifcation of state, since we know that when the player is in dash state it is invincible and motion should be skipped. So we need not turn the invincility flag on or off since it is directly derived from the state flag. 
+
+The problem here is of course that some effects are purely state driven (e.g. buff placed by spell)
+and thus do not entirely resolve the problem.
+
+All in all it is very hard to chose since whether one or the other is better really depends on the application.
+
+My current need is:
+
+* Certain states needs to change depending on animation timers and state
+
+Anyways think this is too hard for me to figure out for now. Instead should focus on my immediate need:
+
+* Refactor 
+    * nw.component.puppet("player") -> nw.component.puppet, "player"
+    * nw.component.script("player") -> nw.component.script, "player"
+    * Local and global sensor checks
+    * Basic patrolling AI
+    * Only destroy and recreate hitboxes on magic value change. Otherwise simply change the collision state
+    * Try out the component and cleanup component approach
+
+The goal is to do the demoing. The danger in continuing the whole effect discussion is that I easily get stuck in an inifite lopp, incapable of figuring out which pros outwiehgts which cons.
