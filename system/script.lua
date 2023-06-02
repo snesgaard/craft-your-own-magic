@@ -92,9 +92,8 @@ local attack_task = {
 }
 ]]--
 
-function edge_patrol.spin_once(id, args)
-    edge_patrol.is_sensor_in_contact("fafa", id)
-    local task = {
+function edge_patrol.patrol_task(id)
+    return {
         ai.stateless_select,
             {edge_patrol.deactivate_ground, id},
             {ai.sequence_forget,
@@ -105,6 +104,94 @@ function edge_patrol.spin_once(id, args)
             {ai.sequence_forget,
                 {edge_patrol.set_move_intent, id, stack.get(nw.component.mirror, id) and -1 or 1}
             },
+    }
+end
+
+local function player_controlled_filter(item)
+    return stack.get(nw.component.player_controlled, item)
+end
+
+function edge_patrol.spot_player(_, id)
+    local query = collision.query_local(id, spatial():expand(400, 10), player_controlled_filter)
+    local player_id = unpack(query)
+    if not player_id then return "failure" end
+    stack.set(nw.component.target, id, player_id)
+    return "success"
+end
+
+function edge_patrol.move_to_player(_, id)
+    local target = stack.ensure(nw.component.target, id):unpack()
+    if not target then return "failure" end
+
+    local pos = stack.ensure(nw.component.position, id)
+    local pos_target = stack.ensure(nw.component.position, target)
+    local dx = pos_target.x - pos.x
+    
+    stack.set(nw.component.move_intent, id, dx > 0 and 1 or -1)
+    if math.abs(dx) < 100 then
+        --stack.set(nw.component.move_intent, id, 0)
+        return "success"
+    end
+
+
+    return "pending"
+end
+
+function edge_patrol.set_state(_, id, state, ...)
+    stack.set(nw.component.puppet_state, id, state, ...)
+    return "success"
+end
+
+function edge_patrol.perform_attack(_, id)
+    stack.set(nw.component.puppet_state, id, "punch_a")
+    return "success"
+end
+
+function edge_patrol.wait_for_attack(_, id)
+    return puppet_animator.is_done(id) and "success" or "pending"
+end
+
+function edge_patrol.wait(data, duration)
+    local time = stack.ensure(nw.component.time, data, clock.get())
+    return clock.get() - time >= duration and "success" or "pending"
+end
+
+function edge_patrol.charge(_, id)
+    stack.set(nw.component.punch_intent, id, true)
+    return stack.get(nw.component.puppet_state, id).name == "charge" and "success" or "pending"
+end
+
+function edge_patrol.punch(_, id)
+    local state = stack.get(nw.component.puppet_state, id)  
+    if state.name == "charge" then
+        stack.set(nw.component.punch_intent, id, false)
+        return "pending"
+    elseif state.name ~= "fly_punch" then
+        return "failure"
+    end
+
+    return "success"
+end
+
+function edge_patrol.attack_task(id)
+    return {
+        ai.sequence_forget,
+            {edge_patrol.spot_player, id},
+            {edge_patrol.move_to_player, id},
+            {edge_patrol.charge, id},
+            {edge_patrol.wait, 0.4},
+            {edge_patrol.set_move_intent, id, 0},
+            {edge_patrol.punch, id},
+            {edge_patrol.wait, 1.0}
+    }
+end
+
+function edge_patrol.spin_once(id, args)
+    edge_patrol.is_sensor_in_contact("fafa", id)
+    local task = {
+        ai.select_forget,
+            edge_patrol.attack_task(id),
+            edge_patrol.patrol_task(id)
     }
 
     ai.run(args, task)

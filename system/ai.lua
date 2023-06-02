@@ -32,7 +32,10 @@ end
 
 function ai.sequence_forget(data, ...)
     local status = ai.sequence(data, ...)
-    if status ~= "pending" then stack.remove(task_status, data) end
+    if status ~= "pending" then
+        stack.remove(task_status, data)
+        stack.remove(task_data, data)
+    end
     return status
 end
 
@@ -43,7 +46,9 @@ function ai.select(data, ...)
 
     for i, task in ipairs(tasks) do
         task_data[i] = task_data[i] or nw.ecs.id.weak("task")
-        if task_status[i] ~= "pending" then task_status[i] = run_task(task_data[i], unpack(task)) end
+        if not task_status[i] or task_status[i] == "pending" then
+            task_status[i] = run_task(task_data[i], unpack(task))
+        end
         if task_status[i] ~= "failure" then return task_status[i] end
     end
 
@@ -53,6 +58,12 @@ end
 function ai.stateless_select(data, ...)
     local status = ai.select(data, ...)
     stack.remove(task_status, data)
+    return status
+end
+
+function ai.select_forget(data, ...)
+    local status = ai.select(data, ...)
+    if status ~= "pending" then stack.remove(task_status, data) end
     return status
 end
 

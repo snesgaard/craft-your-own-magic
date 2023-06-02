@@ -7,7 +7,11 @@ function horizontal_movement.can_move(state)
 end
 
 function horizontal_movement.spin(id, state)
-    if not horizontal_movement.can_move(state) then return end 
+    if not horizontal_movement.can_move(state) then
+        local v = stack.ensure(nw.component.velocity, id)
+        v.x = 0
+        return
+    end 
     for _, dt in event.view("update") do
         local dir = stack.get(nw.component.move_intent, id) or 0
         local speed = 150
@@ -341,12 +345,14 @@ function boxer.fly_punch.spin(id, state)
 
     stack.ensure(dash.skip_motion, state.data, id, boxer.fly_punch.duration)
     local p = stack.ensure(dash.position, state.data, id)
-    local d = stack.ensure(dash.position_change, state.data, id, boxer.fly_punch.distance, state.args.vertical)
+    local args = state.args or {}
+    local d = stack.ensure(dash.position_change, state.data, id, boxer.fly_punch.distance, args.vertical)
     local t = clock.get() - state.time
 
     for _, dt in event.view("update") do
         local next_p = ease.outQuad(math.min(t, boxer.fly_punch.duration), p, d, boxer.fly_punch.duration)
-        collision.move_to(id, next_p.x, next_p.y)
+        local next_p_future = ease.outQuad(math.min(t + dt, boxer.fly_punch.duration), p, d, boxer.fly_punch.duration)
+        collision.move(id, next_p_future.x - next_p.x, next_p_future.y - next_p.y)
     end
 
     if t < boxer.fly_punch.duration then return end

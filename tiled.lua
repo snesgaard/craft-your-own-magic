@@ -151,11 +151,26 @@ function type_loader.edge_patrol(object, index, layer)
     collision.register(id, spatial(-w / 2, -h, w, h))
     collision.warp_to(id, object.x, object.y)
 
+    local sprite_state_map = dict{
+        idle = Video.from_atlas("art/characters", "mc-boxer/idle"):loop(),
+        walk = Video.from_atlas("art/characters", "mc-boxer/run"):loop(),
+        charge = Video.from_atlas("art/characters", "mc-boxer/charge"):loop(),
+        fly_punch_h = Video.from_atlas("art/characters", "mc-boxer/fly_punch_h"):loop(),
+        fly_punch_v = Video.from_atlas("art/characters", "mc-boxer/fly_punch_v"):loop(),
+        ascend = Video.from_atlas("art/characters", "mc-boxer/idle"):loop(),
+        descend = Video.from_atlas("art/characters", "mc-boxer/idle"):loop(),
+        punch_a = Video.from_atlas("art/characters", "mc-boxer/punch_a"):speed(0.5):once(),
+        punch_b = Video.from_atlas("art/characters", "mc-boxer/punch_b"):speed(0.5):once(),
+    }
+
     local c = list(
         {nw.component.drawable, nw.drawable.bump_body},
         {nw.component.gravity},
         {nw.component.script("edge_patrol")},
-        {nw.component.move_speed, 30}
+        {nw.component.drawable, nw.drawable.frame},
+        {nw.component.puppet("boxer-player")},
+        {nw.component.puppet_state_map, sprite_state_map}
+        --{nw.component.move_speed, 30}
     )
     stack.assemble(c, id)
 
