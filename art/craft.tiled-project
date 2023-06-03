@@ -27,6 +27,11 @@
                     "name": "drawable",
                     "type": "string",
                     "value": "bump_body"
+                },
+                {
+                    "name": "terrain",
+                    "type": "bool",
+                    "value": true
                 }
             ],
             "name": "generic",

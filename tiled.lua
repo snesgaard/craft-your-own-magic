@@ -268,6 +268,7 @@ function tiled.assemble_from_properties(properties)
     if p.damage then table.insert(c, {nw.component.damage, p.damage}) end
     if p.script then table.insert(c, {nw.component.script(p.script)}) end
     if p.target then table.insert(c, {nw.component.target, p.target.id}) end
+    if p.terrain then table.insert(c, {nw.component.is_terrain}) end
 
     return c
 end
