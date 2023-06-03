@@ -1,11 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="1" nextlayerid="3" nextobjectid="12">
+<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="1" nextlayerid="3" nextobjectid="14">
  <editorsettings>
   <export target="../../../../../../../tmp/test.lua" format="lua"/>
  </editorsettings>
  <tileset firstgid="1" source="../tileset/ground.tsx"/>
  <layer id="1" name="geometry" width="30" height="20">
   <data encoding="csv">
+   <chunk x="-32" y="-16" width="16" height="16">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,
+0,0,0,0,0,0,0,0,0,0,0,28,29,29,29,17,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,28,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</chunk>
    <chunk x="-16" y="-16" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -14,9 +32,9 @@
 0,0,0,0,0,0,0,0,0,0,0,0,1,4,0,0,
 0,0,0,0,0,0,0,0,0,0,1,2,35,33,4,0,
 0,0,0,0,0,0,0,0,0,0,28,29,29,29,31,0,
-0,0,0,0,0,0,1,4,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,28,57,4,1,2,2,2,2,2,2,
-0,0,0,0,0,0,1,35,33,61,17,11,11,11,11,11,
+2,2,2,2,2,2,2,4,0,0,0,0,0,0,0,0,
+11,11,11,11,11,11,11,33,4,1,2,2,2,2,2,2,
+29,29,29,29,29,29,17,11,33,61,17,11,11,11,11,11,
 0,0,0,0,0,0,10,11,11,33,35,11,11,15,29,17,
 0,0,0,0,0,0,10,11,11,11,11,11,15,57,2,35,
 0,0,0,0,0,0,10,15,17,11,11,11,33,35,11,11,
@@ -102,7 +120,7 @@
   <object id="1" name="camera_spawn" type="camera_spawn" x="-36" y="-51">
    <point/>
   </object>
-  <object id="2" type="mc_boxer" x="19" y="-167" width="25" height="19.6667"/>
+  <object id="2" type="mc_boxer" x="-244.333" y="-167.333" width="25" height="19.6667"/>
   <object id="3" type="generic" x="140.667" y="-212.667" width="48.6667" height="21.3333">
    <properties>
     <property name="breakable" type="bool" value="true"/>
@@ -130,6 +148,15 @@
   <object id="7" type="generic" x="-102" y="-378.667" width="40.3333" height="32.3333"/>
   <object id="8" type="edge_patrol" x="166" y="-146.667">
    <point/>
+  </object>
+  <object id="12" type="switch" x="-191.333" y="-145.333">
+   <point/>
+  </object>
+  <object id="13" type="door" x="-291.333" y="-204.667" width="24" height="58.3333">
+   <properties>
+    <property name="script" value="door"/>
+    <property name="target" type="object" value="12"/>
+   </properties>
   </object>
  </objectgroup>
 </map>

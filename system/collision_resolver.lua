@@ -69,6 +69,10 @@ function collision_resolver.handle_collision(item, other, colinfo)
     if stack.get(nw.component.breaker, item) and stack.get(nw.component.breakable, other) then
         stack.destroy(other)
     end
+
+    if stack.get(nw.component.damage, item) and stack.get(nw.component.switch, other) ~= nil then
+        stack.set(nw.component.switch, other, true)
+    end
 end
 
 function collision_resolver.spin()

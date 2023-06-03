@@ -180,6 +180,10 @@ end
 
 function component.breaker() return true end
 
+function component.switch(state) return state end
+
 function component.jump_extra() return true end
+
+function component.damage(d) return d end
 
 return component

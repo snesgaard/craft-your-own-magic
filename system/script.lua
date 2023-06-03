@@ -259,6 +259,25 @@ function player.spin()
     end
 end
 
+local door = {}
+
+function door.spin_once(id)
+    local target = stack.ensure(nw.component.target, id):unpack()
+    if not target then return end
+    
+    if stack.get(nw.component.switch, target) then
+        stack.set(nw.component.color, id, 0, 1, 0)
+    else
+        stack.set(nw.component.color, id, 1, 0, 0)
+    end
+end
+
+function door.spin()
+    for id, _ in stack.view_table(nw.component.script("door")) do
+        door.spin_once(id)
+    end
+end
+
 local script = {}
 
 function script.spin()
@@ -266,6 +285,7 @@ function script.spin()
     player_boxer.spin()
     patrol_box.spin()
     edge_patrol.spin()
+    door.spin()
 end
 
 return script 

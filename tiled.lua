@@ -215,6 +215,45 @@ function type_loader.mc_boxer(object, index, layer)
     return id
 end
 
+function type_loader.switch(object, index, layer)
+    local id = object.id
+
+    local x, h, w, h = object.x, object.y, object.width, object.height
+    local w, h = 16, 16
+    collision.register(id, spatial(-w / 2, -h, w, h))
+    collision.warp_to(id, object.x, object.y)
+
+    stack.assemble(
+        {
+            {nw.component.is_ghost},
+            {nw.component.drawable, nw.drawable.switch},
+            {nw.component.switch, false}
+        },
+        id
+    )
+    stack.assemble(tiled.assemble_from_properties(object.properties), id)
+
+    return id
+end
+
+function type_loader.door(object, index, layer)
+    local id = object.id
+
+    local x, h, w, h = object.x, object.y, object.width, object.height
+    collision.register(id, spatial(-w / 2, -h, w, h))
+    collision.warp_to(id, object.x + w / 2, object.y + h)
+
+    stack.assemble(
+        {
+            {nw.component.drawable, nw.drawable.bump_body},
+        },
+        id
+    )
+    stack.assemble(tiled.assemble_from_properties(object.properties), id)
+
+    return id
+end
+
 function tiled.assemble_from_properties(properties)
     local c = list()
     local p = properties
@@ -224,6 +263,9 @@ function tiled.assemble_from_properties(properties)
     if p.ghost then table.insert(c, {nw.component.is_ghost}) end
     if p.breakable then table.insert(c, {nw.component.breakable}) end
     if p.breaker then table.insert(c, {nw.component.breaker}) end
+    if p.damage then table.insert(c, {nw.component.damage, p.damage}) end
+    if p.script then table.insert(c, {nw.component.script(p.script)}) end
+    if p.target then table.insert(c, {nw.component.target, p.target.id}) end
 
     return c
 end
