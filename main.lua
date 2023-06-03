@@ -55,7 +55,9 @@ local function default_collision_filter(item, other)
         return 
     end
 
-    return "slide"
+    if stack.get(nw.component.is_terrain, other) then return "slide" end
+
+    return "cross"
 end
 
 function weak_assemble(arg, tag)
