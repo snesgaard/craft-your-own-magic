@@ -101,9 +101,7 @@ function edge_patrol.patrol_task(id)
                 {edge_patrol.set_move_intent, id, 0},
                 {edge_patrol.flip, id}
             },
-            {ai.sequence_forget,
-                {edge_patrol.set_move_intent, id, stack.get(nw.component.mirror, id) and -1 or 1}
-            },
+            {edge_patrol.set_move_intent, id, stack.get(nw.component.mirror, id) and -1 or 1}
     }
 end
 

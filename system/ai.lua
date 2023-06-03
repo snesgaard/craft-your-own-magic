@@ -58,12 +58,16 @@ end
 function ai.stateless_select(data, ...)
     local status = ai.select(data, ...)
     stack.remove(task_status, data)
+    stack.remove(task_data, data)
     return status
 end
 
 function ai.select_forget(data, ...)
     local status = ai.select(data, ...)
-    if status ~= "pending" then stack.remove(task_status, data) end
+    if status ~= "pending" then
+        stack.remove(task_status, data)
+        stack.remove(task_data, data)
+    end
     return status
 end
 

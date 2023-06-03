@@ -383,3 +383,15 @@ Anyways think this is too hard for me to figure out for now. Instead should focu
 The goal is to do the demoing. The danger in continuing the whole effect discussion is that I easily get stuck in an inifite lopp, incapable of figuring out which pros outwiehgts which cons.
 
 Actually just tried the cleanup approach. Wasn't actually all that hard to replicate and it is much more straightforward. Goes to show I shouldn't think generally, but rather on specific needs.
+
+# 2023-06-03
+
+So have succesfully implemented an AI agent using the behavior tree approach. It's behavior is fairly simple. It patrols from side to side until the player is spotted. Then it moves towards the player and attacks them. Furthermore it uses the player puppet, demonstrating that the decoupling between controls and puppet is working nicely. Also demonstrated with both simple attacking and a more complicated charge -> fly punch cycle.
+
+Next step is to build more of the basic elements. According to my notes these includes:
+
+* Switches, lever and ground
+* Doors 
+* Movable blocks
+
+Afterwards, I should revisit the design documents and draw up some levels. Also combat system.
