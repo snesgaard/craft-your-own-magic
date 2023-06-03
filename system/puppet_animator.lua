@@ -31,6 +31,8 @@ local function slice_ids()
     return {}
 end
 
+local function none_filter() return end
+
 local function create_slice_hitboxes(id, key, slice, magic, properties)
     -- Slice collision detection
     local slice_ids = stack.ensure(slice_ids, id)
@@ -51,7 +53,7 @@ local function create_slice_hitboxes(id, key, slice, magic, properties)
 
     collision.register(s_id, slice)
     collision.warp_to(s_id, p.x, p.y)
-    collision.flip_to(s_id, stack.get(nw.component.mirror, id))
+    collision.flip_to(s_id, stack.get(nw.component.mirror, id), none_filter)
     -- Move to check for collision
     local _, _, cols = collision.move(s_id, 0, 0)
 end

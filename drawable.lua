@@ -29,7 +29,7 @@ function drawable.switch(id)
 
     gfx.push("all")
     nw.drawable.push_state(id)
-    if stack.get(nw.component.switch, id) then
+    if stack.get(nw.component.switch_state, id) then
         gfx.setColor(0.1, 0.8, 0.2)
     else
         gfx.setColor(0.8, 0.2, 0.1)

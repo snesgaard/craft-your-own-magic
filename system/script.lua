@@ -127,8 +127,11 @@ function edge_patrol.move_to_player(_, id)
     
     stack.set(nw.component.move_intent, id, dx > 0 and 1 or -1)
     if math.abs(dx) < 100 then
-        --stack.set(nw.component.move_intent, id, 0)
         return "success"
+    end
+
+    if math.abs(dx) > 300 then
+        return "failure"
     end
 
 
@@ -265,10 +268,18 @@ function door.spin_once(id)
     local target = stack.ensure(nw.component.target, id):unpack()
     if not target then return end
     
-    if stack.get(nw.component.switch, target) then
+    local state = stack.get(nw.component.switch_state, target)
+    if state then
         stack.set(nw.component.color, id, 0, 1, 0)
     else
         stack.set(nw.component.color, id, 1, 0, 0)
+    end
+
+    for _, dt in event.view("update") do
+        local x, y, w, h = collision.get_model_hitbox(id)
+        local hb = spatial(x, state and -2 * h or -h, w,  h)
+        collision.unregister(id)
+        collision.register(id, hb)
     end
 end
 

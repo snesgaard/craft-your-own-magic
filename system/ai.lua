@@ -58,7 +58,6 @@ end
 function ai.stateless_select(data, ...)
     local status = ai.select(data, ...)
     stack.remove(task_status, data)
-    stack.remove(task_data, data)
     return status
 end
 

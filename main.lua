@@ -27,6 +27,10 @@ decorate(nw.drawable, require "drawable", true)
 
 Frame.slice_to_pos = Spatial.centerbottom
 
+function math.round(v)
+    return math.floor(v + 0.5)
+end
+
 local function spin()
     while event.spin() > 0 do
         clock.spin()
@@ -45,6 +49,10 @@ end
 local function default_collision_filter(item, other)
     if stack.get(nw.component.is_ghost, item) or stack.get(nw.component.is_ghost, other) then
         return "cross"
+    end
+
+    if stack.get(nw.component.is_terrain, item) and stack.get(nw.component.is_terrain, other) then
+        return 
     end
 
     return "slide"

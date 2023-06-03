@@ -120,7 +120,7 @@
   <object id="1" name="camera_spawn" type="camera_spawn" x="-36" y="-51">
    <point/>
   </object>
-  <object id="2" type="mc_boxer" x="-244.333" y="-167.333" width="25" height="19.6667"/>
+  <object id="2" name="player" type="mc_boxer" x="54" y="-244.333" width="25" height="19.6667"/>
   <object id="3" type="generic" x="140.667" y="-212.667" width="48.6667" height="21.3333">
    <properties>
     <property name="breakable" type="bool" value="true"/>
@@ -128,7 +128,7 @@
     <property name="drawable" value="bump_body"/>
    </properties>
   </object>
-  <object id="4" type="generic" x="107.333" y="-193" width="10.6667" height="44.3333">
+  <object id="4" type="generic" x="49.333" y="-182.333" width="10.6667" height="44.3333">
    <properties>
     <property name="breakable" type="bool" value="true"/>
     <property name="collision" type="bool" value="true"/>

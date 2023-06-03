@@ -32,6 +32,7 @@ local function load_tilelayer(index, layer)
                 local id = nw.ecs.id.weak("tile")
                 collision.register(id, spatial(0, 0, tile.width, tile.height))
                 collision.warp_to(id, (chunk.x + x - 1) * tile.width, (chunk.y + y - 1) * tile.height)
+                stack.set(nw.component.is_terrain, id)
                 table.insert(chunk.ids, id)
             end
         end
@@ -239,13 +240,14 @@ end
 function type_loader.door(object, index, layer)
     local id = object.id
 
-    local x, h, w, h = object.x, object.y, object.width, object.height
+    local x, h, w, h = object.x, object.y, math.round(object.width), math.round(object.height)
     collision.register(id, spatial(-w / 2, -h, w, h))
     collision.warp_to(id, object.x + w / 2, object.y + h)
 
     stack.assemble(
         {
             {nw.component.drawable, nw.drawable.bump_body},
+            {nw.component.is_terrain}
         },
         id
     )

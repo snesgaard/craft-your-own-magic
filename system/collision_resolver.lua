@@ -71,7 +71,7 @@ function collision_resolver.handle_collision(item, other, colinfo)
     end
 
     if stack.get(nw.component.damage, item) and stack.get(nw.component.switch, other) ~= nil then
-        stack.set(nw.component.switch, other, true)
+        stack.set(nw.component.switch_state, other, true)
     end
 end
 
