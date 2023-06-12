@@ -180,7 +180,7 @@ function edge_patrol.attack_task(id)
             {edge_patrol.spot_player, id},
             {edge_patrol.move_to_player, id},
             {edge_patrol.charge, id},
-            {edge_patrol.wait, 0.4},
+            {edge_patrol.wait, 1.0},
             {edge_patrol.set_move_intent, id, 0},
             {edge_patrol.punch, id},
             {edge_patrol.wait, 1.0}

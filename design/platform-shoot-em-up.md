@@ -395,3 +395,26 @@ Next step is to build more of the basic elements. According to my notes these in
 * Movable blocks
 
 Afterwards, I should revisit the design documents and draw up some levels. Also combat system.
+
+# 2023-06-12
+
+So again things have been implemented. Also made a new character moveset using a rig-like animation approach. Works fairly well. Next step is probably making an enemy agent or two: Bonk-bot and Shoot-bot:
+
+* Rough animations
+* Ai with simple patrol -> attack pattern
+* Base damage and health system
+* Hp display
+
+The idea is to prototype the demonstrate some basic combat and abilities and stuff.
+
+Also heres a card game idea for a deckbuilder CCG. Think a combat system ala Netrunner. You have two types of cards: spells and relics. Spells are normal, instant effects.
+
+Relics are sortoff a minion replacement. Instead of being a minion on the board, it is sortof like hardware and software in netrunner. It gives you permanent abilities and reactions. So you can setup a complex series of interactions ala hearthstone, but without having to deal with minions you need to command.
+
+I guess minions could be okay as well, as initially one only needs to draw a single sprite. Also have good idea for the card/effect resolution engine. But man all the GUI really kills me :/
+
+First all. All cards and elements always exists. They can be toggled or moved around, but never destroyed. If a character dies, it is moved to a dead pile.
+
+Second GUI needs to be figured out some how. Again thing an approach of pure rendering with some background logic is good. So clicks on the GUI is merely transferred back to the logic as events.
+
+And model as much of the game as data as possible. Also find GUI lib probably

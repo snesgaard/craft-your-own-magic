@@ -48,8 +48,22 @@ end
 
 function motion.move_intent(dt)
     for id, intent in stack.view_table(nw.component.move_intent) do
-        local speed = stack.get(nw.component.move_speed, id) or 0
-        collision.move(id, speed * dt * intent, 0)
+        if stack.ensure(nw.component.disable_move, id) == 0 then
+            local speed = stack.get(nw.component.move_speed, id) or 0
+            collision.move(id, speed * dt * intent, 0)
+        end
+    end
+end
+
+function motion.flip_intent(dt)
+    for id, intent in stack.view_table(nw.component.move_intent) do
+        if stack.ensure(nw.component.disable_flip, id) == 0 then
+            if intent < 0 then
+                collision.flip_to(id, true)
+            elseif  0 < intent then
+                collision.flip_to(id, false)
+            end
+        end
     end
 end
 
@@ -64,6 +78,7 @@ function motion.spin()
         end
 
         motion.move_intent(dt)
+        motion.flip_intent(dt)
     end
 
     for _, ax, ay, cols in event.view("move") do

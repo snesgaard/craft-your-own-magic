@@ -279,6 +279,124 @@ function player_puppet.spin()
     end
 end
 
+local hit = {}
+
+function hit.cleanup_component(v) return v or 0 end
+
+function hit.clean(id, state)
+    local c = stack.get(hit.cleanup_component, id)
+    if not c or c == 0 then return end
+
+    stack.remove(hit.cleanup_component, id)
+
+    stack.map(nw.component.disable_move, id, add, -c)
+    stack.map(nw.component.disable_flip, id, add, -c)
+end
+
+function hit.intent(id, state)
+    if state.name ~= "idle" then return end
+    local intent = stack.get(nw.component.attack_intent, id)
+    if not intent or timer.is_done(intent) then return end
+
+    stack.set(nw.component.puppet_state, id, "hit")
+    stack.remove(nw.component.attack_intent, id)
+end
+
+function hit.setup(id)
+    stack.map(hit.cleanup_component, id, add, 1)
+    stack.map(nw.component.disable_move, id, add, 1)
+    stack.map(nw.component.disable_flip, id, add, 1)
+end
+
+function hit.spin(id, state)
+    hit.intent(id, state)
+
+    if state.name ~= "hit" then
+        hit.clean(id)
+        return
+    end
+
+    stack.ensure(hit.setup, state.data, id)
+
+    if not puppet_animator.is_done(id) then return end
+
+    stack.set(nw.component.puppet_state, id, "idle")
+end
+
+--[[
+{
+    from = "idle",
+    to = "hit",
+    intent = nw.component.attack_intent
+}
+
+local update = {}
+
+function trigger.idle(id, state)
+    if fsm.pop_intent(nw.component.hit_intent) then
+        return "hit"
+    elseif fsm.pop(nw.component.dash_intent) then
+        return "dash"
+    elseif stack.get(nw.component.charge_intent) then
+        return "charge"
+    end
+end
+
+function trigger.hit(id, state)
+    if puppet_animator.is_done(id) then return "idle" end
+end
+
+function enter.hit(id, state)
+    stack.map(nw.component.disable_move, id, add, 1)
+    stack.map(nw.component.disable_flip, id, add, 1)
+end
+
+function exit.hit(id, state)
+    stack.map(nw.component.disable_move, id, sub, 1)
+    stack.map(nw.component.disable_flip, id, sub, 1)
+end
+
+function update.charge(id, state)
+    local t = clock.get() - state.time
+
+    if t < duration and not stack.get(nw.component.cleanup, state.data) then
+        stack.set(nw.component.do_cleanup, state.data)
+
+        stack.map(nw.component.disable_dash, id, add, 1)
+        stack.map(nw.component.disable_jump, id, add, 1)
+    end
+
+    local disable_dash = stack.ensure(nw.component.disable_dash, state.data) > 0
+    local disable_jump = stack.ensure(nw.component.disable_jump, state.data) > 0
+
+    if not disable_dash and fsm.pop_intent(nw.component.dash_intent, id) then
+        return "dash"
+    elseif not disable_jump and jump.can(id) and fsm.pop_intent(nw.component.jump, id) then
+        jump.perform(id)
+        return "idle"
+    end
+
+    if stack.get(nw.component.charge_intent, id) then return end
+    
+    local t = clock.get() - state.time
+    return t < duration and "punch" or "fly_punch"
+end
+
+function enter.charge(id, state)
+    stack.map(nw.component.disable_move, id, add, 1)
+end
+
+function exit.charge(id, state)
+    stack.map(nw.component.disable_move, id, sub, 1)
+
+    if not stack.get(nw.component.cleanup, state.data) then return end
+
+    stack.map(nw.component.disable_dash, id, sub, 1)
+    stack.map(nw.component.disable_jump, id, sub, 1)
+end
+
+]]--
+
 local boxer = {}
 
 boxer.charge = {
@@ -406,11 +524,23 @@ function boxer.spin()
     end
 end
 
+local gobbo = {}
+
+function gobbo.spin()
+    for id, _ in stack.view_table(nw.component.puppet("gobbo")) do
+        local state = stack.ensure(nw.component.puppet_state, id)
+        jump.spin(id, state)
+        dash.spin(id, state)
+        hit.spin(id, state)
+    end
+end
+
 local puppet_control = {boxer=boxer}
 
 function puppet_control.spin()
     player_puppet.spin()
     boxer.spin()
+    gobbo.spin()
 end
 
 return puppet_control

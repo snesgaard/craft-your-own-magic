@@ -190,4 +190,8 @@ function component.damage(d) return d end
 
 function component.is_terrain() return true end
 
+function component.disable_move(v) return v or 0 end
+
+function component.disable_flip(v) return v or 0 end
+
 return component
