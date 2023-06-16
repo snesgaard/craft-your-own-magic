@@ -194,4 +194,10 @@ function component.disable_move(v) return v or 0 end
 
 function component.disable_flip(v) return v or 0 end
 
+function component.debug() return true end
+
+function component.health(h) return h or 0 end
+
+function component.hit_registry() return {} end
+
 return component

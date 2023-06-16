@@ -27,6 +27,12 @@ decorate(nw.drawable, require "drawable", true)
 
 Frame.slice_to_pos = Spatial.centerbottom
 
+function debug(id) return stack.get(nw.component.debug, id) end
+
+function get_video(key, atlas_key)
+    return Video.from_atlas(atlas_key or "art/characters", key)
+end
+
 function math.round(v)
     return math.floor(v + 0.5)
 end
@@ -111,6 +117,15 @@ function love.draw()
     gfx.push()
     painter.push_transform()
     if show_collision then collision.draw() end
+    gfx.pop()
+
+    gfx.push()
+    local test_nodes = {
+        {"foo"},
+        {"bar", "baz"}
+    }
+
+    ai.painter.draw(test_nodes)
     gfx.pop()
 end
 

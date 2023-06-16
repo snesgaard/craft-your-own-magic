@@ -53,26 +53,46 @@ function collision_resolver.trigger_effect(effect_id, user_id, target_id)
     effect_func(user_id, target_id, power)
 end
 
+function collision_resolver.already_processed(owner, target, item, other)
+    local r = stack.ensure(nw.component.hit_registry, item)
+    if r[target] then return true end
+    r[target] = true
+end
+
+function collision_resolver.damage(owner, target, item)
+    local damage = stack.get(nw.component.damage, item)
+    local hp = stack.get(nw.component.health, target)
+    if not damage or not hp then return end
+    local real_damage = math.min(hp, damage)
+    local next_hp = hp - real_damage
+
+    local info = {
+        damage = real_damage,
+        target = target,
+        owner = owner,
+    }
+
+    event.emit("damage", info)
+end
+
 function collision_resolver.handle_collision(item, other, colinfo)
     local owner = stack.get(nw.component.owner, item) or item
     local target = stack.get(nw.component.owner, other) or other
     local name = stack.get(nw.component.name, item)
 
     local magic = stack.get(nw.component.magic, item)
-    
-    for effect_id, hitbox_name in stack.view_table(nw.component.hitbox_attention(owner)) do
-        if magic == stack.get(nw.component.magic, effect_id) and hitbox_name == name then
-            collision_resolver.trigger_effect(effect_id, owner, target)
-        end
-    end
+
+    if collision_resolver.already_processed(owner, target, item, other) then return end
 
     if stack.get(nw.component.breaker, item) and stack.get(nw.component.breakable, other) then
         stack.destroy(other)
     end
 
     if stack.get(nw.component.damage, item) and stack.get(nw.component.switch, other) ~= nil then
-        stack.set(nw.component.switch_state, other, true)
+        stack.map(nw.component.switch_state, other, function(v) return not v end)
     end
+
+    collision_resolver.damage(owner, target, item)
 end
 
 function collision_resolver.spin()

@@ -73,25 +73,6 @@ function edge_patrol.deactivate_ground(_, id)
     return motion.is_on_ground(id) and "failure" or "success"
 end
 
---[[
-local attack_task = {
-    ai.sequence,
-        {edge_patrol.acquire_target, id},
-        {edge_patrol.rng_roll, id}
-        {ai.select,
-            {ai.sequence,
-                {ai.condition, rng_check, id, 0.1},
-                normal_attack(id)
-            },
-            {ai.sequence,
-                {ai.condition, rng_check, id, 0.3},
-                ranged_attack(id)
-            },
-            retreat(id)
-        },
-}
-]]--
-
 function edge_patrol.patrol_task(id)
     return {
         ai.stateless_select,
@@ -289,6 +270,19 @@ function door.spin()
     end
 end
 
+local bonk_bot = {}
+
+function bonk_bot.spin_once(id, args)
+    local task = edge_patrol.patrol_task(id)
+    ai.run(args, task)
+end
+
+function bonk_bot.spin()
+    for id, args in stack.view_table(nw.component.script("bonk_bot")) do
+        bonk_bot.spin_once(id, args)
+    end
+end
+
 local script = {}
 
 function script.spin()
@@ -297,6 +291,7 @@ function script.spin()
     patrol_box.spin()
     edge_patrol.spin()
     door.spin()
+    bonk_bot.spin()
 end
 
 return script 

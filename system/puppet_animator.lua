@@ -8,9 +8,9 @@ function state_resolver.idle(id, state_map, state)
     else
         local v = stack.ensure(nw.component.velocity, id)
         if v.y < 0 then
-            return state_map.ascend
+            return state_map.ascend or state_map.idle
         else
-            return state_map.descend
+            return state_map.descend or state_map.idle
         end
     end
 end

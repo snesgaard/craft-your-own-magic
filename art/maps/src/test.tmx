@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="1" nextlayerid="3" nextobjectid="14">
+<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="1" nextlayerid="3" nextobjectid="15">
  <editorsettings>
   <export target="../../../../../../../tmp/test.lua" format="lua"/>
  </editorsettings>
@@ -146,7 +146,7 @@
    <polyline points="0,0 91,4.33333 156.333,32.6667 205.333,7.33333"/>
   </object>
   <object id="7" type="generic" x="-102" y="-378.667" width="40.3333" height="32.3333"/>
-  <object id="8" type="edge_patrol" x="166" y="-146.667">
+  <object id="8" type="edge_patrol" x="166" y="-146.667" visible="0">
    <point/>
   </object>
   <object id="12" type="switch" x="-191.333" y="-145.333">
@@ -157,6 +157,9 @@
     <property name="script" value="door"/>
     <property name="target" type="object" value="12"/>
    </properties>
+  </object>
+  <object id="14" name="bonk" type="bonk_bot" x="197.667" y="-149.333">
+   <point/>
   </object>
  </objectgroup>
 </map>

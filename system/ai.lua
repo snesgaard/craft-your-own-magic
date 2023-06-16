@@ -71,6 +71,9 @@ function ai.select_forget(data, ...)
 end
 
 function ai.run(data, task)
+    if data == nil then
+        error("Data id was nil")
+    end
     return run_task(data, unpack(task))
 end
 
@@ -82,5 +85,35 @@ end
 function ai.condition(data, func, ...)
     return func(...) and "success" or "failure"
 end
+
+local painters = {}
+
+function painters.sequence(data, func, ...)
+    local subtasks 
+end
+
+function painters.draw(levels, edges)
+    local root = spatial(0, 0, 100, 50)
+
+    local text_opt = {
+        align = "center",
+        valign = "center",
+        font = painter.font(80),
+        scale = 4
+    }
+
+    for i, nodes in ipairs(levels) do
+        local shape = root
+
+        for j, node in ipairs(nodes) do
+            painter.draw_text("foobar", shape, text_opt)
+            shape = shape:right(10, 0)
+        end
+
+        root = root:down(0, 10)
+    end
+end
+
+ai.painter = painters
 
 return ai

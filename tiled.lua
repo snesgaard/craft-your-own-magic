@@ -43,7 +43,7 @@ local function load_tilelayer(index, layer)
             {nw.component.layer, index},
             {nw.component.tilelayer, layer},
             {nw.component.drawable, nw.drawable.tilelayer},
-            {nw.component.hidden, not layer.visible}
+            {nw.component.hidden, not layer.visible},
         },
         layer
     )
@@ -79,7 +79,7 @@ end
 
 function tiled.load_object(object, index, layer)
     local f = tiled.type_loader[object.type]
-    if not f then
+    if not f or not object.visible then
         print("No loader for type", object.type)
         return
     end
@@ -244,6 +244,36 @@ function type_loader.gobbo(object, index, layer)
             {nw.component.script("boxer-player")},
             {nw.component.layer, index},
             {nw.component.move_speed, 100}
+        },
+        id
+    )
+
+    return id
+end
+
+function type_loader.bonk_bot(object, index, layer)
+    local id = object.id
+    
+    local x, y = object.x + object.width / 2, object.y + object.height
+    local w, h = 8, 28
+    collision.register(id, spatial(-w / 2, -h, w, h))
+    collision.warp_to(id, x, y)
+
+    local sprite_state_map = {
+        idle = get_video("bonk_bot/idle"):loop()
+    }
+
+    stack.assemble(
+        {
+            {nw.component.gravity},
+            {nw.component.drawable, nw.drawable.frame},
+            {nw.component.puppet_state_map, sprite_state_map},
+            {nw.component.puppet_state, "idle"},
+            {nw.component.layer, index},
+            {nw.component.move_speed, 35},
+            {nw.component.health, 10},
+            {nw.component.debug},
+            {nw.component.script("bonk_bot")}
         },
         id
     )

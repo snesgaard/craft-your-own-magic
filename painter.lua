@@ -73,6 +73,18 @@ local DEFAULT_OPT = {
     font = painter.font(8)
 }
 
+local function compute_valign(text, font, w, h, scale, valign)
+    local _, segs = font:getWrap(text, w / scale)
+    local th = #segs * font:getHeight() * scale
+    if valign == "center" then
+        return (h  - th) * 0.5
+    elseif valign == "bottom" then
+        return h - th
+    end
+
+    return 0
+end
+
 function painter.draw_text(text, area, opt)
     local opt = opt or DEFAULT_OPT
     local align = opt.align or DEFAULT_OPT.align
