@@ -25,7 +25,6 @@ function patrol_box.spin_once(id, args)
             {patrol_box.move_to, id, vec2(-100, -100)},
             {patrol_box.move_to, id, vec2(0, -100)}
     }
-
     ai.run(args, task)
 end
 
@@ -158,7 +157,7 @@ end
 function edge_patrol.attack_task(id)
     return {
         ai.sequence_forget,
-            {edge_patrol.spot_player, id},
+            {edge_patrol.spot_player, id, name="spot_player"},
             {edge_patrol.move_to_player, id},
             {edge_patrol.charge, id},
             {edge_patrol.wait, 1.0},
@@ -187,6 +186,129 @@ end
 
 local player_boxer = {}
 
+function player_boxer.pop_intent(comp, id)
+    local intent = stack.get(comp, id)
+    if not intent or timer.is_done(intent) then return end
+    stack.remove(comp, id)
+    return true
+end
+
+function player_boxer.pop_extra_jump()
+    local v = stack.get(nw.component.jump_extra, id)
+    if v then stack.remove(nw.component.jump_extra, id) end
+    return v
+end
+
+function player_boxer.jump(id)
+    return 
+    ai.sequence {
+        ai.select {
+            ai.condition(motion.is_on_ground, id),
+            ai.condition(stack.get, nw.component.jump_extra, id)
+        },
+        ai.condition(player_boxer.pop_intent, nw.component.jump_intent, id),
+        ai.action(function()
+            motion.jump(id, 40)
+            if motion.is_on_ground(id) then
+                stack.remove(nw.component.on_ground, id)
+                stack.set(nw.component.jump_extra, id)
+            else
+                stack.remove(nw.component.jump_extra, id)
+            end
+        end)
+    }
+end
+
+function player_boxer.hit(id)
+    return
+    ai.sequence {
+        ai.condition(player_boxer.pop_intent, nw.component.attack_intent, id),
+        ai.action(function()
+            stack.map(nw.component.disable_move, id, add, 1)
+            stack.map(nw.component.disable_flip, id, add, 1)
+            
+            stack.map(nw.component.restore_move, id, add, 1)
+            stack.map(nw.component.restore_flip, id, add, 1)
+        end),   
+        ai.action(stack.set, nw.component.puppet_state, id, "hit"),
+        ai.wait_until(ai.condition(puppet_animator.is_done, id)),
+        ai.action(stack.set, nw.component.puppet_state, id, "idle")
+    }
+end
+
+local dash_data = {duration = 0.15}
+
+function dash_data.position(id)
+    return stack.get(nw.component.position, id) or vec2()
+end
+
+function dash_data.position_change(id, distance, is_vertical)
+    local distance = distance or 50
+    if is_vertical then
+        return vec2(0, -distance)
+    else
+        return vec2((stack.get(nw.component.mirror, id) and -1 or 1) * distance, 0)
+    end
+end
+
+function player_boxer.dash(id)
+    local data_token = nw.ecs.id.weak("dash_data")
+
+    return 
+    ai.sequence {
+        ai.condition(function()
+            local cd = stack.get(nw.component.dash_cooldown, id)
+            return not cd or timer.is_done(cd)
+        end),
+        ai.condition(player_boxer.pop_intent, nw.component.dash_intent, id),
+        ai.action(function()
+            stack.map(nw.component.disable_move, id, add, 1)
+            stack.map(nw.component.disable_flip, id, add, 1)
+            
+            stack.map(nw.component.restore_move, id, add, 1)
+            stack.map(nw.component.restore_flip, id, add, 1)
+
+            stack.remove(dash_data.position, data_token)
+            stack.remove(dash_data.position_change, data_token)
+
+            stack.set(nw.component.puppet_state, id, "dash")
+        end),
+        ai.node(function()
+            stack.remove(nw.component.velocity, id)
+
+            local state = stack.get(nw.component.puppet_state, id)
+            local p = stack.ensure(dash_data.position, data_token, id)
+            local dp = stack.ensure(dash_data.position_change, data_token, id)
+            local t = clock.get() - state.time
+        
+            for _, dt in event.view("update") do
+                local next_p = ease.linear(t, p, dp, dash_data.duration)
+                collision.move_to(id, next_p.x, next_p.y)
+            end
+        
+            if t < dash_data.duration then return "pending" end
+
+            stack.set(nw.component.dash_cooldown, id)
+            return "success"
+        end)
+    }
+end
+
+function player_boxer.behavior(id)
+    return 
+    ai.select {
+        ai.fail(
+            ai.sequence {
+                ai.action(motion.restore, id),
+                ai.action(puppet_animator.ensure, id, "idle")
+            }
+        ),
+        ai.fail(player_boxer.jump(id)),
+        player_boxer.hit(id),
+        player_boxer.dash(id)
+    }
+end
+
 function player_boxer.spin_once(id)
     for _, key in event.view("keypressed") do
         if key == "space" then
@@ -209,6 +331,9 @@ function player_boxer.spin_once(id)
     for _, dt in event.view("update") do
         stack.set(nw.component.move_intent, id, input.get_direction_x())
     end
+
+    local behavior = stack.ensure(player_boxer.behavior, id, id)
+    ai.run(behavior)
 end
 
 function player_boxer.spin()
@@ -272,9 +397,64 @@ end
 
 local bonk_bot = {}
 
+local function is_terrain(id)
+    return stack.get(nw.component.is_terrain, id)
+end
+
+local function is_player(id)
+    return stack.get(nw.component.player_controlled, id)
+
+end
+
+function bonk_bot.patrol(id)
+    return
+    ai.select {
+        ai.invert(
+            ai.condition(motion.is_on_ground, id)
+        ),
+        ai.sequence {
+            ai.select {
+                ai.is_sensor_in_contact(id, spatial(10, -10, 1, 1), is_terrain),
+                ai.invert(
+                    ai.is_sensor_in_contact(id, spatial(10, 0, 1, 1), is_terrain)
+                ),
+            },
+            ai.action(stack.set, nw.component.move_intent, id, 0),
+            ai.action(motion.move_intent_from_flip, id, true)
+        },
+        ai.action(motion.move_intent_from_flip, id)
+    }
+end
+
+function bonk_bot.attack(id)
+    return
+    ai.sequence {
+        ai.action(stack.set, nw.component.move_intent, id, 0),
+        ai.wait(0.5),
+        ai.action(stack.set, nw.component.puppet_state, id, "hit"),
+        ai.wait_until(
+            ai.condition(function() return puppet_animator.is_done(id) end)
+        ),
+        ai.action(stack.set, nw.component.puppet_state, id, "idle")
+    }
+end
+
+function bonk_bot.behavior(id)
+    return
+    ai.select {
+        ai.sequence {
+            --ai.is_sensor_in_contact(id, spatial(10, -10, 20, 1), is_player),
+            ai.spot_target(id, spatial(0, 0, 200, 100):up(), is_player),
+            ai.go_to_target(id, 30),
+            bonk_bot.attack(id),
+        },
+        bonk_bot.patrol(id)
+    }
+end
+
 function bonk_bot.spin_once(id, args)
-    local task = edge_patrol.patrol_task(id)
-    ai.run(args, task)
+    local bh = stack.ensure(bonk_bot.behavior, args, id)
+    ai.run(bh)
 end
 
 function bonk_bot.spin()

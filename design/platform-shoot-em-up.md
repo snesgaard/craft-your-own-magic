@@ -418,3 +418,22 @@ First all. All cards and elements always exists. They can be toggled or moved ar
 Second GUI needs to be figured out some how. Again thing an approach of pure rendering with some background logic is good. So clicks on the GUI is merely transferred back to the logic as events.
 
 And model as much of the game as data as possible. Also find GUI lib probably
+
+# 2023-06-18
+
+So I basically went full behavior trees and its awesome. Both for implementing AI agent behavior and player character control. Thinking I am going to deprecate the puppet_control system, since the behavior tree and do it's job, in a more concise way.
+
+Goal is still to implement some basic combat. Hitting and health and maybe some hit stunning. Since the AI agent is ready, rest should be straight forward coding.
+
+* Healthbars
+* Numbers
+* Hitstun?
+    * Make behavior interruptable
+
+Okay så probably need to revamp the combat side of things. I need to basically:
+
+* Health and damage
+* Hit push-back
+* Hit stun
+* Ai interrupts
+* Behavior system

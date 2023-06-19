@@ -57,4 +57,19 @@ function drawable.frame(id)
     gfx.pop()
 end
 
+function drawable.text(id)
+    local text = stack.get(nw.component.text, id)
+    local area = stack.get(nw.component.gui_area, id)
+    if not text or not area then return end
+
+    gfx.push("all")
+    
+    nw.drawable.push_transform(id)
+    nw.drawable.push_state(id)
+
+    painter.draw_text(text, area, stack.get(nw.component.text_opt, id))
+
+    gfx.pop()
+end
+
 return drawable

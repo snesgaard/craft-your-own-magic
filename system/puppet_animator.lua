@@ -115,4 +115,10 @@ function puppet_animator.is_done(id)
     return video:is_done(time)
 end
 
+function puppet_animator.ensure(id, key)
+    local state = stack.get(nw.component.puppet_state, id)
+    if state and state.name == key then return end
+    stack.set(nw.component.puppet_state, id, key)
+end
+
 return puppet_animator

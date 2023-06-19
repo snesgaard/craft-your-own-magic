@@ -67,6 +67,12 @@ function motion.flip_intent(dt)
     end
 end
 
+function motion.move_intent_from_flip(id, inverse)
+    local m = stack.get(nw.component.mirror, id) and -1 or 1
+    if inverse then m = -m end
+    stack.set(nw.component.move_intent, id, m)
+end
+
 function motion.spin()
     for _, dt in event.view("update") do 
         for id, gravity in stack.view_table(nw.component.gravity) do
@@ -86,6 +92,17 @@ function motion.spin()
     end
 end
 
+function motion.jump_velocity_from_height(h, g)
+    return math.sqrt(2 * h * g)
+end
+
+function motion.jump(id, h)
+    local g = stack.ensure(nw.component.gravity, id)
+    local v = motion.jump_velocity_from_height(h, g.y)
+    stack.set(nw.component.velocity, id, 0, -v)
+    event.emit("jump", id, stack.get(nw.component.position, id) or vec2())
+end
+
 function motion.is_on_ground(id)
     local on_ground = stack.get(nw.component.on_ground, id)
     if not on_ground then return false end
@@ -94,6 +111,20 @@ end
 
 function motion.clear_on_ground(id)
     stack.remove(nw.component.on_ground, id)
+end
+
+function motion.restore(id)
+    local m = stack.get(nw.component.restore_move, id) or 0
+    if 0 < m then
+        stack.remove(nw.component.restore_move, id)
+        stack.map(nw.component.disable_move, id, add, -m)
+    end
+
+    local f = stack.get(nw.component.restore_flip, id) or 0
+    if 0 < f then
+        stack.remove(nw.component.restore_flip, id)
+        stack.map(nw.component.disable_flip, id, add, -m)
+    end
 end
 
 return motion

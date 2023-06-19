@@ -240,10 +240,10 @@ function type_loader.gobbo(object, index, layer)
             {nw.component.drawable, nw.drawable.frame},
             {nw.component.puppet_state_map, sprite_state_map},
             {nw.component.puppet_state, "idle"},
-            {nw.component.puppet("gobbo")},
             {nw.component.script("boxer-player")},
             {nw.component.layer, index},
-            {nw.component.move_speed, 100}
+            {nw.component.move_speed, 100},
+            {nw.component.health, 20}
         },
         id
     )
@@ -260,7 +260,8 @@ function type_loader.bonk_bot(object, index, layer)
     collision.warp_to(id, x, y)
 
     local sprite_state_map = {
-        idle = get_video("bonk_bot/idle"):loop()
+        idle = get_video("bonk_bot/idle"):loop(),
+        hit = get_video("bonk_bot/hit"):once()
     }
 
     stack.assemble(

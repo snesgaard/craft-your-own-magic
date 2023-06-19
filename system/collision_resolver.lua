@@ -65,6 +65,7 @@ function collision_resolver.damage(owner, target, item)
     if not damage or not hp then return end
     local real_damage = math.min(hp, damage)
     local next_hp = hp - real_damage
+    stack.set(nw.component.health, target, next_hp)
 
     local info = {
         damage = real_damage,

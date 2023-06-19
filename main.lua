@@ -14,6 +14,7 @@ clock = require "system.clock"
 timer = require "system.timer"
 tiled = require "tiled"
 sfx = require "system.sfx"
+gui = require "system.gui"
 
 ai = require "system.ai"
 script = require "system.script"
@@ -47,6 +48,7 @@ local function spin()
         script.spin()
         puppet_control.spin()
         puppet_animator.spin()
+        gui.spin()
         ---
         require("system.collision_resolver").spin()
     end
@@ -86,18 +88,6 @@ function love.load(args)
     stack.set(nw.component.position, constant.id.camera, spawn.x, spawn.y)
 
     collision.set_default_filter(default_collision_filter)
-
-    stack.assemble(
-        {
-            {nw.component.is_ghost},
-            {nw.component.drawable, nw.drawable.bump_body},
-            {nw.component.layer, 1000},
-            {nw.component.script("patrolbox")}
-        },  
-        "aiboi"
-    )
-    collision.register("aiboi", spatial(0, 0, 10, 10))
-    collision.warp_to("aiboi", 0, -100)
 end
 
 function love.update(dt)
@@ -119,14 +109,7 @@ function love.draw()
     if show_collision then collision.draw() end
     gfx.pop()
 
-    gfx.push()
-    local test_nodes = {
-        {"foo"},
-        {"bar", "baz"}
-    }
-
-    ai.painter.draw(test_nodes)
-    gfx.pop()
+    gui.health_bar.draw()
 end
 
 function love.keypressed(key)

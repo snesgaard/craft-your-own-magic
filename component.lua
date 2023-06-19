@@ -200,4 +200,16 @@ function component.health(h) return h or 0 end
 
 function component.hit_registry() return {} end
 
+function component.node_status() return list() end
+
+function component.text(text) return text or "notext" end
+
+function component.text_opt(opt) return opt end
+
+function component.gui_area(g) return g end
+
+function component.restore_move(v) return v or 0 end
+
+function component.restore_flip(v) return v or 0 end
+
 return component
