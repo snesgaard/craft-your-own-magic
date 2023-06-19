@@ -332,7 +332,7 @@ function player_boxer.spin_once(id)
         stack.set(nw.component.move_intent, id, input.get_direction_x())
     end
 
-    local behavior = stack.ensure(player_boxer.behavior, id, id)
+    local behavior = stack.ensure(nw.component.behavior, id, player_boxer.behavior(id))
     ai.run(behavior)
 end
 
@@ -442,6 +442,9 @@ end
 function bonk_bot.behavior(id)
     return
     ai.select {
+        ai.fail(
+            ai.action(puppet_animator.ensure, id, "idle")
+        ),
         ai.sequence {
             --ai.is_sensor_in_contact(id, spatial(10, -10, 20, 1), is_player),
             ai.spot_target(id, spatial(0, 0, 200, 100):up(), is_player),
@@ -453,7 +456,7 @@ function bonk_bot.behavior(id)
 end
 
 function bonk_bot.spin_once(id, args)
-    local bh = stack.ensure(bonk_bot.behavior, args, id)
+    local bh = stack.ensure(nw.component.behavior, id, bonk_bot.behavior(id))
     ai.run(bh)
 end
 
@@ -472,6 +475,11 @@ function script.spin()
     edge_patrol.spin()
     door.spin()
     bonk_bot.spin()
+
+    for id, _ in stack.view_table(nw.component.reset_script) do
+        stack.remove(nw.component.behavior, id)
+    end
+    stack.destroy_table(nw.component.reset_script)
 end
 
 return script 

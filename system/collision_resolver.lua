@@ -74,6 +74,8 @@ function collision_resolver.damage(owner, target, item)
     }
 
     event.emit("damage", info)
+
+    stack.set(nw.component.reset_script, target)
 end
 
 function collision_resolver.handle_collision(item, other, colinfo)

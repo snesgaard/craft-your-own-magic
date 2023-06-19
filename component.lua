@@ -212,4 +212,8 @@ function component.restore_move(v) return v or 0 end
 
 function component.restore_flip(v) return v or 0 end
 
+function component.reset_script() return true end
+
+function component.behavior(b) return b end
+
 return component
