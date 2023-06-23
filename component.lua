@@ -216,4 +216,6 @@ function component.reset_script() return true end
 
 function component.behavior(b) return b end
 
+function component.hurtbox() return true end
+
 return component

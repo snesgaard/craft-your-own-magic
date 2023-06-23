@@ -45,7 +45,7 @@ local function create_slice_hitboxes(id, key, slice, magic, properties)
         {nw.component.is_ghost},
         {nw.component.magic, magic},
         {nw.component.name, key},
-        {nw.component.ownder, id}
+        {nw.component.owner, id}
     }
 
     stack.assemble(predefined_c, s_id)

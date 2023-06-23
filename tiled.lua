@@ -274,7 +274,7 @@ function type_loader.bonk_bot(object, index, layer)
             {nw.component.move_speed, 35},
             {nw.component.health, 10},
             {nw.component.debug},
-            {nw.component.script("bonk_bot")}
+            --{nw.component.script("bonk_bot")}
         },
         id
     )
@@ -335,6 +335,7 @@ function tiled.assemble_from_properties(properties)
     if p.script then table.insert(c, {nw.component.script(p.script)}) end
     if p.target then table.insert(c, {nw.component.target, p.target.id}) end
     if p.terrain then table.insert(c, {nw.component.is_terrain}) end
+    if p.hurtbox then table.insert(c, {nw.component.hurtbox}) end
 
     return c
 end
