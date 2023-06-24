@@ -15,6 +15,7 @@ timer = require "system.timer"
 tiled = require "tiled"
 sfx = require "system.sfx"
 gui = require "system.gui"
+combat = require "system.combat"
 
 ai = require "system.ai"
 script = require "system.script"

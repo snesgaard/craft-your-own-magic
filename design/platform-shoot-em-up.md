@@ -433,7 +433,69 @@ Goal is still to implement some basic combat. Hitting and health and maybe some 
 Okay så probably need to revamp the combat side of things. I need to basically:
 
 * Health and damage
-* Hit push-back
-* Hit stun
-* Ai interrupts
-* Behavior system
+* !!! Hit push-back
+* !!! Hit stun
+* !!! Ai interrupts
+* !!! Behavior system
+
+# 2023-06-24
+
+So having made health and push and stunning prototypes I think it is time to formalize things a bit.
+I am thinking about making systems/rules formalizing.
+
+## Health
+ 
+Data:
+
+* Health
+* Max Health
+* Invincible
+    * Immune
+
+Health is life. As along as health is greater than 0, the actor is alive and can act in the world.
+When health is reduced to 0, the character is considered dead and cannot act in any way.
+Health is reduce through damage and healing.
+
+Max heal is the upper limit for health. Healing cannot bring health above this value. If max health is raised or lowered health is adjusted to respect this limit.
+
+An invicible character cannot received damage.
+
+## Knockback
+
+* Knockback
+* immune-knockback
+
+Each attack has a knockback stat which is equal or greater than 0. An entity hit with this attack will be moved horizontally by said value. Direction of motion will be the defined by the difference in position between hitboxes.
+
+Immune-knockback means an actor cannot be moved via knockback.
+
+Question how does this interact with non-health entities. E.g. a lever should not be knockbackable, but a box could be. Or perhaps a knockbackable lever would be fun?
+
+But then marking all entities with collision as knockback-immune would be annyoing as doors and tiles would also need that component.
+
+Maybe something like, if it has health it is automatically knockbackable unless immune. If it doesn't, it must explicitly be marked as being susceptible to knockback
+
+## Hitstun
+
+* is_stunned
+* immune-stun
+* stun
+
+A attack with the stun component will stun an entity. Meaning it's ai is reset and the is_stunned property is applied for a brief period of time. Entities should respect the is_stunned property by not acting and playing the stun animation.
+
+The immune-stun property means the entity will not be hit-stunned.
+
+## Daze
+
+* is_dazed
+* immune-daze
+* daze
+* resistance-daze
+* resistance-daze-max
+
+Daze is similar to stun, in that it temporally disables an entity. However it is longer lasting than stun. Daze is triggered when the resistance-daze stat is equal or greater than the resistance-daze-max stat.
+When this happens, is_dazed is set, resistance-daze is set to 0 and resistance-daze-max is increased.
+
+immune-daze means this entity can never be dased.
+
+Daze can only affect entities with health.

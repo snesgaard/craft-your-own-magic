@@ -12,22 +12,11 @@ function collision_resolver.damage(item, other, owner, target)
     local hp = stack.get(nw.component.health, target)
 
     if not damage or not hp then return end
-
-    local real_damage = math.min(hp, damage)
-    local next_hp = hp - real_damage
-    stack.set(nw.component.health, target, next_hp)
-
-    local info = {
-        damage = real_damage,
-        target = target,
-        owner = owner,
-    }
-
-    event.emit("damage", info)
-    -- stack.set(nw.component.reset_script, target)
+    
+    combat.damage(target, damage)
 end
 
-function collision_resolver.push_back(item, other, owner, target, colinfo)
+function collision_resolver.knockback(item, other, owner, target, colinfo)
     local damage = stack.get(nw.component.damage, item)
     local hp = stack.get(nw.component.health, target)
     if not damage or not hp then return end
@@ -36,7 +25,8 @@ function collision_resolver.push_back(item, other, owner, target, colinfo)
     local t = stack.get(nw.component.position, target) or vec2()
 
     local dx = t.x - o.x
-    collision.move(target, 5 * dx / math.abs(dx), 0)
+    local knockback = 5 * dx / math.abs(dx)
+    combat.knockback(target, knockback)
 end
 
 function collision_resolver.handle_collision(item, other, colinfo)
@@ -60,7 +50,7 @@ function collision_resolver.handle_collision(item, other, colinfo)
     end
 
     collision_resolver.damage(item, other, owner, target, colinfo)
-    collision_resolver.push_back(item, other, owner, target, colinfo)
+    collision_resolver.knockback(item, other, owner, target, colinfo)
 end
 
 function collision_resolver.spin()

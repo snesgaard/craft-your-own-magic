@@ -218,4 +218,29 @@ function component.behavior(b) return b end
 
 function component.hurtbox() return true end
 
+function component.is_stunned(d)
+    return weak_assemble(
+        {
+            {nw.component.timer, d or 0.3}
+        },
+        "stun_timer"
+    )
+end
+
+component.resistance = nw.component.relation(function(value, max)
+    max = max or value
+    return {
+        max = max,
+        value = value
+    }
+end)
+
+component.immune = nw.component.relation(function(v)
+    if v == nil then return true end
+
+    return v
+end)
+
+component.health = component.resistance("health")
+
 return component

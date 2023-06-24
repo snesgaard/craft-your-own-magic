@@ -59,7 +59,7 @@ end
 function health_bar.draw()
     for id, _ in stack.view_table(nw.component.player_controlled) do
         local hp = stack.get(nw.component.health, id)
-        if health_bar.draw_bar(hp) then return end
+        if health_bar.draw_bar(hp.value) then return end
     end
 end
 
