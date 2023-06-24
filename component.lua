@@ -236,10 +236,10 @@ component.resistance = nw.component.relation(function(value, max)
 end)
 
 component.immune = nw.component.relation(function(v)
-    if v == nil then return true end
-
-    return v
+    return v or 0
 end)
+
+component.restore_immune = nw.component.relation(function(v) return v or 0 end)
 
 component.health = component.resistance("health")
 

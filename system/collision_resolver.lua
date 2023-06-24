@@ -13,7 +13,8 @@ function collision_resolver.damage(item, other, owner, target)
 
     if not damage or not hp then return end
     
-    combat.damage(target, damage)
+    local info = combat.damage(target, damage)
+    if info and info.damage > 0 then combat.stun(target) end
 end
 
 function collision_resolver.knockback(item, other, owner, target, colinfo)
@@ -51,6 +52,7 @@ function collision_resolver.handle_collision(item, other, colinfo)
 
     collision_resolver.damage(item, other, owner, target, colinfo)
     collision_resolver.knockback(item, other, owner, target, colinfo)
+    
 end
 
 function collision_resolver.spin()

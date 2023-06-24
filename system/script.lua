@@ -264,9 +264,11 @@ function player_boxer.dash(id)
         ai.action(function()
             stack.map(nw.component.disable_move, id, add, 1)
             stack.map(nw.component.disable_flip, id, add, 1)
+            stack.map(nw.component.immune("damage"), id, add, 1)
             
             stack.map(nw.component.restore_move, id, add, 1)
             stack.map(nw.component.restore_flip, id, add, 1)
+            stack.map(nw.component.restore_immune("damage"), id, add, 1)
 
             stack.remove(dash_data.position, data_token)
             stack.remove(dash_data.position_change, data_token)
@@ -300,6 +302,7 @@ function player_boxer.behavior(id)
         ai.fail(
             ai.sequence {
                 ai.action(motion.restore, id),
+                ai.action(combat.restore, id),
                 ai.action(puppet_animator.ensure, id, "idle")
             }
         ),

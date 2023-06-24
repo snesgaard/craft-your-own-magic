@@ -274,7 +274,7 @@ function type_loader.bonk_bot(object, index, layer)
             {nw.component.move_speed, 35},
             {nw.component.health, 10},
             {nw.component.debug},
-            --{nw.component.script("bonk_bot")}
+            {nw.component.script("bonk_bot")}
         },
         id
     )

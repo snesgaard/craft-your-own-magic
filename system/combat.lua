@@ -1,7 +1,7 @@
 local combat = {}
 
 function combat.damage(target, damage)
-    if stack.get(nw.component.immune("damage"), target) then return end
+    if stack.ensure(nw.component.immune("damage"), target) > 0 then return end
 
     local hp = stack.get(nw.component.health, target)
     if not hp then return end
@@ -20,11 +20,13 @@ function combat.damage(target, damage)
 end
 
 function combat.knockback(target, knockback)
-    if not stack.get(nw.component.health, target) then
-        if not stack.ensure(nw.component.immune("knockback"), target, true) then
+    if not stack.ensure(nw.component.health, target) then
+        if not stack.ensure(nw.component.immune("knockback"), target, 1) > 0 then
             return
         end
-    elseif stack.get(nw.component.immune("knockback"), target) then
+    elseif stack.ensure(nw.component.immune("knockback"), target) > 0 then
+        return
+    elseif stack.ensure(nw.component.immune("damage"), target) > 0 then
         return
     end
 
@@ -32,10 +34,10 @@ function combat.knockback(target, knockback)
 end
 
 function combat.stun(target)
-    if stack.get(nw.component.immune("stun"), target) then return end
+    if stack.ensure(nw.component.immune("stun"), target) > 0 then return end
 
     stack.set(nw.component.reset_script, target)
-    stack.set(nw.component.is_sensor_in_contact, target)
+    stack.set(nw.component.is_stunned, target)
 end
 
 function combat.is_stunned(target)
@@ -43,6 +45,17 @@ function combat.is_stunned(target)
     if not is_stunned then return false end
 
     return not timer.is_done(is_stunned)
+end
+
+function combat.restore(target)
+    local stats = {"damage"}
+    for _, key in ipairs(stats) do
+        local d = stack.get(nw.component.restore_immune(key), target) or 0
+        if d > 0 then
+            stack.remove(nw.component.restore_immune(key), target)
+            stack.map(nw.component.immune(key), target, add, -d)
+        end
+    end
 end
 
 return combat
