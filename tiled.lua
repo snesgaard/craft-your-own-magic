@@ -86,6 +86,12 @@ function tiled.load_object(object, index, layer)
     return f(object, index, layer)
 end
 
+local function hitbox_from_body(idle)
+    local slice = idle.frames:head().slices.body
+    local w, h = slice.w, slice.h
+    return spatial(math.floor(-w / 2), -h, w, h)
+end
+
 local type_loader = {}
 tiled.type_loader = type_loader
 
@@ -282,6 +288,69 @@ function type_loader.bonk_bot(object, index, layer)
     return id
 end
 
+function type_loader.shoot_bot(object, index, layer)
+    local id = object.id
+
+    local x, y = object.x, object.y
+    local w, h = 8, 28
+    collision.register(id, spatial(-w / 2, -h, w, h))
+    collision.warp_to(id, x, y)
+
+    local sprite_state_map = {
+        idle = get_video("shoot_bot/idle"):loop(),
+        shoot = get_video("shoot_bot/shoot"):once()
+    }
+
+    stack.assemble(
+        {
+            {nw.component.gravity},
+            {nw.component.drawable, nw.drawable.frame},
+            {nw.component.puppet_state_map, sprite_state_map},
+            {nw.component.puppet_state, "idle"},
+            {nw.component.layer, index},
+            {nw.component.move_speed, 35},
+            {nw.component.script("shoot_bot")}
+        },
+        id
+    )
+
+    return id
+end
+
+function type_loader.cloak(object, index, layer)
+    local id = object.id
+
+    local sprite_state_map = {
+        idle = get_video("cloak/idle"):loop(),
+        walk = get_video("cloak/run"):loop(),
+        prepare_jump_hit = get_video("cloak/prepare_jump_hit"):loop(),
+        action_jump_hit = get_video("cloak/action_jump_hit"):once(),
+        recover_jump_hit = get_video("cloak/recover_jump_hit"):loop(),
+        prepare_hit = get_video("cloak/prepare_hit"):loop(),
+        action_hit = get_video("cloak/action_hit"):once(),
+        recover_hit = get_video("cloak/recover_hit"):loop(),
+    }
+
+    collision.register(id, hitbox_from_body(sprite_state_map.idle))
+    collision.warp_to(id, object.x, object.y)
+
+    stack.assemble(
+        {
+            {nw.component.gravity},
+            {nw.component.drawable, nw.drawable.frame},
+            {nw.component.puppet_state_map, sprite_state_map},
+            {nw.component.puppet_state, "idle"},
+            {nw.component.layer, index},
+            {nw.component.move_speed, 45},
+            {nw.component.script("cloak")},
+            {nw.component.health, 15}
+        },
+        id
+    )
+
+    return id
+end
+
 function type_loader.switch(object, index, layer)
     local id = object.id
 
@@ -336,6 +405,7 @@ function tiled.assemble_from_properties(properties)
     if p.target then table.insert(c, {nw.component.target, p.target.id}) end
     if p.terrain then table.insert(c, {nw.component.is_terrain}) end
     if p.hurtbox then table.insert(c, {nw.component.hurtbox}) end
+    if p.shoot then table.insert(c, {nw.component.shoot, p.shoot}) end
 
     return c
 end

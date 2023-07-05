@@ -4,7 +4,7 @@ function combat.damage(target, damage)
     if stack.ensure(nw.component.immune("damage"), target) > 0 then return end
 
     local hp = stack.get(nw.component.health, target)
-    if not hp then return end
+    if not hp or hp.value <= 0 then return end
 
     local real_damage = math.min(damage, hp.max)
     local next_hp = hp.value - real_damage
@@ -15,7 +15,7 @@ function combat.damage(target, damage)
     }
 
     event.emit("damage", info)
-    stack.set(nw.component.health, next_hp, hp.max)
+    stack.set(nw.component.health, target, next_hp, hp.max)
     return info
 end
 
@@ -56,6 +56,43 @@ function combat.restore(target)
             stack.map(nw.component.immune(key), target, add, -d)
         end
     end
+end
+
+local shooting = {}
+
+function shooting.handle_shoot(id, projectile_type)
+    if stack.get(nw.component.already_did_shoot, id) then return end
+
+    local x, y, w, h = collision.get_world_hitbox(id)
+    if not x then return end
+    
+    local pid = nw.ecs.id.strong("bullet")
+    collision.register(pid, spatial():expand(10, 10))
+    collision.warp_to(pid, x + w / 2, y + h / 2)
+
+    stack.assemble(
+        {
+            {nw.component.is_ghost},
+            {nw.component.velocity, 100, 0},
+            {nw.component.drawable, nw.drawable.bump_body},
+            {nw.component.timer, 2.0},
+            {nw.component.die_on_timer_done},
+            {nw.component.damage, 1}
+        },
+        pid
+    )
+
+    stack.set(nw.component.already_did_shoot, id)
+end
+
+function shooting.spin()
+    for id, projectile_type in stack.view_table(nw.component.shoot) do
+        shooting.handle_shoot(id, projectile_type)
+    end
+end
+
+function combat.spin()
+    shooting.spin()
 end
 
 return combat

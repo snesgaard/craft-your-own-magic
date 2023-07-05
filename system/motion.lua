@@ -96,6 +96,14 @@ function motion.jump_velocity_from_height(h, g)
     return math.sqrt(2 * h * g)
 end
 
+function motion.jump_time_to_ground(h, g)
+    local v = math.sqrt(2 * h * g)
+    local a = g / 2
+    local b = v
+    local c = 0
+    return b / a
+end
+
 function motion.jump(id, h)
     local g = stack.ensure(nw.component.gravity, id)
     local v = motion.jump_velocity_from_height(h, g.y)

@@ -243,4 +243,8 @@ component.restore_immune = nw.component.relation(function(v) return v or 0 end)
 
 component.health = component.resistance("health")
 
+function component.shoot(t) return t end
+
+function component.already_did_shoot() return true end
+
 return component

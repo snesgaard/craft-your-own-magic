@@ -273,6 +273,28 @@ function ai.node(func, ...)
     }
 end
 
+function ai.set(...)
+    return ai.action(stack.set, ...)
+end
+
+function ai.wait_until_puppet_done(id)
+    return ai.wait_until(
+        ai.condition(function() return puppet_animator.is_done(id) end)
+    )
+end
+
+function assembly.rng(node)
+    local rng = love.math.random
+    return rng() <= node.chance and "success" or "failure"
+end
+
+function ai.rng(chance)
+    return {
+        type = "rng",
+        chance = chance
+    }
+end
+
 ai.run = run_node
 
 return ai

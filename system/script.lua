@@ -423,7 +423,15 @@ function bonk_bot.patrol(id)
                 ),
             },
             ai.action(stack.set, nw.component.move_intent, id, 0),
-            ai.action(motion.move_intent_from_flip, id, true)
+            ai.wait(1),
+            ai.action(function()
+                for _, _ in event.view("update") do
+                    collision.flip_to(id, not stack.get(nw.component.mirror, id))
+                    return "success"
+                end
+
+                return "pending"
+            end),
         },
         ai.action(motion.move_intent_from_flip, id)
     }
@@ -469,6 +477,113 @@ function bonk_bot.spin()
     end
 end
 
+local shoot_bot = {}
+
+function shoot_bot.shoot(id)
+    return
+    ai.sequence {
+        ai.action(stack.set, nw.component.puppet_state, id, "shoot"),
+        ai.wait_until(
+            ai.condition(function() return puppet_animator.is_done(id) end)
+        ),
+        ai.wait(1.0),
+    }
+
+end
+
+function shoot_bot.behavior(id)
+    return ai.select {
+        ai.fail(
+            ai.action(puppet_animator.ensure, id, "idle")
+        ),
+        shoot_bot.shoot(id),
+        bonk_bot.patrol(id)
+    }
+end
+
+function shoot_bot.spin_once(id)
+    local bh = stack.ensure(nw.component.behavior, id, shoot_bot.behavior(id))
+    ai.run(bh)
+end
+
+function shoot_bot.spin()
+    for id, args in stack.view_table(nw.component.script("shoot_bot")) do
+        shoot_bot.spin_once(id, args)
+    end
+end
+
+local cloak = {}
+
+function cloak.jump_hit(id)
+    return
+    ai.sequence{
+        ai.action(function()
+            local m = stack.get(nw.component.mirror, id)
+            local g = stack.get(nw.component.gravity, id)
+            if not g then return end
+            local sx = m and -1 or 1
+            local h = 50
+            motion.jump(id, h)
+            local t = motion.jump_time_to_ground(h, g.y)
+            local ms = stack.get(nw.component.move_speed, id) or 0
+            local dx = 50
+            local vx = dx / t
+            local intent = sx * vx / ms 
+            stack.set(nw.component.move_intent, id, intent)
+            motion.clear_on_ground(id)
+        end),
+        ai.action(stack.set, nw.component.puppet_state, id, "prepare_jump_hit"),
+        ai.wait_until(
+            ai.condition(function()
+                return motion.is_on_ground(id)
+            end)
+        ),
+        ai.action(function()
+            stack.set(nw.component.puppet_state, id, "action_jump_hit")
+            stack.set(nw.component.move_intent, id, 0)
+        end),
+        ai.wait_until(
+            ai.condition(function() return puppet_animator.is_done(id) end)
+        ),
+        ai.action(stack.set, nw.component.puppet_state, id, "recover_jump_hit"),
+        ai.wait(0.5)
+    }
+end
+
+function cloak.hit(id)
+    return
+    ai.sequence {
+        ai.set(nw.component.puppet_state, id, "prepare_hit"),
+        ai.wait(0.5),
+        ai.set(nw.component.puppet_state, id, "action_hit"),
+        ai.wait_until_puppet_done(id),
+        ai.set(nw.component.puppet_state, id, "recover_hit"),
+        ai.wait(0.5)
+    }
+end
+
+function cloak.behavior(id)
+    return ai.select {
+        ai.sequence {
+            ai.rng(0.75),
+            cloak.hit(id)
+        },
+        cloak.jump_hit(id),
+        bonk_bot.patrol(id)
+    }
+end
+
+function cloak.spin_once(id)
+    local bh = stack.ensure(nw.component.behavior, id, cloak.behavior(id))
+    ai.run(bh)
+end
+
+function cloak.spin()
+    for id, args in stack.view_table(nw.component.script("cloak")) do
+        cloak.spin_once(id, args)
+    end
+end
+
 local script = {}
 
 function script.spin()
@@ -478,6 +593,8 @@ function script.spin()
     edge_patrol.spin()
     door.spin()
     bonk_bot.spin()
+    shoot_bot.spin()
+    cloak.spin()
 
     for id, _ in stack.view_table(nw.component.reset_script) do
         stack.remove(nw.component.behavior, id)

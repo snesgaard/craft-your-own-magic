@@ -49,6 +49,7 @@ local function spin()
         script.spin()
         puppet_control.spin()
         puppet_animator.spin()
+        combat.spin()
         gui.spin()
         ---
         require("system.collision_resolver").spin()
