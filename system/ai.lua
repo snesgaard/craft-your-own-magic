@@ -295,6 +295,58 @@ function ai.rng(chance)
     }
 end
 
+function assembly.random_choice(node)
+    node.choice = node.choice or choice(node.nodes, node.weights)
+    local status = run_node(node.choice)
+    if status ~= "pending" then node.choice = nil end
+    return status
+end
+
+function ai.random_choice(nodes, weights)
+    if weights and #nodes ~= #weights then
+        error("Node and weights did not match")
+    end
+    return {
+        type = "random_choice",
+        nodes = nodes,
+        weights = weights,
+    }
+end
+
+local function weighted_shuffle(nodes, dices)
+    local dices = dices or {}
+    local roll = list()
+
+    for index, _ in ipairs(nodes) do
+        roll[index] = love.math.random(dices[index] or 100)
+    end
+
+    local sorted_roll = roll:argsort()
+
+    local sorted_nodes = list()
+
+    for i, j in ipairs(sorted_roll) do
+        sorted_nodes[i] = nodes[j]
+    end
+
+    return sorted_nodes
+end
+
+function assembly.shuffle_select(node)
+    node.select = node.select or ai.select(weighted_shuffle(node.nodes, node.dices))
+    local status = run_node(node.select)
+    if status ~= "pending" then node.select = nil end
+    return status
+end
+
+function ai.shuffle_select(nodes, dices)
+    return {
+        type = "shuffle_select",
+        nodes = nodes,
+        dices = dices
+    }
+end
+
 ai.run = run_node
 
 return ai

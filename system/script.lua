@@ -564,11 +564,13 @@ end
 
 function cloak.behavior(id)
     return ai.select {
-        ai.sequence {
-            ai.rng(0.75),
-            cloak.hit(id)
-        },
-        cloak.jump_hit(id),
+        ai.shuffle_select(
+            {
+                cloak.hit(id),
+                cloak.jump_hit(id)
+            },
+            {60, 30}
+        ),
         bonk_bot.patrol(id)
     }
 end

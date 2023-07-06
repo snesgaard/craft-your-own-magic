@@ -76,6 +76,29 @@ function weak_assemble(arg, tag)
     return id
 end
 
+function choice(items, p)
+    local p = p or {}
+    local sum = 0
+
+    for index, _ in ipairs(items) do
+        sum = sum + (p[index] or 1)
+    end
+
+    if sum <= 0 then
+        error("Weights was 0 or less")
+    end
+
+    local r = love.math.random()
+
+    local w = 0
+    for index, item in ipairs(items) do
+        w = w + (p[index] or 1) / sum
+        if r <= w then return item end
+    end
+
+    return List.tail(items)
+end
+
 function love.load(args)
     map = tiled.load("art/maps/build/test.lua")
 
