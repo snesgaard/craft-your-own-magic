@@ -321,12 +321,13 @@ local function weighted_shuffle(nodes, dices)
         roll[index] = love.math.random(dices[index] or 100)
     end
 
+    
     local sorted_roll = roll:argsort()
-
+    
     local sorted_nodes = list()
-
+    
     for i, j in ipairs(sorted_roll) do
-        sorted_nodes[i] = nodes[j]
+        sorted_nodes[#nodes - i + 1] = nodes[j]
     end
 
     return sorted_nodes
