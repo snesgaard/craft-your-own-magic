@@ -72,4 +72,15 @@ function drawable.text(id)
     gfx.pop()
 end
 
+function drawable.particles(id)
+    local p = stack.get(nw.component.particles, id)
+    if not p then return end
+
+    gfx.push("all")
+    nw.drawable.push_state(id)
+    local x, y = p:getPosition()
+    gfx.draw(p, x, y, 0, 1, 1, x, y)
+    gfx.pop()
+end
+
 return drawable

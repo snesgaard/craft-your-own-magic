@@ -48,6 +48,10 @@ local function create_slice_hitboxes(id, key, slice, magic, properties)
         {nw.component.owner, id}
     }
 
+    if stack.get(nw.component.player_controlled, id) then
+        stack.set(nw.component.player_controlled, s_id)
+    end
+
     stack.assemble(predefined_c, s_id)
     stack.assemble(tiled.assemble_from_properties(properties), s_id)
 

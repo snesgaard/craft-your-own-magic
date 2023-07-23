@@ -70,18 +70,27 @@ function shooting.handle_shoot(id, projectile_type)
     collision.register(pid, spatial():expand(10, 10))
     collision.warp_to(pid, x + w / 2, y + h / 2)
 
+    local mirror = stack.get(nw.component.mirror, id)
+    local sx = mirror and -1 or 1
+
+    
     stack.assemble(
         {
             {nw.component.is_ghost},
-            {nw.component.velocity, 100, 0},
+            {nw.component.velocity, sx * 100, 0},
             {nw.component.drawable, nw.drawable.bump_body},
             {nw.component.timer, 2.0},
             {nw.component.die_on_timer_done},
-            {nw.component.damage, 1}
+            {nw.component.damage, 1},
         },
         pid
     )
 
+    if stack.get(nw.component.player_controlled, id) then
+        stack.set(nw.component.player_controlled, pid)
+    end
+    
+    collision.flip_to(pid, mirror)
     stack.set(nw.component.already_did_shoot, id)
 end
 

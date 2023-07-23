@@ -12,6 +12,9 @@ function collision_resolver.damage(item, other, owner, target)
     local hp = stack.get(nw.component.health, target)
 
     if not damage or not hp then return end
+    if stack.get(nw.component.player_controlled, item) == stack.get(nw.component.player_controlled, target) then
+        return
+    end
     
     local info = combat.damage(target, damage)
     if info and info.damage > 0 then combat.stun(target) end
@@ -21,6 +24,9 @@ function collision_resolver.knockback(item, other, owner, target, colinfo)
     local damage = stack.get(nw.component.damage, item)
     local hp = stack.get(nw.component.health, target)
     if not damage or not hp then return end
+    if stack.get(nw.component.player_controlled, item) == stack.get(nw.component.player_controlled, target) then
+        return
+    end
 
     local o = stack.get(nw.component.position, owner) or vec2()
     local t = stack.get(nw.component.position, target) or vec2()

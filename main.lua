@@ -16,6 +16,7 @@ tiled = require "tiled"
 sfx = require "system.sfx"
 gui = require "system.gui"
 combat = require "system.combat"
+rng = require "random"
 
 ai = require "system.ai"
 script = require "system.script"
@@ -37,6 +38,10 @@ end
 
 function math.round(v)
     return math.floor(v + 0.5)
+end
+
+function real_random(min, max)
+    return ease.linear(love.math.random(), min, max - min, 1)
 end
 
 local function spin()
@@ -116,7 +121,7 @@ function love.load(args)
 end
 
 function love.update(dt)
-    event.emit("update", dt)
+    if not paused then event.emit("update", dt) end
     spin()
 
     -- HACK: Funky camera tracking!
@@ -133,7 +138,7 @@ function love.draw()
     painter.push_transform()
     if show_collision then collision.draw() end
     gfx.pop()
-
+    
     gui.health_bar.draw()
 end
 
@@ -141,6 +146,7 @@ function love.keypressed(key)
     if key == "escape" then love.event.quit() end
     if key == "g" then collectgarbage() end
     if key == "c" then show_collision = not show_collision end
+    if key == "p" then paused = not paused end
     input.keypressed(key)
 end
 

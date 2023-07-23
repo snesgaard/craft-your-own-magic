@@ -214,7 +214,11 @@ function component.restore_flip(v) return v or 0 end
 
 function component.reset_script() return true end
 
-function component.behavior(b) return b end
+function component.behavior(b, ...)
+    if type(b) == "table" then return b end
+    if type(b) == "function" then return b(...) end
+    errorf("Unknown behavior type: %s", type(b))
+end
 
 function component.hurtbox() return true end
 
@@ -246,5 +250,15 @@ component.health = component.resistance("health")
 function component.shoot(t) return t end
 
 function component.already_did_shoot() return true end
+
+function component.particles(args)
+    return nw.particles(args)
+end
+
+component.sfx = nw.component.relation(function(...) return list(...) end)
+
+function component.die_on_empty() return true end
+
+function component.sfx_triggered() return true end
 
 return component

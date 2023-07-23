@@ -416,6 +416,7 @@ function bonk_bot.patrol(id)
             ai.condition(motion.is_on_ground, id)
         ),
         ai.sequence {
+            ai.action(puppet_animator.ensure, id, "idle"),
             ai.select {
                 ai.is_sensor_in_contact(id, spatial(10, -10, 1, 1), is_terrain),
                 ai.invert(
@@ -546,13 +547,28 @@ function cloak.jump_hit(id)
             ai.condition(function() return puppet_animator.is_done(id) end)
         ),
         ai.action(stack.set, nw.component.puppet_state, id, "recover_jump_hit"),
-        ai.wait(0.5)
+        ai.wait(real_random(0.4, 1.0))
+    }
+end
+
+function cloak.approach_and_jump_hit(id)
+    local jitter = math.random(1, 5)
+    local v = ai.hitbox_range(id, "action_jump_hit", "jump_hit") + vec2(50 + jitter, 50 - jitter)
+
+    return
+    ai.sequence {
+        --ai.test_distance_to_target(id, 70, math.huge),
+        ai.go_to_target(id, v, 2),
+        ai.turn_towards_target(id),
+        cloak.jump_hit(id)
     }
 end
 
 function cloak.hit(id)
     return
     ai.sequence {
+        ai.set(nw.component.move_intent, id, 0),
+        ai.turn_towards_target(id),
         ai.set(nw.component.puppet_state, id, "prepare_hit"),
         ai.wait(0.5),
         ai.set(nw.component.puppet_state, id, "action_hit"),
@@ -562,27 +578,103 @@ function cloak.hit(id)
     }
 end
 
+function cloak.approach_and_hit(id)
+    local jitter = math.random(1, 5)
+    local v = ai.hitbox_range(id, "action_hit", "hit")
+    return
+    ai.sequence {
+        ai.go_to_target(id, v + vec2(jitter, -jitter), 1.5),
+        cloak.hit(id),
+    }
+end
+
+function cloak.shoot(id)
+    return 
+    ai.sequence {
+        ai.test_distance_to_target(id, 100, math.huge),
+        ai.turn_towards_target(id),
+        ai.set(nw.component.move_intent, id, 0),
+        ai.set(nw.component.puppet_state, id, "prepare_shoot"),
+        ai.wait(1.0),
+        ai.set(nw.component.puppet_state, id, "action_shoot"),
+        ai.wait_until_puppet_done(id),
+        ai.wait(0.5)
+    }
+end
+
+function cloak.stop_and_think(id)
+    return
+    ai.sequence {
+        ai.set(nw.component.move_intent, id, 0),
+        ai.turn_towards_target(id, true),
+        ai.wait(1.0),
+        ai.turn_towards_target(id),
+        ai.wait(1.0),
+    }
+end
+
 function cloak.behavior(id)
     return ai.select {
-        ai.shuffle_select(
-            {
-                cloak.hit(id),
-                cloak.jump_hit(id)
-            },
-            {60, 30}
-        ),
-        bonk_bot.patrol(id)
+        ai.sequence{
+            ai.action(puppet_animator.ensure, id, "idle"),
+            ai.spot_target(id, spatial(-200, 0, 400, 20):up(), is_player),
+            ai.shuffle_select(
+                {
+                    cloak.approach_and_hit(id),
+                    cloak.shoot(id),
+                    cloak.approach_and_jump_hit(id),
+                    cloak.stop_and_think(id)
+                },
+                {0, 0, 40, 0}
+            ),
+        },
+        bonk_bot.patrol(id),
     }
 end
 
 function cloak.spin_once(id)
-    local bh = stack.ensure(nw.component.behavior, id, cloak.behavior(id))
+    local bh = stack.ensure(nw.component.behavior, id, cloak.behavior, id)
     ai.run(bh)
 end
 
 function cloak.spin()
     for id, args in stack.view_table(nw.component.script("cloak")) do
         cloak.spin_once(id, args)
+    end
+end
+
+local axe = {}
+
+function axe.hit(id)
+    print(ai.hitbox_range(id, "hit", "hit"))
+    return
+    ai.sequence {
+        ai.set(nw.component.move_intent, id),
+        ai.set(nw.component.puppet_state, id, "hit"),
+        ai.wait_until_puppet_done(id),
+        ai.wait(1.0),
+    }
+end
+
+function axe.behavior(id)
+    return
+    ai.select {
+        ai.sequence {
+            ai.cooldown(10.0),
+            axe.hit(id),
+        },
+        bonk_bot.patrol(id)
+    }
+end
+
+function axe.spin_once(id)
+    local bh = stack.ensure(nw.component.behavior, id, axe.behavior, id)
+    ai.run(bh)
+end
+
+function axe.spin()
+    for id, args in stack.view_table(nw.component.script("axe")) do
+        axe.spin_once(id, args)
     end
 end
 
@@ -597,6 +689,7 @@ function script.spin()
     bonk_bot.spin()
     shoot_bot.spin()
     cloak.spin()
+    axe.spin()
 
     for id, _ in stack.view_table(nw.component.reset_script) do
         stack.remove(nw.component.behavior, id)

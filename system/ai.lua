@@ -235,17 +235,41 @@ function assembly.go_to_target(node)
     local pos_target = stack.get(nw.component.position, target) or vec2()
     local d = pos_target - pos
 
-    if math.abs(d.x) <= node.min_distance then return "success" end
+    local min = node.min_distance
+    local max = node.max_distance
 
-    stack.set(nw.component.move_intent, node.id, d.x < 0 and -1 or 1)
+    if min <= math.abs(d.x) and math.abs(d.x) < max  then
+        return "success"
+    end
+
+    local s = node.speed
+    local m = math.abs(d.x) < min and -1 or 1
+
+    stack.set(nw.component.move_intent, node.id, d.x < 0 and -m * s or m * s)
     return "pending"
 end
 
-function ai.go_to_target(id, min_distance)
+local function go_to_target_distance(distance)
+    if type(distance) == "number" then
+        return 0, distance
+    end
+    if type(distance) == "table" then
+        local min, max = distance:unpack()
+        if not min or not max then error("Invalid distances", min, max) end
+        return min, max
+    end
+
+    errorf("Unknown distance type %s", type(distance))
+end
+
+function ai.go_to_target(id, distance, speed)
+    local min, max = go_to_target_distance(distance)
     return {
         type = "go_to_target",
         id = id,
-        min_distance = min_distance
+        min_distance = min,
+        max_distance = max,
+        speed = speed or 1
     }
 end
 
@@ -318,7 +342,8 @@ local function weighted_shuffle(nodes, dices)
     local roll = list()
 
     for index, _ in ipairs(nodes) do
-        roll[index] = love.math.random(dices[index] or 100)
+        local dice = dices[index] or 100
+        roll[index] = dice > 0 and love.math.random(1, dice) or 0
     end
 
     
@@ -346,6 +371,87 @@ function ai.shuffle_select(nodes, dices)
         nodes = nodes,
         dices = dices
     }
+end
+
+local function test_distance(id, target, min, max)
+    local p_i = stack.get(nw.component.position, id)
+    local p_j = stack.get(nw.component.position, target)
+    if not p_i or not p_j then
+        return 
+    end
+    local dx = p_i.x - p_j.x
+    local dy = p_i.y - p_j.y
+    local d2 = dx * dx + dy * dy
+    local min2 = min * min
+    local max2 = max * max
+    return min2 <= d2 and d2 < max2
+end
+
+local function test_distance_to_target(id, min, max)
+    local target = stack.get(nw.component.target, id):head()
+    if not target then return end
+    return test_distance(id, target, min, max)
+end
+
+function ai.test_distance_to_target(id, min, max)
+    return ai.condition(test_distance_to_target, id, min, max)
+end 
+
+function assembly.turn_towards_target(node)
+    local id = node.id
+    local target = stack.get(nw.component.target, id):head()
+    if not target then return "failure" end
+
+    for _, dt in event.view("update") do
+        local p_i = stack.get(nw.component.position, id)
+        local p_t = stack.get(nw.component.position, target)
+        if not p_i or not p_t then return "failure" end
+        local mirror = p_i.x > p_t.x
+        if node.invert then mirror = not mirror end
+        collision.flip_to(id, mirror)
+        return "success"
+    end
+
+    return "pending"
+end
+
+function ai.turn_towards_target(id, invert)
+    return {
+        type = "turn_towards_target",
+        id = id,
+        invert = invert
+    }
+end
+
+function ai.cooldown(duration)
+    local token = {}
+    return ai.condition(function()
+        local t = stack.get(nw.component.time, token)
+        local c = clock.get()
+        if not t or duration <= c - t then
+            stack.set(nw.component.time, token, c)
+            return true
+        else
+            return false
+        end
+    end)
+end
+
+function ai.hitbox_range(id, state, slice)
+    local m = stack.get(nw.component.puppet_state_map, id)
+    if not m then
+        error("No state map for id", id)
+    end
+    local v = m[state]
+    if not v then errorf("No state '%s' for id %s", state, tostring(id)) end
+
+    for _, f in ipairs(v.frames) do
+        --local s = f.slices[slice]
+        local s = f:get_slice(slice)
+        if s then return vec2(s.x, s.x + s.w) end
+    end
+
+    errorf("Unable to find slice %s", slice)
 end
 
 ai.run = run_node
