@@ -499,3 +499,58 @@ When this happens, is_dazed is set, resistance-daze is set to 0 and resistance-d
 immune-daze means this entity can never be dased.
 
 Daze can only affect entities with health.
+
+# 2023-07-23
+
+Been almost a month since I write this log. A lot has happened. Been iterating on the behavior tree approach and it still works pretty well.
+
+Also been trying out a new workflow for developing new enemies:
+
+* Decide on overall theme and role
+* Rough out design silhouette
+* Build basic forms for animation
+* Animate walking, hit, idle using forms
+* Add silhouette to animations
+* Integrate into game and develop AI for it.
+
+Developed two enemies "skeleton-cloak" and "zombie-axe" using this method. Is fairly fast for prototyping and iteration. Animation is still by far the slowest as figuring out poses, adding forms and timing everything still takes time. Staying on model in terms of scale is still a bit of a problem.
+
+Another important innovation is add a layer with reference for animation. Makes staying on model a bit easier
+
+If I were to revise the workflow it would probably be:
+
+* Design and role
+* Idle silhouette + basic forms
+* Animate using forms
+    * Import into engine
+    * Tweak timing, spacing etc.
+    * Adjust sizes to stay on model
+* Add silhouette to animations
+
+Afterwards:
+
+* Idle color + shading
+* Add shading to animations
+
+Importance put on reducing time from idea to testing in-engine.
+
+Also added a cool system for syncing particle effects with hitbox animations. Basically just add an sfx property to the slice in Aseprite and you can do things such as sparks flying from scraping metal or impact sparks.
+
+Am ironing out most of the techincal problems one by one.
+
+Guess one thing that is missing is a death system. Meaning when actors run out of HP, they should die. Thinking that is just adding a death animation / sprite, and dealing with this in the behavior tree.
+
+On a more negative side, I still have no idea what to do with this game overall. Is cool making designs and animating them, but would like to approach something more playable soon. Something that you can engage with. 
+
+It really is design that is my current headache. My initial inspiration was creating something ala Metal Slug. A sidescroller shoot-em-up. Should be easy to pick up and play, without too much in the way of mechanical complexity. Basically just hit and/or shoot with maybe some explosions on top of it.
+
+Maybe what I should try to just to create level, sortof a vertical slice. With a couple of enemies, maybe a boss fight, music and final shading. Just to see what it would take. It would have to start with planning.
+
+* Decide an a setting and theme
+* Decide on player abilities
+* Brainstorm a couple of enemy designs
+* Design level/encounter sections
+* Put these together into a final level (5 mins length max.)
+* Design a boss-fight at the end.
+
+Simplicity is important here. Both for the player and also for me. Since I am not very experience with level design, I must keep things simple to not loose my mind :P
