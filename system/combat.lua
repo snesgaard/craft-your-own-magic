@@ -58,6 +58,13 @@ function combat.restore(target)
     end
 end
 
+function combat.is_dead(id)
+    local health = stack.get(nw.component.health, id)
+    if not health then return false end
+
+    return health.value <= 0
+end
+
 local shooting = {}
 
 function shooting.handle_shoot(id, projectile_type)

@@ -1,3 +1,13 @@
+local common = {}
+
+function common.base_actor(id)
+    return
+    ai.sequence {
+        ai.condition(combat.is_dead, id),
+        ai.action(stack.destroy, id)
+    }
+end
+
 local patrol_box = {}
 
 function patrol_box.move_to(_, id, goal)
@@ -405,8 +415,7 @@ local function is_terrain(id)
 end
 
 local function is_player(id)
-    return stack.get(nw.component.player_controlled, id)
-
+    return stack.get(nw.component.player_controlled, id) and stack.get(nw.component.health, id)
 end
 
 function bonk_bot.patrol(id)
@@ -554,7 +563,6 @@ end
 function cloak.approach_and_jump_hit(id)
     local jitter = math.random(1, 5)
     local v = ai.hitbox_range(id, "action_jump_hit", "jump_hit") + vec2(50 + jitter, 50 - jitter)
-
     return
     ai.sequence {
         --ai.test_distance_to_target(id, 70, math.huge),
@@ -615,6 +623,7 @@ end
 
 function cloak.behavior(id)
     return ai.select {
+        common.base_actor(id),
         ai.sequence{
             ai.action(puppet_animator.ensure, id, "idle"),
             ai.spot_target(id, spatial(-200, 0, 400, 20):up(), is_player),
@@ -625,7 +634,7 @@ function cloak.behavior(id)
                     cloak.approach_and_jump_hit(id),
                     cloak.stop_and_think(id)
                 },
-                {0, 0, 40, 0}
+                {20, 40, 20, 5}
             ),
         },
         bonk_bot.patrol(id),
@@ -646,7 +655,6 @@ end
 local axe = {}
 
 function axe.hit(id)
-    print(ai.hitbox_range(id, "hit", "hit"))
     return
     ai.sequence {
         ai.set(nw.component.move_intent, id),

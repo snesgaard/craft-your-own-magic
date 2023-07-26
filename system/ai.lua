@@ -231,8 +231,9 @@ function assembly.go_to_target(node)
     local target = stack.get(nw.component.target, node.id):unpack()
     if not target then return "failure" end
 
-    local pos = stack.get(nw.component.position, node.id) or vec2()
-    local pos_target = stack.get(nw.component.position, target) or vec2()
+    local pos = stack.get(nw.component.position, node.id)
+    local pos_target = stack.get(nw.component.position, target)
+    if not pos or not pos_target then return "failure" end
     local d = pos_target - pos
 
     local min = node.min_distance
