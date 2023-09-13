@@ -554,3 +554,207 @@ Maybe what I should try to just to create level, sortof a vertical slice. With a
 * Design a boss-fight at the end.
 
 Simplicity is important here. Both for the player and also for me. Since I am not very experience with level design, I must keep things simple to not loose my mind :P
+
+# 2023-07-30
+
+Still not making a lot progress on the game part. Have in the art department. Drawing exercises and shading makes me itching to start creating more stuff for the game.
+
+Now I do have some more overall considerations on how the design process could look like:
+
+* Decide on overall game concept
+* Decide on central mechanics of the game
+* Decide on player abilities
+* Design obstacles
+* Design encounters and level
+
+To elaborate a bit.
+
+## Game Concept
+This is the games overall theme and genre. An example: "Sidescroller beat-em up in a desert with necromancer".
+
+Sets the overall theme, mechanics and visual language. This should also include the overall goal/win condition of the game.
+In short: "what is the game about"
+
+## Central Mechanics
+These are basically the rules on which the game will operate.
+Think of it in terms of systems and base mechanics by which these systems will interact.
+E.g. health, motion.
+
+## Player Abilities
+Overall how will the player interact with the systems. What options and abilities should be available to them.
+
+## Obstacles
+An obstacle is a problem for the player to solve, ideally with multiple solutions.
+These can be enemies or level geometry or something else depending on the game design.
+
+An obstacle should present an interesting problem on it's own. As in interacting with it in a completely blank room, should be fairly interesting.
+E.g. enemies in Dark Souls are pretty great and interesting on their own. They're obviously infinitely better in context of the levels.
+
+## Encounter
+An encouter is a collection of obstacles: e.g. geometry + enemies. In general it can be thought of as a single scene.
+Can be puzzles, combat, platformning or a combination of all three.
+All depends on what obstacles are put in.
+
+## Level
+A level is a collection of encounters. These can be in a linear sequence or spread out in a more open manner.
+Level should contain a goal or objective of some kind. Can be as simple as move all the way to the right.
+
+## In Conclusion
+I think obstacle and encounter design are greatly underappreciated. I have played many JRPGs that have great combat and craft systems, meaning great player ability design, but bad obstacle and encounter design.
+Typically in the sense that they're too simple or too easy. They have simple solutions and do not encourage enganging in their systems.
+
+Mana Khemia is IMO a good example. The battle system is excellent with different abilities and the party swapping and timeline mechanics. But most encounters can be solved via the simple algorithm of:
+
+* If hurt, heal
+* otherwise use the most damaging ability you have
+
+No need to vary up play, or build differently.
+
+Slay the Spire is an example of a game with excellent obstacle and encounter design. Unless you have a truly degenerately powerful deck, few enemies can be effeciently defeated by mindlessly attacking.
+Take for instance the simple Lice. The cover mechanic on this enemy creates many ways of solving it:
+
+* Attack it one round and finish it off after the cover wears off.
+* Attack it with a single powerful attack, which kills it before cover kicks in
+* Use some combination of non-attack and attack damage, to kill it before cover activates
+
+Or Advocado
+
+* Defeat it quickly before you take too much damage
+* Build heavy defenses and slowly chip away it's health
+
+Then you have things like the Chosen and Awakened One which puts soft restrictions on your abilities, punishing you for relying too much on a single mechanic.
+
+Let us try to analyze something in this manner
+
+## Slay the Spire
+
+Here we mostly focus on the combat portion of the game.
+
+### Concept
+Roguelike deck-builder with turn-based combat, centered on climbing and destroying a mysterious spire.
+
+### Central Mechanics
+
+Cards -- Player abilities are given as cards, which are drawn from a player built deck. Each round a new hand is drawn randomly.
+Health -- Like most games. When it reaches 0, the associated entity dies. Health is reduce via damage and increased via healing
+Block -- Temporary health. Damage typically first reduces block, before it reduces health. Block is removed at the start of a turn.
+Energy -- Used to play cards. Starts at 3 and is refilled at the start of a turn.
+Intention -- The player can in general see roughly what the enemy will do on their turn.
+Exhaust -- When a card is exhausted, it is added to the exhaust pile, rather than the discard pile
+
+Card types: Attack, Skill, Powers
+
+### Player Abilities
+On the players turn, the player can do the following:
+
+* Play a card 
+* Use a potion
+
+Cards can only be played if the player can pay the required energy.
+Potions can always be used, but is single use only.
+
+### Obstacles
+
+Lice -- An enemy which gains block on the first attack. Forcing players to work around it.
+Cultist -- An enemy which gains strength pr round, forcing player into a damage race while balancing defense.
+Jawworm -- An enemy which can gain strength, but also defend and attack heavily. A damage race, where the player must balance both defense and offense.
+Chosen -- An enemy which puts a debuff on the player, penalising skill usage. Effectively asks player whether can deal 100 damage during the first deck rotation.
+Awakened One -- Gains strength on each power played. Meaning either the player must refrain from playing powers, or have a powerful scaling strategy that can offset the increased offense of the awakened one.
+
+### Encounters
+
+* Three lice
+* Cultist + Chosen
+* Cultist, Cultist, Awakened One
+* 3 x Jawworm
+* Jawworm + Lice
+* Cultist + Jawworm
+
+## Tomb Explorer
+
+### Concept
+A side-scroller beat-em up, centered on delving deeper into an ancient tomb for treasure.
+
+### Central Mechanics
+
+Health -- if this reaches 0, the entity dies.
+Horizontal movement -- Entities can only move freely horizontally, even when in air
+Veritcal movement -- If flying can move freely vertically, otherwise motion is governed as a ballistic curve
+Energy Crystal -- These are spent on abilities. When spent the crystal goes on cooldown, and is unavailable for some time.
+
+### Player Abilities
+
+Horizontal movement -- As all entites
+Jumping -- Can jump on ground and have an additional jump mid air
+Attacking -- Create a hitbox, which damages enemies on contact
+Block/Parry -- Player can block to reduce incoming damage. A well timed block results negates damage, and damages the attacker.
+Specials -- Player can have access to up to three specials at a time. These expent energy crystals for powerful effects.
+Bowgun -- Fires arrows used for attacking. Can be stuck on walls for platformning.
+
+### Obstacles
+
+#### Geometry
+Elevation -- Blocks horizontal motion. Elevation must be increased to pass it.
+Pits -- Entites can fall into it and may die.
+Barrel -- Explodes on hit.
+Jetstream -- Accelerates entity in a given direction
+Terrain -- Cannot be passed through by entities.
+
+#### Enemies
+Grenadier -- Enemy which throws grenades. Projectiles follows a ballistic curve, and takes time to arrive which allows the player to move out of the way.
+Small fries -- Small enemy with minor melee attacks. Will swarm the player, attacking on mass.
+Big grunt -- Slow and heavy hitting enemy. Attacks are very forward facing and can be avoided by moving behind the enemy.
+Flyer -- Free horizontal and vertical movement. Will generally fly overhead in a fixed pattern and try to hit the player with overhead bombs.
+Summoner -- Will continually spawn minions which attacks the player. Summons disappear when summoner is defeated.
+Supporter -- Heavily buffs the speed of enemies. Runs away from the player.
+Turret -- Fires projectiles in a straight line towards the player. Doesn't move otherwise. Can repulse nearby enemies via an AOE.
+
+## Descent of the Cryomancer
+A side-sroller beat-em up. Descent into an ancient tomb for secrets and treasure. Focus on creation of level geometry.
+
+### Central Mechanics
+
+Health -- If this reaches 0, the entity dies.
+Platforming -- Generally speaking entities can move freely horizontally. Only flyers can move freely vertically, others move in ballistic curves.
+Terrain -- Squares which are generally impassible by entities and effects.
+One-way platform -- Squares can be passed through from all directions, except above.
+Rime Crystals -- These are spent on creating ice and special moves. When spent, goes on cooldown before it can be used again.
+
+### Player Abilities
+
+Ice Blocks -- Create a temporary platform. This acts as terrain with a lifetime.
+Jumping -- Can double jump to gain elevation
+Dash -- Quick horizontal movement. Cancels vertical momemtum. Gain invincibility.
+Ice Projectiles -- Fires small ice projectiles. Damages enemies. If it hits terrain, will form a temporary small one-way platform.
+Horizontal Movement
+Frost Nova -- Charged move. Results in a big ice explosion, with damage scaling with the charge time. Forms one-way platforms used for jumping.
+
+# 2023-08-11
+
+Not a lot has happened on the game development/coding side of things.
+Have experimented alot with art, expecially color palettes and bounce back lighting.
+
+
+## Colors
+
+To summarize feel that creating color palettes by spanning the primary and secondary colors as well as a neutral tone, mixed with a common unifier color creates a nice palette.
+Then all these tones share a common set of bounce lighting and core shadow colors. Sketched some plants and did a full illustration of some birds on a cliff. Seems to work fairly well.
+In case I need more colors, I can always mix the existing ones in the palette if e.g. I need a darker blue.
+
+A full color bridge is made of 5 colors: core shadow, bounce light, half-tone, direct light and highlight. By employing the shared core and bounce light tones, I have 7 color bridges, using only 23 colors.
+Could probably prune it even further by merging some of the similar colors.
+
+Now the whole reason I went through the color palette process, was to create some "universal" palette which I can use to create assets. Such that I dont have to solve for some universal color harmony before hand. Just the general feel (purple in this case).
+
+## Stuck in Limbo
+
+Am still not further along actually getting going with more game development. Still don't know what to make exactly.
+I know that the overall design document approach is the right way to go. But is hard to keep my passion going using that approach.
+Also conherency of vision can be problem. Sometimes a week or two can pass before I work on the game, and I usually forget where I was going and why.
+
+Also sometimes feels like I'm stuck when I resume work on the same animation for third time in a row.
+
+I know logically that the design document and plan is the way to go. To keep track of what I am making and roughly how I am going to make it.
+Also keeping scope limited, such that I don't end up working on something for months and lose interesting without finishing it.
+
+An idea could be:

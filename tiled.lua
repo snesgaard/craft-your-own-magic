@@ -422,6 +422,35 @@ function type_loader.door(object, index, layer)
     return id
 end
 
+function type_loader.bomber(object, index, layer)
+    local id = object.id
+    
+    local sprite_state_map = {
+        idle = get_video("bomber/idle"):loop(),
+        walk = get_video("bomber/walk"):loop(),
+        throw = get_video("bomber/throw"):once()
+    }
+
+    collision.register(id, hitbox_from_body(sprite_state_map.idle))
+    collision.warp_to(id, object.x, object.y)
+
+    stack.assemble(
+        {
+            {nw.component.gravity},
+            {nw.component.drawable, nw.drawable.frame},
+            {nw.component.puppet_state_map, sprite_state_map},
+            {nw.component.puppet_state, "idle"},
+            {nw.component.layer, index},
+            {nw.component.move_speed, 25},
+            {nw.component.script("bomber")},
+            {nw.component.health, 10}
+        },
+        id
+    )
+
+    return id
+end
+
 function tiled.assemble_from_properties(properties)
     local c = list()
     local p = properties
@@ -437,7 +466,13 @@ function tiled.assemble_from_properties(properties)
     if p.terrain then table.insert(c, {nw.component.is_terrain}) end
     if p.hurtbox then table.insert(c, {nw.component.hurtbox}) end
     if p.shoot then table.insert(c, {nw.component.shoot, p.shoot}) end
+    if p.throw then table.insert(c, {nw.component.throw, p.throw}) end
     if p.sfx then table.insert(c, {nw.component.sfx(p.sfx)}) end
+    if p.gravity then table.insert(c, {nw.component.gravity}) end
+    if p.bouncy then table.insert(c, {nw.component.bouncy, p.bouncy}) end
+    if p.velocity_x or p.velocity_y then
+        table.insert(c, {nw.component.velocity, p.velocity_x or 0, p.velocity_y or 0})
+    end
 
     return c
 end

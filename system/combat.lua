@@ -37,7 +37,7 @@ function combat.stun(target)
     if stack.ensure(nw.component.immune("stun"), target) > 0 then return end
 
     stack.set(nw.component.reset_script, target)
-    stack.set(nw.component.is_stunned, target)
+    stack.set(nw.component.is_stunned, target, 1.0)
 end
 
 function combat.is_stunned(target)
@@ -101,9 +101,69 @@ function shooting.handle_shoot(id, projectile_type)
     stack.set(nw.component.already_did_shoot, id)
 end
 
+local throw = {}
+
+function throw.get_center(id)
+    local x, y, w, h = collision.get_world_hitbox(id)
+    if not x then return end
+    return x + w / 2, y + h / 2
+end
+
+function throw.hitbox_from_type(throw_type)
+    return spatial():expand(10, 10)
+end
+
+function throw.assemble_from_type(throw_type)
+    return {
+        {nw.component.timer, 2.0}
+    }
+end
+
+function throw.velocity_from_target(id)
+
+end
+
+function throw.velocity_from_settings(id)
+    local m = stack.get(nw.component.mirror, id)
+    local sx = m and -1 or 1
+    return vec2(150 * sx, - 150)
+end
+
+function throw.spin_once(id, throw_type)
+    if stack.get(nw.component.already_did_shoot, id) then return end
+
+    local x, y = throw.get_center(id)
+    local v = throw.velocity_from_target(id) or throw.velocity_from_settings(id)
+    local hitbox = throw.hitbox_from_type(throw_type)
+    local assemble = throw.assemble_from_type(throw_type)
+    
+    if not x or not v or not hitbox then return end
+
+    local pid = nw.ecs.id.strong()
+    collision.register(pid, hitbox)
+    collision.warp_to(pid, x, y)
+    collision.flip_to(pid, stack.get(nw.component.mirror, id))
+
+    if assemble then stack.assemble(assemble, pid) end
+
+    stack.ensure(nw.component.timer, pid, 1.0)
+    --stack.set(nw.component.is_ghost, pid)
+    stack.set(nw.component.die_on_timer_done, pid)
+    stack.set(nw.component.velocity, pid, v.x, v.y)
+    stack.set(nw.component.gravity, pid)
+    stack.set(nw.component.drawable, pid, nw.drawable.bump_body)
+    stack.set(nw.component.bouncy, pid, 0.75)
+
+    stack.set(nw.component.already_did_shoot, id)
+end
+
 function shooting.spin()
     for id, projectile_type in stack.view_table(nw.component.shoot) do
         shooting.handle_shoot(id, projectile_type)
+    end
+
+    for id, throw_type in stack.view_table(nw.component.throw) do
+        throw.spin_once(id, throw_type)
     end
 end
 

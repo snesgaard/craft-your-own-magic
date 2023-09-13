@@ -70,7 +70,12 @@ local function default_collision_filter(item, other)
         return 
     end
 
-    if stack.get(nw.component.is_terrain, other) then return "slide" end
+    if stack.get(nw.component.is_terrain, other) then
+        if stack.get(nw.component.bouncy, item) then
+            return "bounce"
+        end
+        return "slide"
+    end
 
     return "cross"
 end
@@ -105,7 +110,7 @@ function choice(items, p)
 end
 
 function love.load(args)
-    map = tiled.load("art/maps/build/test.lua")
+    map = tiled.load("art/maps/build/bomber_develop.lua")
 
     local spawn = dict(tiled.object(map, "camera_spawn"))
 

@@ -32,7 +32,7 @@ function collision_resolver.knockback(item, other, owner, target, colinfo)
     local t = stack.get(nw.component.position, target) or vec2()
 
     local dx = t.x - o.x
-    local knockback = 5 * dx / math.abs(dx)
+    local knockback = 1 * dx / math.abs(dx)
     combat.knockback(target, knockback)
 end
 

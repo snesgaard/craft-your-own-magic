@@ -21,7 +21,7 @@ end
 function numbers.position(id)
     local x, y, w, h = collision.get_world_hitbox(id)
     if not x then
-        local pos = stack.get(nw.component.position, info.target) or vec2()
+        local pos = stack.get(nw.component.position, id) or vec2()
         return pos.x, pos.y
     end
 

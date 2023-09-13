@@ -249,6 +249,8 @@ component.health = component.resistance("health")
 
 function component.shoot(t) return t end
 
+function component.throw(t) return t end
+
 function component.already_did_shoot() return true end
 
 function component.particles(args)

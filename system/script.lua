@@ -1,10 +1,30 @@
 local common = {}
 
-function common.base_actor(id)
-    return
+function common.death(id)
+    return 
     ai.sequence {
         ai.condition(combat.is_dead, id),
         ai.action(stack.destroy, id)
+    }
+end
+
+function common.stun(id)
+    return
+    ai.sequence {
+        ai.condition(combat.is_stunned, id),
+        ai.set(nw.component.puppet_state, id, "idle"),
+        ai.set(nw.component.move_intent, id, 0),
+        ai.wait_until(
+            ai.condition(function(id) return not combat.is_stunned(id) end)
+        )
+    }
+end
+
+function common.base_actor(id)
+    return
+    ai.select {
+        common.death(id),
+        common.stun(id)
     }
 end
 
@@ -664,12 +684,25 @@ function axe.hit(id)
     }
 end
 
+function axe.approach_and_hit(id)
+    local jitter = math.random(1, 5)
+    local v = ai.hitbox_range(id, "hit", "hit")
+    return
+    ai.sequence {
+        ai.set(nw.component.puppet_state, id, "idle"),
+        ai.go_to_target(id, v - vec2(0, 10)),
+        ai.turn_towards_target(id),
+        axe.hit(id)
+    }
+end
+
 function axe.behavior(id)
     return
     ai.select {
+        common.base_actor(id),
         ai.sequence {
-            ai.cooldown(10.0),
-            axe.hit(id),
+            ai.spot_target(id, spatial(-200, 0, 400, 20):up(), is_player),
+            axe.approach_and_hit(id)
         },
         bonk_bot.patrol(id)
     }
@@ -686,6 +719,30 @@ function axe.spin()
     end
 end
 
+local bomber = {}
+
+function bomber.throw(id)
+    return
+    ai.sequence {
+        ai.set(nw.component.move_intent, id),
+        ai.set(nw.component.puppet_state, id, "throw"),
+        ai.wait_until_puppet_done(id),
+        ai.wait(1.0),
+    }
+end
+
+function bomber.behavior(id)
+    --return bonk_bot.patrol(id)
+    return bomber.throw(id)
+end
+
+function bomber.spin()
+    for id, args in stack.view_table(nw.component.script("bomber")) do
+        local bh = stack.ensure(nw.component.behavior, id, bomber.behavior, id)
+        ai.run(bh)
+    end
+end
+
 local script = {}
 
 function script.spin()
@@ -698,6 +755,7 @@ function script.spin()
     shoot_bot.spin()
     cloak.spin()
     axe.spin()
+    bomber.spin()
 
     for id, _ in stack.view_table(nw.component.reset_script) do
         stack.remove(nw.component.behavior, id)

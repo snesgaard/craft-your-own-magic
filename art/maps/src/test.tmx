@@ -192,7 +192,7 @@
   <object id="1" name="camera_spawn" type="camera_spawn" x="-36" y="-51">
    <point/>
   </object>
-  <object id="2" name="player" type="gobbo" x="284" y="75.6663" width="25" height="19.6667"/>
+  <object id="2" name="player" type="gobbo" x="215.057" y="-168.948" width="25" height="19.6667"/>
   <object id="3" type="generic" x="142.334" y="-201" width="48.6667" height="21.3333">
    <properties>
     <property name="breakable" type="bool" value="true"/>
