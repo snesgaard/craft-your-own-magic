@@ -17,6 +17,8 @@ sfx = require "system.sfx"
 gui = require "system.gui"
 combat = require "system.combat"
 rng = require "random"
+tf = require "system.tf"
+throw = require "system.throw"
 
 ai = require "system.ai"
 script = require "system.script"
@@ -43,6 +45,8 @@ end
 function real_random(min, max)
     return ease.linear(love.math.random(), min, max - min, 1)
 end
+
+transform = love.math.newTransform
 
 local function spin()
     while event.spin() > 0 do
@@ -136,12 +140,41 @@ function love.update(dt)
     end
 end
 
+local throw_data = {
+    x = 10,
+    y = -20,
+    speed = 300,
+    angle = -math.pi * 0.25
+}
+
 function love.draw()
     painter.draw()
 
     gfx.push()
     painter.push_transform()
     if show_collision then collision.draw() end
+    for id, _ in stack.view_table(nw.component.camera_should_track) do
+        gfx.push()
+
+        local t_o1 = tf.entity(id)
+        local t_o2 = tf.entity(2)
+
+        --local t_12 = t_o2 * t_o1:inverse()
+
+        local t_os = t_o1 * transform(throw_data.x, throw_data.y)
+        local tx, ty = tf.transform_origin(t_os:inverse() * t_o2)
+        gfx.applyTransform(t_os)
+        throw_data.angle = throw.solve_throw_angle_equation(
+            tx, ty, throw_data.speed, nw.component.gravity().y
+        )
+        gfx.circle("line", 0, 0, 4)
+        gfx.circle("line", tx, ty, 4)
+        if throw_data.angle then
+            throw.draw_trajectory(throw_data.speed, throw_data.angle, nw.component.gravity().y)
+        end
+        
+        gfx.pop()
+    end
     gfx.pop()
     
     gui.health_bar.draw()
@@ -152,6 +185,15 @@ function love.keypressed(key)
     if key == "g" then collectgarbage() end
     if key == "c" then show_collision = not show_collision end
     if key == "p" then paused = not paused end
+    if key == "t" then
+        local t = tf.entity(1)
+        local x, y = t:transformPoint(throw_data.x, throw_data.y)
+        local vx, vy = tf.transform_velocity(
+            t, throw.velocity(throw_data.speed, throw_data.angle)
+        )
+        throw.throw(x, y, vx, vy)
+        
+    end
     input.keypressed(key)
 end
 

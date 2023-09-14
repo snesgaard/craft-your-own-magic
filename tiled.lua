@@ -132,7 +132,7 @@ function type_loader.mc_basic(object, index, layer)
 end
 
 function type_loader.generic(object, index, layer)
-    local id = nw.ecs.id.strong("generic")
+    local id = object.id
 
     local pp = tiled.project_object_properties.generic or dict()
     local p = Dictionary.fuse(object.properties, pp)
