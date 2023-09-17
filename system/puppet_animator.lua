@@ -76,6 +76,10 @@ end
 
 local puppet_animator = {}
 
+function puppet_animator.view_current_slices(id)
+    return next, stack.get(slice_ids, id) or {}
+end
+
 function puppet_animator.spin_once(id, state, dt)
     local state_map = stack.get(nw.component.puppet_state_map, id) or dict()
     local state_time = state.time
@@ -119,10 +123,46 @@ function puppet_animator.is_done(id)
     return video:is_done(time)
 end
 
+function puppet_animator.play(id, key)
+    stack.set(nw.component.puppet_state, id, key)
+end
+
 function puppet_animator.ensure(id, key)
     local state = stack.get(nw.component.puppet_state, id)
     if state and state.name == key then return end
     stack.set(nw.component.puppet_state, id, key)
+end
+
+local function view_slice_iterator(video, data)
+    local data = data or {}
+
+    data.index = data.index or 1
+    local frame = video.frames[data.index]
+    if not frame then return end
+
+    local slice_name, slice = next(frame.slices, data.slice_name)
+    if slice_name == nil then
+        data.index = data.index + 1
+        data.slice_name = nil
+        return view_slice_iterator(video, data)
+    end
+
+    local slice_data = frame.slice_data[slice_name] or {}
+    data.slice_name = slice_name 
+
+    return data, slice_name, frame:get_slice(slice_name), slice_data
+end
+
+local EMPTY_VIDEO = Video.create()
+
+function puppet_animator.view_slices(id, key)
+    local state_map = stack.get(nw.component.puppet_state_map, id)
+    if not state_map then return view_slice_iterator, EMPTY_VIDEO end
+
+    local video = state_map[key]
+    if not video then return view_slice_iterator, EMPTY_VIDEO end
+
+    return view_slice_iterator, video
 end
 
 return puppet_animator

@@ -725,8 +725,9 @@ function bomber.throw(id)
     return
     ai.sequence {
         ai.set(nw.component.move_intent, id),
-        ai.set(nw.component.puppet_state, id, "throw"),
-        ai.wait_until_puppet_done(id),
+        ai.set(nw.component.target, id, 1),
+        ai.turn_towards_target(id),
+        ai.throw_projectile(id),
         ai.wait(1.0),
     }
 end

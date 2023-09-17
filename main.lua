@@ -127,6 +127,10 @@ function love.load(args)
     stack.set(nw.component.position, constant.id.camera, spawn.x, spawn.y)
 
     collision.set_default_filter(default_collision_filter)
+
+    for index, name, slice, slice_data in puppet_animator.view_slices(2, "throw") do
+        print(index.index, name)
+    end
 end
 
 function love.update(dt)
@@ -168,9 +172,9 @@ function love.draw()
             tx, ty, throw_data.speed, nw.component.gravity().y
         )
         gfx.circle("line", 0, 0, 4)
-        gfx.circle("line", tx, ty, 4)
+        --gfx.circle("line", tx, ty, 4)
         if throw_data.angle then
-            throw.draw_trajectory(throw_data.speed, throw_data.angle, nw.component.gravity().y)
+            --throw.draw_trajectory(throw_data.speed, throw_data.angle, nw.component.gravity().y)
         end
         
         gfx.pop()

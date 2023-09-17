@@ -251,6 +251,8 @@ function component.shoot(t) return t end
 
 function component.throw(t) return t end
 
+function component.throw_speed(sp) return sp or 300 end
+
 function component.already_did_shoot() return true end
 
 function component.particles(args)
@@ -262,5 +264,7 @@ component.sfx = nw.component.relation(function(...) return list(...) end)
 function component.die_on_empty() return true end
 
 function component.sfx_triggered() return true end
+
+component.flag = nw.component.relation(function(v) return true end)
 
 return component

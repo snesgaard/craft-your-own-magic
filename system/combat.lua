@@ -163,7 +163,7 @@ function shooting.spin()
     end
 
     for id, throw_type in stack.view_table(nw.component.throw) do
-        throw.spin_once(id, throw_type)
+        --throw.spin_once(id, throw_type)
     end
 end
 

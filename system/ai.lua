@@ -455,6 +455,33 @@ function ai.hitbox_range(id, state, slice)
     errorf("Unable to find slice %s", slice)
 end
 
+
 ai.run = run_node
+
+local function validate_extension(name, assembly_func, api_func)
+    local msg = nil
+
+    if name == nil then msg = (msg or "") .. "Name was nil\n" end
+    if assembly_func == nil then msg = (msg or "") .. "Assembly was nil\n" end
+    if api_func == nil then msg = (msg or "") .. "Api was nil\n" end
+    if ai[name] then msg = (msg or "") .. "Api already taken\n" end
+    if assembly[name] then msg = (msg or "") .. "Assembly already taken\n" end
+
+    return msg
+end
+
+function ai.extend(name, assembly_func, api_func)
+    local msg = validate_extension(name, assembly_func, api_func)
+    if msg then error(msg) end
+
+    ai[name] = api_func
+    assembly[name] = assembly_func
+end
+
+function ai.flag(id, key)
+    local v = stack.get(nw.component.flag(key), id)
+    stack.ensure(nw.component.flag(key), id)
+    return not v
+end
 
 return ai

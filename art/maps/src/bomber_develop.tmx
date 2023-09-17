@@ -136,7 +136,7 @@
   <object id="2" name="bomber" type="bomber" x="154.997" y="-72.9927">
    <point/>
   </object>
-  <object id="3" name="bouncer" type="generic" x="43.2549" y="-154.997" width="29.7378" height="23.4298">
+  <object id="3" name="bouncer" type="generic" x="43.2549" y="-154.997" width="29.7378" height="23.4298" visible="0">
    <properties>
     <property name="bouncy" type="float" value="0.75"/>
     <property name="breakable" type="bool" value="false"/>

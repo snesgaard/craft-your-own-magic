@@ -443,7 +443,8 @@ function type_loader.bomber(object, index, layer)
             {nw.component.layer, index},
             {nw.component.move_speed, 25},
             {nw.component.script("bomber")},
-            {nw.component.health, 10}
+            {nw.component.health, 10},
+            {nw.component.throw_speed, 250}
         },
         id
     )
